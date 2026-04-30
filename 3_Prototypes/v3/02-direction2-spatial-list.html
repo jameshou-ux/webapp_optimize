@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction 2 — Spatial/List Merged Shell · imToken Web</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #fff;
+    --panel: #fafafa;
+    --surface: #f2f2f2;
+    --surface-2: #e8e8e8;
+    --border: #e0e0e0;
+    --border-2: #d0d0d0;
+    --text: #111;
+    --text-2: #555;
+    --text-3: #888;
+    --text-4: #aaa;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --accent-border: #bfdbfe;
+    --green: #16a34a;
+    --red: #dc2626;
+    --radius: 6px;
+  }
+
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.5;
+    min-width: 900px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── COMPACT HEADER — all chrome in one row ── */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 16px;
+    height: 48px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    flex-shrink: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -.3px;
+    white-space: nowrap;
+    margin-right: 14px;
+  }
+
+  .search-wrap {
+    position: relative;
+    width: 240px;
+    flex-shrink: 0;
+  }
+  .search-wrap input {
+    width: 100%;
+    height: 30px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0 10px 0 28px;
+    font-size: 12px;
+    font-family: inherit;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+  }
+  .search-wrap input::placeholder { color: var(--text-4); }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .s-icon {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-4);
+    pointer-events: none;
+  }
+
+  /* Market / My Holdings tabs inside header */
+  .header-tabs {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    margin: 0 10px;
+  }
+  .htab {
+    height: 48px;
+    padding: 0 14px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-3);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color .15s, border-color .15s;
+    white-space: nowrap;
+  }
+  .htab:hover { color: var(--text-2); }
+  .htab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  /* Spatial / List mode toggle */
+  .view-sw {
+    display: flex;
+    background: var(--surface);
+    border-radius: 5px;
+    padding: 2px;
+    border: 1px solid var(--border);
+    margin: 0 10px;
+  }
+  .vbtn {
+    padding: 3px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-3);
+    font-weight: 500;
+    font-family: inherit;
+    transition: color .1s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  .vbtn.active {
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: 0 1px 2px rgba(0,0,0,.08);
+  }
+
+  .header-sep { flex: 1; }
+
+  .btn-sign {
+    height: 30px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--bg);
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    color: var(--text-2);
+    font-weight: 500;
+  }
+  .btn-create {
+    height: 30px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 5px;
+    background: var(--accent);
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+  .btn-create:hover { opacity: .9; }
+
+  /* ── PANES — fill remaining height ── */
+  .pane { display: none; flex: 1; overflow: hidden; min-height: 0; }
+  .pane.active { display: flex; flex-direction: column; }
+
+  /* ── SPATIAL PANE — 65/35 split ── */
+  .spatial-split {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .spatial-canvas {
+    flex: 0 0 65%;
+    border-right: 1px solid var(--border);
+    background: var(--panel);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Canvas hint */
+  .canvas-hint {
+    position: absolute;
+    bottom: 14px;
+    left: 16px;
+    z-index: 2;
+    font-size: 12px;
+    color: var(--text-3);
+    background: var(--bg);
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    transition: opacity .3s;
+  }
+  .canvas-hint.hidden { opacity: 0; }
+
+  /* Bubbles */
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-2);
+    background: var(--surface);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform: translate(-50%, -50%);
+    transition: border-color .15s, background .15s, box-shadow .15s;
+    user-select: none;
+  }
+  .bubble:hover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+  .bubble.selected {
+    border-color: var(--accent);
+    border-width: 2px;
+    background: var(--accent-light);
+    box-shadow: 0 0 0 4px rgba(37,99,235,.1);
+  }
+  .bubble.is-campaign {
+    background: rgba(37,99,235,.04);
+    border-color: rgba(37,99,235,.3);
+  }
+  .bubble.is-campaign.selected {
+    box-shadow: 0 0 0 5px rgba(37,99,235,.12);
+  }
+
+  .b-badge {
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 99px;
+    white-space: nowrap;
+    letter-spacing: .3px;
+  }
+  .b-name {
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    padding: 0 10px;
+    line-height: 1.3;
+    color: var(--text-2);
+  }
+  .b-dots {
+    display: flex;
+    gap: 3px;
+    margin: 4px 0 3px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 0 8px;
+  }
+  .bdot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .b-count { font-size: 10px; color: var(--text-3); }
+
+  /* ── SELECTED PANEL (35%) — persistent across mode switches ── */
+  .selected-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .sp-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px;
+    color: var(--text-3);
+    gap: 10px;
+  }
+  .sp-empty-icon { font-size: 28px; opacity: .4; }
+  .sp-empty-txt { font-size: 13px; line-height: 1.5; max-width: 200px; }
+
+  .sp-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .sp-content::-webkit-scrollbar { width: 3px; }
+  .sp-content::-webkit-scrollbar-thumb { background: var(--surface-2); }
+
+  .sp-hdr {
+    padding: 18px 16px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .sp-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: var(--text-3);
+    margin-bottom: 4px;
+  }
+  .sp-eyebrow.campaign { color: var(--accent); }
+  .sp-title { font-size: 17px; font-weight: 700; letter-spacing: -.3px; margin-bottom: 5px; }
+  .sp-desc { font-size: 12px; color: var(--text-2); line-height: 1.55; }
+
+  .sp-body {
+    padding: 14px 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .sp-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+  .sp-chip {
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--text-2);
+    background: var(--surface);
+  }
+  .sp-chip strong { font-weight: 600; color: var(--text); }
+
+  .sp-sec-lbl {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-3);
+    margin-bottom: 6px;
+  }
+
+  .sp-trow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .sp-trow:last-child { border-bottom: none; }
+  .sp-ticon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .sp-tname { flex: 1; }
+  .sp-tname-p { font-size: 12px; font-weight: 600; }
+  .sp-tname-s { font-size: 11px; color: var(--text-3); }
+  .sp-tprice { text-align: right; }
+  .sp-tprice-v { font-size: 12px; font-weight: 600; }
+  .sp-tprice-c { font-size: 11px; }
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+  .neu { color: var(--text-3); }
+
+  .sp-footer {
+    padding: 12px 16px 16px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .sp-btn-p {
+    height: 36px;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent);
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+  }
+  .sp-btn-p:hover { opacity: .9; }
+  .sp-btn-g {
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-2);
+  }
+  .sp-btn-g:hover { background: var(--surface); }
+  .sp-cue { font-size: 11px; color: var(--text-3); text-align: center; }
+
+  /* ── LIST PANE — 65/35, same sidebar ── */
+  .list-split {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .list-scroll {
+    flex: 0 0 65%;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 14px 16px;
+    background: var(--bg);
+  }
+  .list-scroll::-webkit-scrollbar { width: 3px; }
+  .list-scroll::-webkit-scrollbar-thumb { background: var(--surface-2); }
+
+  /* Campaign banner in list view */
+  .list-campaign-banner {
+    display: flex;
+    border: 1px solid var(--accent-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 14px;
+    background: var(--accent-light);
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .list-campaign-banner:hover { border-color: #93c5fd; }
+  .lcb-vis {
+    width: 100px;
+    flex-shrink: 0;
+    background: rgba(37,99,235,.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--accent);
+    border-right: 1px solid var(--accent-border);
+    padding: 12px;
+  }
+  .lcb-body { flex: 1; padding: 12px 14px; }
+  .lcb-eye {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--accent);
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+  .live-txt { font-size: 10px; font-weight: 700; color: var(--green); }
+  .lcb-title { font-size: 13px; font-weight: 700; letter-spacing: -.2px; margin-bottom: 3px; }
+  .lcb-desc { font-size: 12px; color: var(--text-2); line-height: 1.45; margin-bottom: 8px; }
+  .lcb-cta {
+    height: 26px;
+    padding: 0 10px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .list-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .lt-label { font-size: 13px; font-weight: 600; }
+  .lt-count { font-size: 12px; color: var(--text-3); }
+  .lt-selected-lbl { font-size: 12px; color: var(--text-3); margin-left: auto; }
+  .lt-selected-lbl strong { color: var(--accent); font-weight: 600; }
+
+  .list-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .lcard {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 11px;
+    cursor: pointer;
+    background: var(--bg);
+    transition: border-color .12s, background .1s;
+  }
+  .lcard:hover { border-color: var(--border-2); background: var(--surface); }
+  .lcard.highlighted { border-color: var(--accent); background: var(--accent-light); }
+
+  .lcard-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    background: var(--surface);
+    color: var(--text-3);
+    border: 1px solid var(--border);
+    margin-bottom: 5px;
+  }
+  .lcard-badge.campaign { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .lcard-title { font-size: 12px; font-weight: 700; letter-spacing: -.1px; margin-bottom: 2px; }
+  .lcard-desc {
+    font-size: 11px;
+    color: var(--text-2);
+    line-height: 1.4;
+    margin-bottom: 7px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .lcard-icons { display: flex; gap: 3px; margin-bottom: 6px; }
+  .licon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .lcard-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-3);
+  }
+  .lp-v { font-size: 11px; font-weight: 600; color: var(--text); text-align: right; }
+  .lp-c { font-size: 10px; text-align: right; }
+
+  /* List panel: same shared panel component */
+  .list-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  /* ── MY HOLDINGS PANE — anonymous state ── */
+  .hld-pane { flex: 1; overflow-y: auto; }
+  .hld-inner {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    text-align: center;
+  }
+  .ha-icon { font-size: 36px; margin-bottom: 14px; }
+  .ha-title { font-size: 18px; font-weight: 700; letter-spacing: -.3px; margin-bottom: 7px; }
+  .ha-msg { font-size: 13px; color: var(--text-2); max-width: 360px; margin: 0 auto 20px; line-height: 1.6; }
+  .ha-actions { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; justify-content: center; }
+  .ha-cta {
+    height: 36px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent);
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+  }
+  .ha-ghost {
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-2);
+  }
+  .ha-confidence { font-size: 12px; color: var(--text-3); margin-bottom: 16px; }
+  .ha-link { font-size: 13px; color: var(--accent); cursor: pointer; font-weight: 500; }
+  .ha-link:hover { text-decoration: underline; }
+
+  /* Hover tooltip */
+  #htip {
+    position: fixed;
+    background: var(--text);
+    color: #fff;
+    border-radius: 5px;
+    padding: 6px 10px;
+    font-size: 11px;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity .1s;
+    max-width: 160px;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+  #htip.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- COMPACT HEADER: all chrome in one row -->
+<header class="header">
+  <span class="logo">imToken</span>
+
+  <div class="search-wrap">
+    <svg class="s-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" placeholder="Search tokens, collections…" />
+  </div>
+
+  <!-- Market / My Holdings in header -->
+  <div class="header-tabs">
+    <button class="htab active" id="tab-market" onclick="switchTab('market')">Market</button>
+    <button class="htab" id="tab-holdings" onclick="switchTab('holdings')">My Holdings</button>
+  </div>
+
+  <!-- Spatial / List mode toggle in header -->
+  <div class="view-sw" id="view-sw">
+    <button class="vbtn active" id="btn-spatial" onclick="setMode('spatial')">
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7"/></svg>
+      Spatial
+    </button>
+    <button class="vbtn" id="btn-list" onclick="setMode('list')">
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M4 4h9M4 8h9M4 12h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="1.5" cy="4" r="1" fill="currentColor"/><circle cx="1.5" cy="8" r="1" fill="currentColor"/><circle cx="1.5" cy="12" r="1" fill="currentColor"/></svg>
+      List
+    </button>
+  </div>
+
+  <div class="header-sep"></div>
+  <button class="btn-sign">Sign in</button>
+  <button class="btn-create">Create account</button>
+</header>
+
+<!-- ══ MARKET PANE ══ -->
+<div class="pane active" id="pane-market">
+
+  <!-- SPATIAL mode: canvas + sidebar -->
+  <div class="spatial-split" id="spatial-body">
+    <div class="spatial-canvas" id="spatial-canvas">
+      <div class="canvas-hint" id="canvas-hint">Click any bubble to explore it</div>
+    </div>
+
+    <!-- Persistent panel — stays when switching to List mode -->
+    <div class="selected-panel" id="selected-panel">
+      <div class="sp-empty" id="sp-empty">
+        <div class="sp-empty-icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg></div>
+        <div class="sp-empty-txt">Select a collection or campaign to see details here</div>
+      </div>
+      <div class="sp-content" id="sp-content" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- LIST mode: grid + same sidebar -->
+  <div class="list-split" id="list-body" style="display:none;">
+    <div class="list-scroll">
+      <!-- Campaign banner -->
+      <div class="list-campaign-banner" onclick="select('defiSummer')">
+        <div class="lcb-vis">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span>Featured</span>
+        </div>
+        <div class="lcb-body">
+          <div class="lcb-eye">
+            <span>Featured campaign</span>
+            <span class="live-dot"></span>
+            <span class="live-txt">Live</span>
+          </div>
+          <div class="lcb-title">DeFi Summer 2026</div>
+          <div class="lcb-desc">Curated yield and liquidity opportunities across 8 chains. Gas handled automatically.</div>
+          <button class="lcb-cta">Explore campaign →</button>
+        </div>
+      </div>
+
+      <div class="list-toolbar">
+        <span class="lt-label">Collections</span>
+        <span class="lt-count" id="lt-count">8</span>
+        <span class="lt-selected-lbl" id="lt-selected-lbl"></span>
+      </div>
+      <div class="list-grid" id="list-grid"></div>
+    </div>
+
+    <!-- Same panel component, reused in list mode -->
+    <div class="list-panel" id="list-panel">
+      <div class="sp-empty" id="lp-empty">
+        <div class="sp-empty-icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h.01M3 12h.01M3 19h.01M8 5h13M8 12h13M8 19h13"/></svg></div>
+        <div class="sp-empty-txt">Click a collection card to see details here</div>
+      </div>
+      <div class="sp-content" id="lp-content" style="display:none;"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ MY HOLDINGS PANE — anonymous state ══ -->
+<div class="pane" id="pane-holdings">
+  <div class="hld-pane">
+    <div class="hld-inner">
+      <div class="ha-icon"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 21v-6m7 6V3m7 18V9"/></svg></div>
+      <div class="ha-title">Your holdings live here</div>
+      <div class="ha-msg">Create a passkey account to view your balances and portfolio. Or explore Market first and create when you're ready.</div>
+      <div class="ha-actions">
+        <button class="ha-cta">Create account</button>
+        <button class="ha-ghost">Sign in</button>
+      </div>
+      <div class="ha-confidence"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" style="vertical-align:-2px;flex-shrink:0"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m15.5 7.5l2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4m2-2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></g></svg> Passkey account. No seed phrase setup.</div>
+      <div><span class="ha-link" onclick="switchTab('market')">← Explore Market instead</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="htip"></div>
+
+<script>
+const DATA = [
+  {
+    id: 'defiSummer', name: 'DeFi Summer 2026', type: 'Campaign', campaign: true,
+    desc: 'Curated yield-earning opportunities across Ethereum, Base, Arbitrum and 5 more chains. Gas abstracted.',
+    count: 124, chain: '8 chains', updated: 'Today',
+    x: 50, y: 44, size: 160,
+    tokens: [
+      { s: 'UNI',  n: 'Uniswap',  c: '#FF007A', p: '$7.24',   ch: '+4.1%', neg: false },
+      { s: 'AAVE', n: 'Aave',     c: '#B6509E', p: '$218',    ch: '+2.8%', neg: false },
+      { s: 'MKR',  n: 'Maker',    c: '#1AAB9B', p: '$1,820',  ch: '−1.2%', neg: true  },
+    ]
+  },
+  {
+    id: 'defi', name: 'DeFi Blue Chips', type: 'Curated',
+    desc: 'Top decentralized finance protocols by TVL and market cap.',
+    count: 18, chain: 'ETH', updated: 'Apr 28',
+    x: 22, y: 35, size: 122,
+    tokens: [
+      { s: 'ETH',  n: 'Ethereum',  c: '#627EEA', p: '$2,400',  ch: '−0.5%', neg: true  },
+      { s: 'LINK', n: 'Chainlink', c: '#2A5ADA', p: '$13.42',  ch: '+1.2%', neg: false },
+      { s: 'AAVE', n: 'Aave',      c: '#B6509E', p: '$218',    ch: '+2.8%', neg: false },
+    ]
+  },
+  {
+    id: 'gamefi', name: 'GameFi Essentials', type: 'Curated',
+    desc: 'Play-to-earn and blockchain gaming tokens across multiple chains.',
+    count: 16, chain: 'Multi', updated: 'Apr 28',
+    x: 72, y: 24, size: 110,
+    tokens: [
+      { s: 'AXS',   n: 'Axie Infinity', c: '#0055D5', p: '$6.10',  ch: '−0.8%', neg: true  },
+      { s: 'MAGIC', n: 'Magic',          c: '#BD0912', p: '$1.44',  ch: '+8.3%', neg: false },
+      { s: 'IMX',   n: 'Immutable',      c: '#17B3E0', p: '$1.62',  ch: '+3.1%', neg: false },
+    ]
+  },
+  {
+    id: 'base', name: 'Base Ecosystem', type: 'Curated',
+    desc: 'Tokens native to Coinbase\'s Base L2 — fast, cheap transactions.',
+    count: 16, chain: 'Base', updated: 'Apr 29',
+    x: 14, y: 63, size: 106,
+    tokens: [
+      { s: 'BRETT', n: 'Brett', c: '#0052FF', p: '$0.072', ch: '+12%',  neg: false },
+      { s: 'AERO',  n: 'Aerodrome', c: '#3B82F6', p: '$0.88',  ch: '+5.6%', neg: false },
+    ]
+  },
+  {
+    id: 'rwa', name: 'Real World Assets', type: 'Curated',
+    desc: 'Tokenized real-world assets — equities, bonds, and real estate.',
+    count: 7, chain: 'ETH', updated: 'Apr 27',
+    x: 38, y: 72, size: 98,
+    tokens: [
+      { s: 'ONDO', n: 'Ondo Finance', c: '#1E293B', p: '$1.08', ch: '+2.3%', neg: false },
+      { s: 'CFG',  n: 'Centrifuge',   c: '#2563EB', p: '$0.44', ch: '−1.1%', neg: true  },
+    ]
+  },
+  {
+    id: 'l2', name: 'Layer 2 Leaders', type: 'Curated',
+    desc: 'Top Layer 2 scaling solutions — Arbitrum, Optimism, Polygon.',
+    count: 10, chain: 'Multi', updated: 'Apr 28',
+    x: 64, y: 62, size: 100,
+    tokens: [
+      { s: 'ARB',   n: 'Arbitrum', c: '#2D374B', p: '$0.88', ch: '+6.2%', neg: false },
+      { s: 'OP',    n: 'Optimism', c: '#FF0420', p: '$1.90', ch: '+4.4%', neg: false },
+      { s: 'MATIC', n: 'Polygon',  c: '#8247E5', p: '$0.56', ch: '−2.0%', neg: true  },
+    ]
+  },
+  {
+    id: 'ai', name: 'AI Tokens', type: 'Curated',
+    desc: 'Tokens powering AI compute networks, data marketplaces, and inference.',
+    count: 12, chain: 'ETH', updated: 'Apr 26',
+    x: 80, y: 44, size: 96,
+    tokens: [
+      { s: 'FET',  n: 'Fetch.AI', c: '#333', p: '$1.48', ch: '+3.8%', neg: false },
+      { s: 'RNDR', n: 'Render',   c: '#E91E8C', p: '$5.34', ch: '+6.2%', neg: false },
+    ]
+  },
+  {
+    id: 'stable', name: 'Yield Stablecoins', type: 'Curated',
+    desc: 'USD-pegged stablecoins with on-chain yield — USDC, sDAI and more.',
+    count: 6, chain: 'Multi', updated: 'Apr 29',
+    x: 28, y: 18, size: 90,
+    tokens: [
+      { s: 'USDC', n: 'USD Coin', c: '#2775CA', p: '$1.00', ch: '0.0%', neg: null },
+      { s: 'sDAI', n: 'Savings DAI', c: '#F5AC37', p: '$1.08', ch: '+0.1%', neg: false },
+    ]
+  },
+];
+
+let selected = null;
+let mode = 'spatial';
+
+function buildBubbles() {
+  const canvas = document.getElementById('spatial-canvas');
+  DATA.forEach(col => {
+    const el = document.createElement('div');
+    el.className = 'bubble' + (col.campaign ? ' is-campaign' : '');
+    el.id = 'bub-' + col.id;
+    el.style.cssText = `left:${col.x}%;top:${col.y}%;width:${col.size}px;height:${col.size}px;`;
+    const maxDots = col.size >= 130 ? 3 : 2;
+    const dots = col.tokens.slice(0, maxDots).map(t =>
+      `<div class="bdot" style="background:${t.c}">${t.s.slice(0,2)}</div>`
+    ).join('');
+    el.innerHTML = `
+      ${col.campaign ? '<div class="b-badge">Campaign</div>' : ''}
+      <div class="b-name">${col.name}</div>
+      <div class="b-dots">${dots}</div>
+      <div class="b-count">${col.count}</div>`;
+    el.addEventListener('click', () => select(col.id));
+    el.addEventListener('mouseenter', e => tipShow(e, col));
+    el.addEventListener('mousemove', tipMove);
+    el.addEventListener('mouseleave', tipHide);
+    canvas.appendChild(el);
+  });
+}
+
+function buildListGrid() {
+  const grid = document.getElementById('list-grid');
+  DATA.forEach(col => {
+    const el = document.createElement('div');
+    el.className = 'lcard';
+    el.id = 'lc-' + col.id;
+    const bc = col.campaign ? 'lcard-badge campaign' : 'lcard-badge';
+    const icons = col.tokens.slice(0, 3).map(t =>
+      `<div class="licon" style="background:${t.c}">${t.s.slice(0,2)}</div>`
+    ).join('');
+    const ft = col.tokens[0];
+    const cc = ft.neg === null ? 'neu' : ft.neg ? 'neg' : 'pos';
+    el.innerHTML = `
+      <div class="${bc}">${col.type}</div>
+      <div class="lcard-title">${col.name}</div>
+      <div class="lcard-desc">${col.desc}</div>
+      <div class="lcard-icons">${icons}</div>
+      <div class="lcard-meta">
+        <span>${col.count} tokens · ${col.chain}</span>
+        <div><div class="lp-v">${ft.s} ${ft.p}</div><div class="lp-c ${cc}">${ft.ch}</div></div>
+      </div>`;
+    el.addEventListener('click', () => select(col.id));
+    grid.appendChild(el);
+  });
+}
+
+function panelHTML(col) {
+  const eyebrow = col.campaign ? 'Featured campaign' : col.type;
+  const eyebrowClass = col.campaign ? 'sp-eyebrow campaign' : 'sp-eyebrow';
+  const trows = col.tokens.map(t => {
+    const cc = t.neg === null ? 'neu' : t.neg ? 'neg' : 'pos';
+    return `<div class="sp-trow">
+      <div class="sp-ticon" style="background:${t.c}">${t.s.slice(0,2)}</div>
+      <div class="sp-tname"><div class="sp-tname-p">${t.n}</div><div class="sp-tname-s">${t.s}</div></div>
+      <div class="sp-tprice"><div class="sp-tprice-v">${t.p}</div><div class="sp-tprice-c ${cc}">${t.ch}</div></div>
+    </div>`;
+  }).join('');
+  return `
+    <div class="sp-hdr">
+      <div class="${eyebrowClass}">${eyebrow}</div>
+      <div class="sp-title">${col.name}</div>
+      <div class="sp-desc">${col.desc}</div>
+    </div>
+    <div class="sp-body">
+      <div>
+        <div class="sp-chips">
+          <span class="sp-chip"><strong>${col.count}</strong> tokens</span>
+          <span class="sp-chip">${col.chain}</span>
+          <span class="sp-chip">Updated ${col.updated}</span>
+        </div>
+      </div>
+      <div>
+        <div class="sp-sec-lbl">Representative tokens</div>
+        <div class="sp-token-list">${trows}</div>
+      </div>
+    </div>
+    <div class="sp-footer">
+      <button class="sp-btn-p">${col.campaign ? 'Explore campaign →' : 'View collection →'}</button>
+      <button class="sp-btn-g">Create account</button>
+      <div class="sp-cue"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" style="vertical-align:-2px;flex-shrink:0"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m15.5 7.5l2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4m2-2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></g></svg> Passkey account · No seed phrase</div>
+    </div>`;
+}
+
+function select(id) {
+  selected = id;
+  const col = DATA.find(c => c.id === id);
+  if (!col) return;
+
+  // Highlight bubble
+  document.querySelectorAll('.bubble').forEach(b => b.classList.remove('selected'));
+  const bub = document.getElementById('bub-' + id);
+  if (bub) bub.classList.add('selected');
+
+  // Highlight list card
+  document.querySelectorAll('.lcard').forEach(c => c.classList.remove('highlighted'));
+  const lc = document.getElementById('lc-' + id);
+  if (lc) { lc.classList.add('highlighted'); lc.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+
+  // Update selected label
+  const lbl = document.getElementById('lt-selected-lbl');
+  if (lbl) lbl.innerHTML = `Showing: <strong>${col.name}</strong>`;
+
+  // Hide canvas hint
+  document.getElementById('canvas-hint').classList.add('hidden');
+
+  const html = panelHTML(col);
+
+  // Update spatial panel
+  const spEmpty = document.getElementById('sp-empty');
+  const spContent = document.getElementById('sp-content');
+  if (spEmpty) spEmpty.style.display = 'none';
+  if (spContent) {
+    spContent.style.display = 'flex';
+    spContent.style.flexDirection = 'column';
+    spContent.style.flex = '1';
+    spContent.innerHTML = html;
+  }
+
+  // Update list panel (same content, same collection persists)
+  const lpEmpty = document.getElementById('lp-empty');
+  const lpContent = document.getElementById('lp-content');
+  if (lpEmpty) lpEmpty.style.display = 'none';
+  if (lpContent) {
+    lpContent.style.display = 'flex';
+    lpContent.style.flexDirection = 'column';
+    lpContent.style.flex = '1';
+    lpContent.innerHTML = html;
+  }
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('btn-spatial').classList.toggle('active', m === 'spatial');
+  document.getElementById('btn-list').classList.toggle('active', m === 'list');
+  document.getElementById('spatial-body').style.display = m === 'spatial' ? 'flex' : 'none';
+  document.getElementById('list-body').style.display = m === 'list' ? 'flex' : 'none';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.htab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('pane-' + tab).classList.add('active');
+  document.getElementById('view-sw').style.display = tab === 'market' ? 'flex' : 'none';
+}
+
+// Tooltip
+const tip = document.getElementById('htip');
+function tipShow(e, col) {
+  tip.innerHTML = `<strong style="display:block">${col.name}</strong>${col.count} tokens · ${col.chain}`;
+  tip.classList.add('show');
+  tipMove(e);
+}
+function tipMove(e) {
+  tip.style.left = (e.clientX + 14) + 'px';
+  tip.style.top = (e.clientY - 38) + 'px';
+}
+function tipHide() { tip.classList.remove('show'); }
+
+buildBubbles();
+buildListGrid();
+// Auto-select campaign hub on load
+setTimeout(() => select('defiSummer'), 100);
+</script>
+</body>
+</html>

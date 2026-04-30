@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction 1 v2 — Collection Discovery Surface · imToken Web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&display=swap" rel="stylesheet">
+<style>
+/*
+  DIRECTION 1 v2: Collection Discovery Surface
+  ─────────────────────────────────────────────
+  Design hypothesis:
+  Show enough data on each collection card that users understand
+  what it is and why it matters before clicking.
+
+  Structural identity: Content leads immediately after the tabs.
+  The first thing you see is the campaign card, then the collection
+  grid. No product hero, no cue section — the collection data IS
+  the value proposition.
+
+  Differentiators (vs v1):
+  - Market / My Holdings primary tab model
+  - Collection detail sheet (slide-in) as the decision layer
+  - My Holdings anonymous + empty + assets states
+  PRD refs: §6 IA, §11 List View, §12 Collection Detail, §13 My Holdings
+*/
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #08090a;
+  --panel: #0f1011;
+  --surface: #191a1b;
+  --text-1: #f7f8f8;
+  --text-2: #d0d6e0;
+  --text-3: #8a8f98;
+  --text-4: #62666d;
+  --brand: #5e6ad2;
+  --accent: #7170ff;
+  --accent-h: #828fff;
+  --border: rgba(255,255,255,0.08);
+  --border-s: rgba(255,255,255,0.05);
+  --pos: #27a644;
+  --neg: #DC2626;
+}
+
+body {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-feature-settings: "cv01","ss03";
+  background: var(--bg); color: var(--text-1);
+  font-size: 14px; line-height: 1.5; min-width: 1100px;
+}
+
+/* ── Header ── */
+.header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 24px; height: 52px;
+  border-bottom: 1px solid var(--border); background: var(--panel);
+  position: sticky; top: 0; z-index: 200;
+}
+.logo { font-size: 14px; font-weight: 510; letter-spacing: -.3px; white-space: nowrap; }
+.search-wrap { flex: 1; max-width: 400px; position: relative; }
+.search-wrap input {
+  width: 100%; height: 34px; border: 1px solid var(--border); border-radius: 6px;
+  padding: 0 12px 0 34px; font-size: 13px; font-family: inherit; font-feature-settings: "cv01","ss03";
+  background: rgba(255,255,255,.04); color: var(--text-1); outline: none; transition: border-color .15s;
+}
+.search-wrap input::placeholder { color: var(--text-4); }
+.search-wrap input:focus { border-color: rgba(255,255,255,.15); }
+.s-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-4); pointer-events: none; }
+.hright { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.btn-ghost {
+  height: 34px; padding: 0 14px; border: 1px solid var(--border); border-radius: 6px;
+  background: rgba(255,255,255,.02); font-size: 13px; font-family: inherit; font-feature-settings: "cv01","ss03";
+  cursor: pointer; color: var(--text-2); font-weight: 510; transition: border-color .15s;
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,.15); }
+.btn-primary {
+  height: 34px; padding: 0 14px; border: none; border-radius: 6px;
+  background: var(--brand); font-size: 13px; font-family: inherit; font-feature-settings: "cv01","ss03";
+  cursor: pointer; color: #fff; font-weight: 510; transition: background .15s;
+}
+.btn-primary:hover { background: var(--accent-h); }
+
+/* ── Primary Tabs ── */
+.tabs-bar {
+  display: flex; align-items: center; padding: 0 24px; height: 44px;
+  border-bottom: 1px solid var(--border); background: var(--panel);
+  position: sticky; top: 52px; z-index: 190;
+}
+.tab-btn {
+  height: 44px; padding: 0 18px; border: none; background: transparent;
+  font-size: 13.5px; font-family: inherit; font-feature-settings: "cv01","ss03";
+  font-weight: 510; cursor: pointer; color: var(--text-4);
+  border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s, border-color .15s;
+}
+.tab-btn:hover { color: var(--text-2); }
+.tab-btn.active { color: var(--text-1); border-bottom-color: var(--brand); }
+
+/* ── Panes ── */
+.pane { display: none; }
+.pane.active { display: block; }
+
+/* ── Market page: content leads immediately ── */
+.mkt-page { max-width: 1180px; margin: 0 auto; padding: 22px 24px 80px; }
+
+/* ── Campaign Card ── */
+.campaign-card {
+  display: flex; border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; margin-bottom: 22px; min-height: 152px;
+  background: rgba(255,255,255,.02); transition: border-color .15s;
+}
+.campaign-card:hover { border-color: rgba(255,255,255,.14); }
+.cam-vis {
+  width: 184px; flex-shrink: 0; background: rgba(255,255,255,.03);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px; color: var(--text-4); font-size: 11.5px; border-right: 1px solid var(--border);
+}
+.cam-body { flex: 1; padding: 18px 22px; display: flex; flex-direction: column; justify-content: space-between; }
+.cam-eye {
+  font-size: 10.5px; font-weight: 510; text-transform: uppercase; letter-spacing: .7px;
+  color: var(--text-4); margin-bottom: 5px; display: flex; align-items: center; gap: 7px;
+}
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pos); }
+.live-txt { font-size: 10.5px; font-weight: 510; color: var(--pos); }
+.cam-title { font-size: 16px; font-weight: 510; letter-spacing: -.3px; margin-bottom: 5px; }
+.cam-desc { font-size: 12.5px; color: var(--text-3); line-height: 1.55; margin-bottom: 8px; max-width: 520px; }
+.cam-rel { font-size: 12px; color: var(--text-4); margin-bottom: 14px; }
+.cam-rel a { color: var(--accent); font-weight: 510; text-decoration: none; }
+.cam-rel a:hover { color: var(--accent-h); }
+.cam-bottom { display: flex; align-items: center; gap: 10px; }
+.cam-cta { height: 32px; padding: 0 14px; background: var(--brand); color: #fff; border: none; border-radius: 6px; font-size: 12.5px; font-family: inherit; font-weight: 510; cursor: pointer; transition: background .15s; }
+.cam-cta:hover { background: var(--accent-h); }
+.cam-meta { font-size: 12px; color: var(--text-4); }
+
+/* ── Toolbar ── */
+.toolbar {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+  padding-bottom: 14px; border-bottom: 1px solid var(--border-s);
+}
+.tb-label { font-size: 14px; font-weight: 510; }
+.tb-count { font-size: 13px; color: var(--text-4); margin-right: 2px; }
+.view-sw { display: flex; background: rgba(255,255,255,.04); border-radius: 7px; padding: 3px; border: 1px solid var(--border-s); margin-right: 4px; }
+.vbtn {
+  padding: 3px 12px; border-radius: 5px; font-size: 12.5px; cursor: pointer;
+  border: none; background: transparent; color: var(--text-4); font-weight: 510;
+  font-family: inherit; font-feature-settings: "cv01","ss03"; line-height: 20px; transition: color .15s;
+}
+.vbtn.active { background: rgba(255,255,255,.08); color: var(--text-1); box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+.filter-sep { flex: 1; }
+.filters { display: flex; gap: 5px; }
+.fpill {
+  padding: 4px 12px; border: 1px solid var(--border); border-radius: 9999px;
+  font-size: 12px; cursor: pointer; background: transparent; color: var(--text-3);
+  font-family: inherit; font-feature-settings: "cv01","ss03"; font-weight: 510; transition: all .12s;
+}
+.fpill:hover { border-color: rgba(255,255,255,.15); color: var(--text-2); }
+.fpill.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+.ibtn {
+  width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 6px;
+  background: rgba(255,255,255,.02); cursor: pointer; display: flex;
+  align-items: center; justify-content: center; color: var(--text-4); transition: border-color .15s;
+}
+.ibtn:hover { border-color: rgba(255,255,255,.15); color: var(--text-3); }
+
+/* ── Collection Grid ── */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+/* ── Collection Card: data is the differentiator ── */
+.col-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 16px;
+  display: flex; flex-direction: column; cursor: pointer;
+  background: rgba(255,255,255,.02); transition: border-color .15s, background .15s;
+}
+.col-card:hover { border-color: rgba(255,255,255,.15); background: rgba(255,255,255,.03); }
+.col-card.hidden { display: none; }
+
+.card-badge {
+  display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10.5px;
+  font-weight: 510; text-transform: uppercase; letter-spacing: .4px;
+  background: rgba(255,255,255,.05); color: var(--text-3); margin-bottom: 8px;
+  align-self: flex-start; border: 1px solid var(--border-s);
+}
+.card-badge.campaign { background: var(--brand); color: #fff; border-color: var(--brand); }
+.card-title { font-size: 13.5px; font-weight: 510; letter-spacing: -.2px; margin-bottom: 4px; }
+.card-desc {
+  font-size: 12px; color: var(--text-3); line-height: 1.5; margin-bottom: 12px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Token price table — core differentiator for this direction */
+.token-table { border-top: 1px solid var(--border-s); padding-top: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 7px; }
+.trow { display: flex; align-items: center; gap: 7px; }
+.ticon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.tname { flex: 1; font-size: 11.5px; font-weight: 510; color: var(--text-2); }
+.tname-sub { font-size: 10.5px; color: var(--text-4); font-weight: 400; }
+.tprice { font-size: 11.5px; font-weight: 510; color: var(--text-1); margin-left: auto; }
+.tchange { font-size: 10.5px; min-width: 42px; text-align: right; }
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+.neu { color: var(--text-4); }
+
+.card-footer {
+  border-top: 1px solid var(--border-s); padding-top: 10px;
+  display: flex; align-items: center; justify-content: space-between; margin-top: auto;
+}
+.card-meta-txt { font-size: 11px; color: var(--text-4); line-height: 1.6; }
+.card-cta {
+  height: 28px; padding: 0 11px; background: rgba(255,255,255,.02);
+  border: 1px solid var(--border); border-radius: 5px; font-size: 11.5px;
+  font-family: inherit; font-weight: 510; cursor: pointer; color: var(--text-2); white-space: nowrap;
+  transition: border-color .15s;
+}
+.col-card:hover .card-cta { border-color: rgba(255,255,255,.15); }
+
+/* ── Collection Detail Sheet ── */
+.sheet-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 300;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.sheet-overlay.open { opacity: 1; pointer-events: all; }
+.detail-sheet {
+  position: fixed; top: 0; right: -500px; width: 460px; height: 100vh;
+  background: var(--panel); border-left: 1px solid var(--border);
+  z-index: 301; overflow-y: auto; transition: right .25s ease; display: flex; flex-direction: column;
+}
+.detail-sheet::-webkit-scrollbar { width: 3px; }
+.detail-sheet::-webkit-scrollbar-thumb { background: rgba(255,255,255,.07); }
+.detail-sheet.open { right: 0; }
+
+.sh-hdr {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 20px 20px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.sh-hdr-l { flex: 1; padding-right: 12px; }
+.sh-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10.5px; font-weight: 510; text-transform: uppercase; letter-spacing: .4px; background: rgba(255,255,255,.05); color: var(--text-3); border: 1px solid var(--border-s); margin-bottom: 6px; }
+.sh-badge.campaign { background: var(--brand); color: #fff; border-color: var(--brand); }
+.sh-title { font-size: 18px; font-weight: 510; letter-spacing: -.4px; }
+.sh-close { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; background: rgba(255,255,255,.02); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-4); flex-shrink: 0; transition: color .15s, border-color .15s; }
+.sh-close:hover { color: var(--text-2); border-color: rgba(255,255,255,.15); }
+
+.sh-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 20px; }
+.sh-sec-lbl { font-size: 10.5px; font-weight: 510; text-transform: uppercase; letter-spacing: .6px; color: var(--text-4); margin-bottom: 8px; }
+.sh-desc { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+.sh-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.sh-chip { padding: 3px 9px; border: 1px solid var(--border-s); border-radius: 5px; font-size: 11.5px; color: var(--text-4); }
+.sh-chip strong { color: var(--text-2); font-weight: 510; }
+
+.sh-token-list { display: flex; flex-direction: column; }
+.sh-trow { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border-s); }
+.sh-trow:last-child { border-bottom: none; }
+.sh-ticon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.sh-tname { flex: 1; }
+.sh-tn-p { font-size: 13px; font-weight: 510; }
+.sh-tn-s { font-size: 11px; color: var(--text-4); }
+.sh-tprice { text-align: right; }
+.sh-tprice-v { font-size: 12.5px; font-weight: 510; }
+.sh-tprice-c { font-size: 11px; }
+
+.sh-actions { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+.sh-btn-p { height: 40px; border: none; border-radius: 8px; background: var(--brand); font-size: 13.5px; font-family: inherit; font-weight: 510; cursor: pointer; color: #fff; transition: background .15s; }
+.sh-btn-p:hover { background: var(--accent-h); }
+.sh-btn-g { height: 38px; border: 1px solid var(--border); border-radius: 8px; background: rgba(255,255,255,.02); font-size: 13px; font-family: inherit; font-weight: 510; cursor: pointer; color: var(--text-2); transition: border-color .15s; }
+.sh-btn-g:hover { border-color: rgba(255,255,255,.15); }
+.sh-cue { font-size: 11.5px; color: var(--text-4); text-align: center; }
+
+/* ── My Holdings Page ── */
+.hld-page { max-width: 1180px; margin: 0 auto; padding: 0 24px 80px; }
+.hld-demo-bar { display: flex; align-items: center; gap: 6px; padding: 14px 0 12px; border-bottom: 1px solid var(--border-s); margin-bottom: 24px; }
+.hld-demo-lbl { font-size: 10.5px; color: var(--text-4); text-transform: uppercase; letter-spacing: .5px; font-weight: 510; margin-right: 4px; }
+.hs-btn { padding: 3px 10px; border: 1px solid var(--border); border-radius: 9999px; font-size: 11.5px; cursor: pointer; background: transparent; color: var(--text-4); font-family: inherit; font-weight: 510; transition: all .12s; }
+.hs-btn.active { background: rgba(255,255,255,.06); color: var(--text-2); border-color: rgba(255,255,255,.14); }
+.hstate { display: none; }
+.hstate.active { display: block; }
+
+.hstate-anon { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 0; }
+.ha-title { font-size: 19px; font-weight: 510; letter-spacing: -.4px; margin-bottom: 8px; }
+.ha-msg { font-size: 13px; color: var(--text-3); max-width: 380px; line-height: 1.6; margin-bottom: 22px; }
+.ha-actions { display: flex; gap: 10px; margin-bottom: 9px; }
+.ha-cta { height: 38px; padding: 0 20px; border: none; border-radius: 8px; background: var(--brand); font-size: 13.5px; font-family: inherit; font-weight: 510; cursor: pointer; color: #fff; transition: background .15s; }
+.ha-cta:hover { background: var(--accent-h); }
+.ha-ghost { height: 38px; padding: 0 16px; border: 1px solid var(--border); border-radius: 8px; background: rgba(255,255,255,.02); font-size: 13px; font-family: inherit; font-weight: 510; cursor: pointer; color: var(--text-2); transition: border-color .15s; }
+.ha-ghost:hover { border-color: rgba(255,255,255,.15); }
+.ha-confidence { font-size: 11.5px; color: var(--text-4); margin-bottom: 16px; }
+.ha-links { display: flex; gap: 14px; }
+.ha-link { font-size: 12.5px; color: var(--accent); font-weight: 510; cursor: pointer; }
+.ha-link:hover { color: var(--accent-h); }
+
+.hstate-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 0; }
+.he-title { font-size: 19px; font-weight: 510; letter-spacing: -.4px; margin-bottom: 8px; }
+.he-msg { font-size: 13px; color: var(--text-3); max-width: 380px; line-height: 1.6; margin-bottom: 22px; }
+.he-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.he-btn { height: 36px; padding: 0 16px; border: 1px solid var(--border); border-radius: 7px; background: rgba(255,255,255,.02); font-size: 13px; font-family: inherit; font-weight: 510; cursor: pointer; color: var(--text-2); transition: border-color .15s; }
+.he-btn:hover { border-color: rgba(255,255,255,.15); }
+.he-btn.p { background: var(--brand); border-color: var(--brand); color: #fff; }
+.he-btn.p:hover { background: var(--accent-h); border-color: var(--accent-h); }
+
+.hstate-assets { padding-top: 24px; }
+.ha-summary { display: flex; align-items: center; gap: 16px; padding: 0 0 16px; border-bottom: 1px solid var(--border-s); }
+.ha-total-l { font-size: 12px; color: var(--text-4); margin-bottom: 2px; }
+.ha-total-v { font-size: 22px; font-weight: 510; letter-spacing: -.5px; }
+.ha-chain-filter { display: flex; gap: 5px; margin-left: auto; }
+.hcf { padding: 3px 10px; border: 1px solid var(--border); border-radius: 9999px; font-size: 11.5px; cursor: pointer; background: transparent; color: var(--text-3); font-family: inherit; font-weight: 510; transition: all .12s; }
+.hcf.active { background: rgba(255,255,255,.06); color: var(--text-2); border-color: rgba(255,255,255,.13); }
+.asset-thead { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; padding: 10px 12px; border-bottom: 1px solid var(--border-s); }
+.asset-thead span { font-size: 10.5px; font-weight: 510; text-transform: uppercase; letter-spacing: .5px; color: var(--text-4); }
+.asset-thead span:not(:first-child) { text-align: right; }
+.asset-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; padding: 13px 12px; border-bottom: 1px solid var(--border-s); align-items: center; cursor: pointer; transition: background .1s; }
+.asset-row:hover { background: rgba(255,255,255,.02); }
+.asset-token-info { display: flex; align-items: center; gap: 10px; }
+.asset-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.asset-name { font-size: 13.5px; font-weight: 510; }
+.asset-sym { font-size: 12px; color: var(--text-4); }
+.asset-cell { text-align: right; font-size: 13px; color: var(--text-2); }
+.asset-cell.bold { font-weight: 510; color: var(--text-1); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <span class="logo">imToken Web</span>
+  <div class="search-wrap">
+    <svg class="s-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" placeholder="Search tokens, collections, campaigns">
+  </div>
+  <div class="hright">
+    <button class="btn-ghost">Sign in</button>
+    <button class="btn-primary">Create account</button>
+  </div>
+</header>
+
+<!-- Primary Tabs -->
+<nav class="tabs-bar">
+  <button class="tab-btn active" id="tab-market" onclick="switchTab('market')">Market</button>
+  <button class="tab-btn" id="tab-holdings" onclick="switchTab('holdings')">My Holdings</button>
+</nav>
+
+<!-- ══ MARKET PANE: content leads immediately ══ -->
+<div class="pane active" id="pane-market">
+  <div class="mkt-page">
+
+    <!-- Featured Campaign: structured editorial card -->
+    <div class="campaign-card">
+      <div class="cam-vis">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+        <span>Campaign visual</span>
+      </div>
+      <div class="cam-body">
+        <div>
+          <div class="cam-eye">
+            <span>Featured campaign</span><span class="live-dot"></span><span class="live-txt">Live now</span>
+          </div>
+          <div class="cam-title">Stock Tokens Launch</div>
+          <div class="cam-desc">Explore tokenized equities and real-world asset tokens. Track global stocks on-chain — no brokerage or custody account required.</div>
+          <div class="cam-rel">Related collection: <a href="#">Stock Tokens</a> · 24 tokens · Ethereum</div>
+        </div>
+        <div class="cam-bottom">
+          <button class="cam-cta">Explore campaign →</button>
+          <span class="cam-meta">Campaign active · Updated today</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar: label + view switch + filters -->
+    <div class="toolbar">
+      <span class="tb-label">Collections</span>
+      <span class="tb-count" id="col-count">8</span>
+      <div class="view-sw">
+        <button class="vbtn" onclick="alert('Spatial View — see Direction 2 prototype')">Spatial</button>
+        <button class="vbtn active">List</button>
+      </div>
+      <div class="filter-sep"></div>
+      <div class="filters">
+        <button class="fpill active" data-f="all">All</button>
+        <button class="fpill" data-f="curated">Curated</button>
+        <button class="fpill" data-f="campaign">Campaign</button>
+        <button class="fpill" data-f="preset">Preset</button>
+        <button class="fpill" data-f="pool">Pools</button>
+      </div>
+      <button class="ibtn" title="Sort">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Collection grid: data-rich cards are the hero -->
+    <div class="grid" id="col-grid"></div>
+  </div>
+</div>
+
+<!-- ══ MY HOLDINGS PANE ══ -->
+<div class="pane" id="pane-holdings">
+  <div class="hld-page">
+    <div class="hld-demo-bar">
+      <span class="hld-demo-lbl">Prototype state:</span>
+      <button class="hs-btn active" onclick="setHoldingsState('anon')">Anonymous</button>
+      <button class="hs-btn" onclick="setHoldingsState('empty')">Empty signed-in</button>
+      <button class="hs-btn" onclick="setHoldingsState('assets')">With assets</button>
+    </div>
+    <!-- Anonymous -->
+    <div class="hstate hstate-anon active" id="hs-anon">
+      <div class="ha-title">My Holdings</div>
+      <div class="ha-msg">Create a passkey account to view your holdings. No seed phrase setup. Explore Market first or create when you are ready.</div>
+      <div class="ha-actions">
+        <button class="ha-cta">Create account</button>
+        <button class="ha-ghost">Sign in</button>
+      </div>
+      <div class="ha-confidence">Passkey account. No seed phrase setup.</div>
+      <div class="ha-links">
+        <a class="ha-link" onclick="switchTab('market')">Explore Market</a>
+      </div>
+    </div>
+    <!-- Empty signed-in -->
+    <div class="hstate hstate-empty" id="hs-empty">
+      <div class="he-title">No assets yet</div>
+      <div class="he-msg">Your holdings will appear here after you receive or add tokens.</div>
+      <div class="he-actions">
+        <button class="he-btn p">Receive tokens</button>
+        <button class="he-btn" onclick="switchTab('market')">Explore Market</button>
+        <button class="he-btn">Try Send by Link</button>
+      </div>
+    </div>
+    <!-- With assets -->
+    <div class="hstate hstate-assets" id="hs-assets">
+      <div class="ha-summary">
+        <div><div class="ha-total-l">Total value</div><div class="ha-total-v">$3,842.14</div></div>
+        <div class="ha-chain-filter">
+          <button class="hcf active">All chains</button>
+          <button class="hcf">Arbitrum</button>
+          <button class="hcf">Ethereum</button>
+        </div>
+      </div>
+      <div class="asset-thead">
+        <span>Token</span><span>Balance</span><span>Price</span><span>24h</span><span>Chain</span>
+      </div>
+      <div id="asset-rows"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Collection Detail Sheet -->
+<div class="sheet-overlay" id="sheet-overlay" onclick="closeSheet()"></div>
+<div class="detail-sheet" id="detail-sheet">
+  <div class="sh-hdr">
+    <div class="sh-hdr-l">
+      <div class="sh-badge" id="sh-badge">Curated</div>
+      <div class="sh-title" id="sh-title"></div>
+    </div>
+    <button class="sh-close" onclick="closeSheet()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div class="sh-body" id="sh-body"></div>
+</div>
+
+<script>
+const COLS = [
+  { id:'stocks',  name:'Stock Tokens',     type:'Campaign', filter:'campaign',
+    desc:'Tokenized equities and real-world asset tokens representing global stocks.',
+    count:24, chain:'Ethereum', updated:'Today',
+    tokens:[
+      {s:'AAPL',n:'Apple',   c:'#555555',p:'$228.40',ch:'+0.6%',neg:false},
+      {s:'TSLA',n:'Tesla',   c:'#CC0000',p:'$249.30',ch:'+1.8%',neg:false},
+      {s:'NVDA',n:'NVIDIA',  c:'#76B900',p:'$124.50',ch:'+4.2%',neg:false},
+    ]},
+  { id:'defi',    name:'DeFi Blue Chips',  type:'Curated',  filter:'curated',
+    desc:'Top decentralized finance protocols by market cap and liquidity depth.',
+    count:18, chain:'Ethereum', updated:'Apr 28',
+    tokens:[
+      {s:'ETH', n:'Ethereum', c:'#627EEA',p:'$2,291', ch:'-0.5%',neg:true },
+      {s:'LINK',n:'Chainlink',c:'#2A5ADA',p:'$13.42', ch:'+1.2%',neg:false},
+      {s:'AAVE',n:'Aave',     c:'#B6509E',p:'$98.30', ch:'+0.8%',neg:false},
+    ]},
+  { id:'l1',      name:'Layer 1 Networks', type:'Curated',  filter:'curated',
+    desc:'Major Layer 1 blockchains powering decentralized ecosystems worldwide.',
+    count:12, chain:'Multi-chain', updated:'Apr 27',
+    tokens:[
+      {s:'BTC', n:'Bitcoin', c:'#F7931A',p:'$68,420',ch:'+2.1%',neg:false},
+      {s:'SOL', n:'Solana',  c:'#9945FF',p:'$172.40',ch:'+3.4%',neg:false},
+      {s:'ADA', n:'Cardano', c:'#0D4EB8',p:'$0.44',  ch:'-0.9%',neg:true },
+    ]},
+  { id:'meta',    name:'Metaverse',        type:'Curated',  filter:'curated',
+    desc:'Tokens from virtual worlds, gaming ecosystems, and digital real estate.',
+    count:22, chain:'Ethereum', updated:'Apr 25',
+    tokens:[
+      {s:'MANA',n:'Decentraland', c:'#FF2D55',p:'$0.38',ch:'-2.1%',neg:true },
+      {s:'SAND',n:'The Sandbox',  c:'#04ADEF',p:'$0.41',ch:'+1.6%',neg:false},
+      {s:'AXS', n:'Axie Infinity',c:'#0055D5',p:'$6.22',ch:'-0.7%',neg:true },
+    ]},
+  { id:'gamefi',  name:'GameFi',           type:'Curated',  filter:'curated',
+    desc:'Play-to-earn and blockchain gaming tokens across multiple chains.',
+    count:16, chain:'Multi-chain', updated:'Apr 24',
+    tokens:[
+      {s:'IMX', n:'Immutable X',c:'#17B3E0',p:'$1.72', ch:'+5.1%',neg:false},
+      {s:'RON', n:'Ronin',      c:'#0055FF',p:'$2.18', ch:'+2.3%',neg:false},
+      {s:'BEAM',n:'Beam',       c:'#00A0C0',p:'$0.022',ch:'-1.2%',neg:true },
+    ]},
+  { id:'stable',  name:'Stablecoins',      type:'Curated',  filter:'curated',
+    desc:'USD-pegged and algorithmic stablecoins for trading and savings.',
+    count:8, chain:'Multi-chain', updated:'Apr 28',
+    tokens:[
+      {s:'USDT',n:'Tether',   c:'#26A17B',p:'$1.00',ch:'0.0%',neg:null},
+      {s:'USDC',n:'USD Coin', c:'#2775CA',p:'$1.00',ch:'0.0%',neg:null},
+      {s:'DAI', n:'Dai',      c:'#C8A21A',p:'$1.00',ch:'0.0%',neg:null},
+    ]},
+  { id:'ai',      name:'AI Tokens',        type:'Curated',  filter:'curated',
+    desc:'Tokens powering AI infrastructure, compute networks, and data protocols.',
+    count:14, chain:'Ethereum', updated:'Apr 26',
+    tokens:[
+      {s:'FET', n:'Fetch.AI',       c:'#333333',p:'$1.48',ch:'+3.8%',neg:false},
+      {s:'AGIX',n:'SingularityNET', c:'#6E56CF',p:'$0.72',ch:'+2.1%',neg:false},
+      {s:'RNDR',n:'Render',         c:'#E91E8C',p:'$5.34',ch:'+6.2%',neg:false},
+    ]},
+  { id:'social',  name:'Social Tokens',    type:'Preset',   filter:'preset',
+    desc:'Creator economy and social protocol tokens.',
+    count:10, chain:'Multi-chain', updated:'Apr 22',
+    tokens:[
+      {s:'DESO',n:'DeSo', c:'#333333',p:'$11.20',ch:'-0.5%',neg:true },
+      {s:'RAL', n:'Rally',c:'#EC4899',p:'$0.18', ch:'+1.4%',neg:false},
+    ]},
+];
+
+const ASSETS = [
+  {s:'ETH', n:'Ethereum',c:'#627EEA',balance:'1.24',price:'$2,291',ch:'-0.5%',neg:true, chain:'Arbitrum'},
+  {s:'USDC',n:'USD Coin',c:'#2775CA',balance:'842.00',price:'$1.00',ch:'0.0%',neg:null,chain:'Ethereum'},
+  {s:'ARB', n:'Arbitrum',c:'#2D374B',balance:'320',price:'$1.22',ch:'+1.3%',neg:false,chain:'Arbitrum'},
+];
+
+function buildGrid() {
+  const grid = document.getElementById('col-grid');
+  COLS.forEach(col => {
+    const card = document.createElement('div');
+    card.className = 'col-card';
+    card.dataset.f = col.filter;
+    const bc = col.type === 'Campaign' ? 'card-badge campaign' : 'card-badge';
+    const trows = col.tokens.map(t => {
+      const cc = t.neg === null ? 'neu' : t.neg ? 'neg' : 'pos';
+      return `<div class="trow">
+        <div class="ticon" style="background:${t.c}">${t.s.slice(0,2)}</div>
+        <span class="tname">${t.s} <span class="tname-sub">${t.n}</span></span>
+        <span class="tprice">${t.p}</span>
+        <span class="tchange ${cc}">${t.ch}</span>
+      </div>`;
+    }).join('');
+    card.innerHTML = `
+      <div class="${bc}">${col.type}</div>
+      <div class="card-title">${col.name}</div>
+      <div class="card-desc">${col.desc}</div>
+      <div class="token-table">${trows}</div>
+      <div class="card-footer">
+        <div class="card-meta-txt"><div>${col.count} tokens · ${col.chain}</div><div>Updated ${col.updated}</div></div>
+        <button class="card-cta">View collection</button>
+      </div>`;
+    card.addEventListener('click', () => openSheet(col));
+    grid.appendChild(card);
+  });
+}
+
+function setupFilters() {
+  document.querySelectorAll('.fpill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.fpill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      const f = pill.dataset.f;
+      let n = 0;
+      document.querySelectorAll('.col-card').forEach(c => {
+        const show = f === 'all' || c.dataset.f === f;
+        c.classList.toggle('hidden', !show);
+        if (show) n++;
+      });
+      document.getElementById('col-count').textContent = n;
+    });
+  });
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('pane-' + tab).classList.add('active');
+}
+
+function setHoldingsState(state) {
+  document.querySelectorAll('.hs-btn').forEach(b => b.classList.remove('active'));
+  const idx = {anon:0,empty:1,assets:2};
+  document.querySelectorAll('.hs-btn')[idx[state]].classList.add('active');
+  document.querySelectorAll('.hstate').forEach(s => s.classList.remove('active'));
+  document.getElementById('hs-' + state).classList.add('active');
+}
+
+function buildAssets() {
+  const rows = document.getElementById('asset-rows');
+  ASSETS.forEach(a => {
+    const row = document.createElement('div');
+    row.className = 'asset-row';
+    const cc = a.neg === null ? 'neu' : a.neg ? 'neg' : 'pos';
+    row.innerHTML = `
+      <div class="asset-token-info">
+        <div class="asset-icon" style="background:${a.c}">${a.s.slice(0,2)}</div>
+        <div><div class="asset-name">${a.n}</div><div class="asset-sym">${a.s}</div></div>
+      </div>
+      <div class="asset-cell bold">${a.balance}</div>
+      <div class="asset-cell bold">${a.price}</div>
+      <div class="asset-cell ${cc}">${a.ch}</div>
+      <div class="asset-cell">${a.chain}</div>`;
+    rows.appendChild(row);
+  });
+}
+
+function openSheet(col) {
+  const badge = document.getElementById('sh-badge');
+  badge.textContent = col.type;
+  badge.className = 'sh-badge' + (col.type === 'Campaign' ? ' campaign' : '');
+  document.getElementById('sh-title').textContent = col.name;
+  const trows = col.tokens.map(t => {
+    const cc = t.neg === null ? 'neu' : t.neg ? 'neg' : 'pos';
+    return `<div class="sh-trow">
+      <div class="sh-ticon" style="background:${t.c}">${t.s.slice(0,2)}</div>
+      <div class="sh-tname"><div class="sh-tn-p">${t.n}</div><div class="sh-tn-s">${t.s}</div></div>
+      <div class="sh-tprice"><div class="sh-tprice-v">${t.p}</div><div class="sh-tprice-c ${cc}">${t.ch}</div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('sh-body').innerHTML = `
+    <div>
+      <div class="sh-sec-lbl">About</div>
+      <div class="sh-desc">${col.desc}</div>
+      <div class="sh-chips">
+        <span class="sh-chip"><strong>${col.count}</strong> tokens</span>
+        <span class="sh-chip">${col.chain}</span>
+        <span class="sh-chip">Updated ${col.updated}</span>
+      </div>
+    </div>
+    <div>
+      <div class="sh-sec-lbl">Representative tokens</div>
+      <div class="sh-token-list">${trows}</div>
+    </div>
+    <div class="sh-actions">
+      <button class="sh-btn-p" onclick="closeSheet()">View collection</button>
+      <button class="sh-btn-g">Create account</button>
+      <div class="sh-cue">Create with passkey. No seed phrase setup.</div>
+    </div>`;
+  document.getElementById('sheet-overlay').classList.add('open');
+  document.getElementById('detail-sheet').classList.add('open');
+}
+
+function closeSheet() {
+  document.getElementById('sheet-overlay').classList.remove('open');
+  document.getElementById('detail-sheet').classList.remove('open');
+}
+
+buildGrid();
+setupFilters();
+buildAssets();
+</script>
+</body>
+</html>

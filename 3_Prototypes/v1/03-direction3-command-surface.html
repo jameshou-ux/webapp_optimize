@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction 3 — Token Command Surface · imToken Web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&display=swap" rel="stylesheet">
+<style>
+/*
+  DIRECTION 3: Lightweight Token Command Surface
+  ──────────────────────────────────────────────
+  Design thesis: The first viewport should make entry points obvious.
+  Search is the primary navigation layer — not a utility in the corner.
+  Discovery is useful before account creation.
+  AA onboarding is a small confidence layer woven into the hero,
+  not a wallet education module.
+  Collections render as compact scannable rows below the fold.
+*/
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #08090a;
+  --panel: #0f1011;
+  --surface: #191a1b;
+  --text-1: #f7f8f8;
+  --text-2: #d0d6e0;
+  --text-3: #8a8f98;
+  --text-4: #62666d;
+  --brand: #5e6ad2;
+  --accent: #7170ff;
+  --accent-h: #828fff;
+  --border: rgba(255,255,255,0.08);
+  --border-subtle: rgba(255,255,255,0.05);
+  --pos: #27a644;
+  --neg: #DC2626;
+}
+
+body {
+  font-family: 'Inter', 'SF Pro Display', -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: "cv01", "ss03";
+  background: var(--bg); color: var(--text-1); font-size: 14px; line-height: 1.5;
+  min-width: 1100px;
+}
+
+/* ─── Header: minimal — only logo + account actions ─── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 52px; border-bottom: 1px solid var(--border);
+  background: var(--panel); position: sticky; top: 0; z-index: 100;
+}
+
+.logo { font-size: 14px; font-weight: 510; letter-spacing: -0.3px; color: var(--text-1); }
+
+.hright { display: flex; align-items: center; gap: 8px; }
+
+.btn-ghost {
+  height: 34px; padding: 0 14px; border: 1px solid var(--border); border-radius: 6px;
+  background: rgba(255,255,255,0.02); font-size: 13px; font-family: inherit; font-feature-settings: "cv01", "ss03";
+  cursor: pointer; color: var(--text-2); font-weight: 510;
+  transition: border-color 0.15s;
+}
+
+.btn-ghost:hover { border-color: rgba(255,255,255,0.15); }
+
+.btn-primary {
+  height: 34px; padding: 0 14px; border: none; border-radius: 6px;
+  background: var(--brand); font-size: 13px; font-family: inherit; font-feature-settings: "cv01", "ss03";
+  cursor: pointer; color: #fff; font-weight: 510;
+  transition: background 0.15s;
+}
+
+.btn-primary:hover { background: var(--accent-h); }
+
+/* ─── Hero: search is the primary entry point ─── */
+.hero {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 56px 32px 44px; text-align: center;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg);
+}
+
+.hero-eyebrow {
+  font-size: 11px; font-weight: 510; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--text-4); margin-bottom: 14px;
+}
+
+.hero-title {
+  font-size: 32px; font-weight: 510; letter-spacing: -0.704px;
+  margin-bottom: 8px; line-height: 1.13; color: var(--text-1);
+}
+
+.hero-sub {
+  font-size: 15px; color: var(--text-3); max-width: 440px;
+  margin-bottom: 28px; line-height: 1.55;
+}
+
+/* Large search input — the design differentiator */
+.hero-search {
+  width: 100%; max-width: 600px; position: relative; margin-bottom: 14px;
+}
+
+.hero-search input {
+  width: 100%; height: 50px; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 0 18px 0 48px; font-size: 15px; font-family: inherit; font-feature-settings: "cv01", "ss03";
+  background: rgba(255,255,255,0.04); color: var(--text-1);
+  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.hero-search input::placeholder { color: var(--text-4); }
+
+.hero-search input:focus {
+  border-color: rgba(113,112,255,0.5);
+  box-shadow: 0 0 0 3px rgba(113,112,255,0.1);
+}
+
+.hero-search svg {
+  position: absolute; left: 16px; top: 50%;
+  transform: translateY(-50%); color: var(--text-4); pointer-events: none;
+}
+
+/* Category pills below search */
+.search-cats {
+  display: flex; gap: 8px; margin-bottom: 22px; justify-content: center;
+}
+
+.cat-pill {
+  padding: 5px 14px; border: 1px solid var(--border); border-radius: 9999px;
+  font-size: 12.5px; cursor: pointer; background: transparent; color: var(--text-3);
+  font-family: inherit; font-feature-settings: "cv01", "ss03"; font-weight: 510;
+  transition: all 0.12s;
+}
+
+.cat-pill:hover { border-color: rgba(255,255,255,0.15); color: var(--text-2); }
+.cat-pill.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+/* AA confidence, woven into the hero */
+.hero-account {
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+}
+
+.hero-account button {
+  height: 40px; padding: 0 22px; background: var(--brand); color: #fff;
+  border: none; border-radius: 8px; font-size: 13.5px; font-family: inherit; font-feature-settings: "cv01", "ss03";
+  font-weight: 510; cursor: pointer; transition: background 0.15s;
+}
+
+.hero-account button:hover { background: var(--accent-h); }
+
+.hero-aa {
+  font-size: 12px; color: var(--text-4); max-width: 360px; text-align: center;
+}
+
+/* ─── Campaign strip ─── */
+.campaign-strip {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 32px; border-bottom: 1px solid var(--border);
+  background: var(--panel); max-width: 100%;
+}
+
+.cs-badge {
+  font-size: 10.5px; font-weight: 510; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--text-4); white-space: nowrap;
+}
+
+.cs-live { display: flex; align-items: center; gap: 5px; }
+.cs-dot  { width: 6px; height: 6px; border-radius: 50%; background: var(--pos); }
+.cs-live-txt { font-size: 11px; font-weight: 510; color: var(--pos); }
+
+.cs-sep { color: var(--border); font-size: 14px; }
+
+.cs-title { font-size: 13.5px; font-weight: 510; color: var(--text-1); }
+
+.cs-desc { font-size: 12.5px; color: var(--text-3); flex: 1; }
+
+.cs-collection { font-size: 12.5px; color: var(--text-4); white-space: nowrap; }
+.cs-collection a { color: var(--accent); font-weight: 510; text-underline-offset: 2px; text-decoration: none; }
+.cs-collection a:hover { color: var(--accent-h); }
+
+.cs-cta {
+  height: 32px; padding: 0 14px; border: 1px solid var(--border); border-radius: 6px;
+  background: rgba(255,255,255,0.02); font-size: 12.5px; font-family: inherit; font-feature-settings: "cv01", "ss03";
+  font-weight: 510; cursor: pointer; color: var(--text-2); white-space: nowrap;
+  transition: border-color 0.15s;
+}
+
+.cs-cta:hover { border-color: rgba(255,255,255,0.15); }
+
+/* ─── Collection rows ─── */
+.page { max-width: 1180px; margin: 0 auto; padding: 0 32px 60px; }
+
+.section-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 22px 0 14px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 0;
+}
+
+.sb-label { font-size: 14px; font-weight: 510; color: var(--text-1); }
+.sb-count { font-size: 13px; color: var(--text-4); margin-right: 4px; }
+.sb-filters { display: flex; gap: 5px; }
+
+.rfpill {
+  padding: 4px 11px; border: 1px solid var(--border); border-radius: 9999px;
+  font-size: 12px; cursor: pointer; background: transparent; color: var(--text-3);
+  font-family: inherit; font-feature-settings: "cv01", "ss03"; font-weight: 510;
+  transition: all 0.12s;
+}
+
+.rfpill:hover { border-color: rgba(255,255,255,0.15); color: var(--text-2); }
+.rfpill.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+/* Collection as rows — compact, scannable — the differentiator vs. cards */
+.col-row {
+  display: flex; align-items: center; gap: 16px;
+  cursor: pointer; transition: background 0.1s;
+  border-radius: 6px; padding: 13px 10px; margin: 0 -10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.col-row:hover { background: rgba(255,255,255,0.03); }
+.col-row:hover .cr-cta { border-color: rgba(255,255,255,0.15); }
+
+.cr-icons { display: flex; gap: 3px; flex-shrink: 0; }
+
+.cri {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 700; color: #fff;
+}
+
+.cr-name { min-width: 160px; }
+.cr-name-primary { font-size: 13.5px; font-weight: 510; letter-spacing: -0.2px; color: var(--text-1); }
+.cr-name-sub     { font-size: 11.5px; color: var(--text-4); }
+
+.cr-badge {
+  padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 510;
+  text-transform: uppercase; letter-spacing: 0.3px;
+  background: rgba(255,255,255,0.05); color: var(--text-3); flex-shrink: 0;
+  border: 1px solid var(--border-subtle);
+}
+
+.cr-badge.campaign { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+.cr-desc { flex: 1; font-size: 12.5px; color: var(--text-3); line-height: 1.4; }
+
+.cr-count { font-size: 12.5px; color: var(--text-4); white-space: nowrap; min-width: 80px; text-align: right; }
+
+.cr-price { text-align: right; min-width: 100px; }
+.crp-val { font-size: 13px; font-weight: 510; color: var(--text-1); }
+.crp-ch  { font-size: 11.5px; }
+
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+.neu { color: var(--text-4); }
+
+.cr-cta {
+  height: 30px; padding: 0 12px; border: 1px solid var(--border); border-radius: 6px;
+  background: rgba(255,255,255,0.02); font-size: 12px; font-family: inherit; font-feature-settings: "cv01", "ss03";
+  font-weight: 510; cursor: pointer; color: var(--text-2); white-space: nowrap; flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+
+/* Search results overlay */
+.search-results {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: rgba(0,0,0,0.4) 0px 8px 24px; z-index: 200; display: none;
+  padding: 8px 0; max-height: 400px; overflow-y: auto;
+}
+
+.sr-group-label {
+  padding: 6px 16px 4px; font-size: 10.5px; font-weight: 510;
+  text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-4);
+}
+
+.sr-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px; cursor: pointer; transition: background 0.1s;
+}
+
+.sr-item:hover { background: rgba(255,255,255,0.04); }
+
+.sr-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+
+.sr-name { font-size: 13px; font-weight: 510; color: var(--text-1); }
+.sr-meta { font-size: 11.5px; color: var(--text-4); }
+
+.sr-divider { height: 1px; background: var(--border-subtle); margin: 6px 0; }
+
+/* Empty / loading states */
+.state-empty {
+  text-align: center; padding: 48px 0;
+  display: none;
+}
+
+.state-empty p { font-size: 13.5px; margin-bottom: 6px; color: var(--text-3); }
+.state-empty span { font-size: 12.5px; color: var(--text-4); }
+
+/* Skeleton loader */
+.skeleton-rows { display: none; }
+
+.skeleton-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 13px 10px; border-bottom: 1px solid var(--border-subtle);
+}
+
+.skel {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+.skel-circle { width: 26px; height: 26px; border-radius: 50%; }
+.skel-short { width: 120px; height: 13px; }
+.skel-med   { width: 200px; height: 13px; }
+.skel-long  { flex: 1; height: 13px; }
+.skel-sm    { width: 60px;  height: 13px; }
+.skel-btn   { width: 80px;  height: 30px; border-radius: 6px; }
+
+/* col-row hidden by filter */
+.col-row.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- Header: minimal, just logo + account actions -->
+<header class="header">
+  <span class="logo">imToken Web</span>
+  <div class="hright">
+    <button class="btn-ghost">Sign in</button>
+    <button class="btn-primary">Create account</button>
+  </div>
+</header>
+
+<!-- Hero: search as primary entry point -->
+<div class="hero">
+  <div class="hero-eyebrow">Home of Tokens</div>
+  <h1 class="hero-title">Find any token, any collection.</h1>
+  <p class="hero-sub">Browse curated token collections and campaigns. No wallet setup required to explore.</p>
+
+  <!-- Large search — the structural differentiator -->
+  <div class="hero-search" id="heroSearch">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" id="searchInput" placeholder="Search tokens, collections, campaigns…" autocomplete="off">
+    <!-- Search results dropdown -->
+    <div class="search-results" id="searchResults">
+      <div class="sr-group-label">Collections</div>
+      <div class="sr-item">
+        <div class="sr-icon" style="background:#555">ST</div>
+        <div><div class="sr-name">Stock Tokens</div><div class="sr-meta">Campaign · 24 tokens · ETH</div></div>
+      </div>
+      <div class="sr-item">
+        <div class="sr-icon" style="background:#627EEA">DE</div>
+        <div><div class="sr-name">DeFi Blue Chips</div><div class="sr-meta">Curated · 18 tokens · ETH</div></div>
+      </div>
+      <div class="sr-divider"></div>
+      <div class="sr-group-label">Tokens</div>
+      <div class="sr-item">
+        <div class="sr-icon" style="background:#627EEA">ET</div>
+        <div><div class="sr-name">Ethereum</div><div class="sr-meta">ETH · $2,291 · -0.5%</div></div>
+      </div>
+      <div class="sr-item">
+        <div class="sr-icon" style="background:#F7931A">BT</div>
+        <div><div class="sr-name">Bitcoin</div><div class="sr-meta">BTC · $68,420 · +2.1%</div></div>
+      </div>
+      <div class="sr-divider"></div>
+      <div class="sr-group-label">Campaigns</div>
+      <div class="sr-item">
+        <div class="sr-icon" style="background:#5e6ad2">SC</div>
+        <div><div class="sr-name">Stock Tokens Launch</div><div class="sr-meta">Campaign · Live now</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category pills: search scope selector -->
+  <div class="search-cats">
+    <button class="cat-pill active">All</button>
+    <button class="cat-pill">Tokens</button>
+    <button class="cat-pill">Collections</button>
+    <button class="cat-pill">Campaigns</button>
+  </div>
+
+  <!-- AA confidence cue, woven into the hero -->
+  <div class="hero-account">
+    <button>Create account</button>
+    <span class="hero-aa">Passkey account — no seed phrase, no extension required. Create only when you're ready to act.</span>
+  </div>
+</div>
+
+<!-- Campaign strip: compact, action-led -->
+<div class="campaign-strip">
+  <span class="cs-badge">Featured campaign</span>
+  <div class="cs-live">
+    <span class="cs-dot"></span>
+    <span class="cs-live-txt">Live now</span>
+  </div>
+  <span class="cs-sep">·</span>
+  <span class="cs-title">Stock Tokens Launch</span>
+  <span class="cs-desc">Explore tokenized equities and real-world asset tokens on-chain.</span>
+  <span class="cs-collection">Related: <a href="#">Stock Tokens</a> · 24 tokens</span>
+  <button class="cs-cta">Explore →</button>
+</div>
+
+<!-- Collections: compact rows, not grid cards -->
+<div class="page">
+
+  <div class="section-bar">
+    <span class="sb-label">Collections</span>
+    <span class="sb-count" id="row-count">8</span>
+    <div class="sb-filters">
+      <button class="rfpill active" data-f="all">All</button>
+      <button class="rfpill" data-f="curated">Curated</button>
+      <button class="rfpill" data-f="campaign">Campaign</button>
+      <button class="rfpill" data-f="preset">Preset</button>
+    </div>
+  </div>
+
+  <!-- Skeleton loading state (hidden by default, toggle to show) -->
+  <div class="skeleton-rows" id="skeletonRows">
+    <div class="skeleton-row"><div class="skel skel-circle"></div><div class="skel skel-short"></div><div class="skel skel-med"></div><div class="skel skel-long"></div><div class="skel skel-sm"></div><div class="skel skel-btn"></div></div>
+    <div class="skeleton-row"><div class="skel skel-circle"></div><div class="skel skel-short"></div><div class="skel skel-med"></div><div class="skel skel-long"></div><div class="skel skel-sm"></div><div class="skel skel-btn"></div></div>
+    <div class="skeleton-row"><div class="skel skel-circle"></div><div class="skel skel-short"></div><div class="skel skel-med"></div><div class="skel skel-long"></div><div class="skel skel-sm"></div><div class="skel skel-btn"></div></div>
+  </div>
+
+  <!-- Collection rows -->
+  <div id="rowList"></div>
+
+  <!-- Empty state -->
+  <div class="state-empty" id="emptyState">
+    <p>No collections match this filter</p>
+    <span>Try a different filter or <a href="#" style="color:var(--accent);font-weight:510">clear all</a></span>
+  </div>
+
+</div>
+
+<script>
+const COLS = [
+  {
+    id: 'stocks', name: 'Stock Tokens', type: 'Campaign', filter: 'campaign',
+    desc: 'Tokenized equities and real-world asset tokens representing global stocks.',
+    count: 24, chain: 'ETH', updated: 'Today',
+    tokens: [
+      { s: 'AAPL', c: '#555555' }, { s: 'TSLA', c: '#CC0000' },
+      { s: 'NVDA', c: '#76B900' }, { s: 'AMZN', c: '#FF9900' },
+    ],
+    sig: { label: 'AAPL', price: '$228.40', ch: '+0.6%', neg: false },
+  },
+  {
+    id: 'defi', name: 'DeFi Blue Chips', type: 'Curated', filter: 'curated',
+    desc: 'Top decentralized finance protocols by market cap and liquidity.',
+    count: 18, chain: 'ETH', updated: 'Oct 1',
+    tokens: [
+      { s: 'ETH',  c: '#627EEA' }, { s: 'LINK', c: '#2A5ADA' },
+      { s: 'AAVE', c: '#B6509E' }, { s: 'UNI',  c: '#E91E8C' },
+    ],
+    sig: { label: 'ETH', price: '$2,291', ch: '-0.5%', neg: true },
+  },
+  {
+    id: 'l1', name: 'Layer 1 Networks', type: 'Curated', filter: 'curated',
+    desc: 'Major Layer 1 blockchains powering decentralized ecosystems.',
+    count: 12, chain: 'Multi-chain', updated: 'Oct 2',
+    tokens: [
+      { s: 'BTC', c: '#F7931A' }, { s: 'SOL', c: '#9945FF' },
+      { s: 'ADA', c: '#0D4EB8' },
+    ],
+    sig: { label: 'BTC', price: '$68,420', ch: '+2.1%', neg: false },
+  },
+  {
+    id: 'meta', name: 'Metaverse', type: 'Curated', filter: 'curated',
+    desc: 'Tokens from virtual worlds, gaming ecosystems, and digital real estate.',
+    count: 22, chain: 'ETH', updated: 'Sep 30',
+    tokens: [
+      { s: 'MANA', c: '#FF2D55' }, { s: 'SAND', c: '#04ADEF' },
+      { s: 'AXS',  c: '#0055D5' },
+    ],
+    sig: { label: 'MANA', price: '$0.38', ch: '-2.1%', neg: true },
+  },
+  {
+    id: 'gamefi', name: 'GameFi', type: 'Curated', filter: 'curated',
+    desc: 'Play-to-earn and blockchain gaming tokens.',
+    count: 16, chain: 'Multi-chain', updated: 'Sep 28',
+    tokens: [
+      { s: 'IMX', c: '#17B3E0' }, { s: 'RON', c: '#0055FF' },
+      { s: 'BEAM', c: '#00A0C0' },
+    ],
+    sig: { label: 'IMX', price: '$1.72', ch: '+5.1%', neg: false },
+  },
+  {
+    id: 'stable', name: 'Stablecoins', type: 'Curated', filter: 'curated',
+    desc: 'USD-pegged and algorithmic stablecoins for trading and savings.',
+    count: 8, chain: 'Multi-chain', updated: 'Oct 2',
+    tokens: [
+      { s: 'USDT', c: '#26A17B' }, { s: 'USDC', c: '#2775CA' },
+      { s: 'DAI',  c: '#C8A21A' },
+    ],
+    sig: { label: 'USDT', price: '$1.00', ch: '0.0%', neg: null },
+  },
+  {
+    id: 'ai', name: 'AI Tokens', type: 'Curated', filter: 'curated',
+    desc: 'Tokens powering AI infrastructure, compute networks, and data protocols.',
+    count: 14, chain: 'ETH', updated: 'Oct 1',
+    tokens: [
+      { s: 'FET',  c: '#333333' }, { s: 'AGIX', c: '#6E56CF' },
+      { s: 'RNDR', c: '#E91E8C' },
+    ],
+    sig: { label: 'RNDR', price: '$5.34', ch: '+6.2%', neg: false },
+  },
+  {
+    id: 'social', name: 'Social Tokens', type: 'Preset', filter: 'preset',
+    desc: 'Creator economy and social protocol tokens.',
+    count: 10, chain: 'Multi-chain', updated: 'Sep 25',
+    tokens: [
+      { s: 'DESO', c: '#333333' }, { s: 'RAL', c: '#EC4899' },
+    ],
+    sig: { label: 'DESO', price: '$11.20', ch: '-0.5%', neg: true },
+  },
+];
+
+function buildRows() {
+  const list = document.getElementById('rowList');
+  COLS.forEach(col => {
+    const row = document.createElement('div');
+    row.className = 'col-row';
+    row.dataset.f = col.filter;
+
+    const icons = col.tokens.slice(0, 3).map(t =>
+      `<div class="cri" style="background:${t.c}">${t.s.slice(0,2)}</div>`
+    ).join('');
+
+    const badgeCls = col.type === 'Campaign' ? 'cr-badge campaign' : 'cr-badge';
+    const chCls = col.sig.neg === null ? 'neu' : col.sig.neg ? 'neg' : 'pos';
+
+    row.innerHTML = `
+      <div class="cr-icons">${icons}</div>
+      <div class="cr-name">
+        <div class="cr-name-primary">${col.name}</div>
+        <div class="cr-name-sub">${col.chain}</div>
+      </div>
+      <span class="${badgeCls}">${col.type}</span>
+      <div class="cr-desc">${col.desc}</div>
+      <div class="cr-count">${col.count} tokens · ${col.updated}</div>
+      <div class="cr-price">
+        <div class="crp-val">${col.sig.label} ${col.sig.price}</div>
+        <div class="crp-ch ${chCls}">${col.sig.ch}</div>
+      </div>
+      <button class="cr-cta">View →</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function setupFilters() {
+  document.querySelectorAll('.rfpill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.rfpill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      const f = pill.dataset.f;
+      let n = 0;
+      document.querySelectorAll('.col-row').forEach(r => {
+        const show = f === 'all' || r.dataset.f === f;
+        r.classList.toggle('hidden', !show);
+        if (show) n++;
+      });
+      document.getElementById('row-count').textContent = n;
+      document.getElementById('emptyState').style.display = n === 0 ? 'block' : 'none';
+    });
+  });
+}
+
+function setupSearch() {
+  const input = document.getElementById('searchInput');
+  const results = document.getElementById('searchResults');
+  const catPills = document.querySelectorAll('.cat-pill');
+
+  input.addEventListener('focus', () => {
+    if (input.value.length > 0) results.style.display = 'block';
+  });
+
+  input.addEventListener('input', () => {
+    results.style.display = input.value.length > 0 ? 'block' : 'none';
+  });
+
+  document.addEventListener('click', e => {
+    if (!document.getElementById('heroSearch').contains(e.target)) {
+      results.style.display = 'none';
+    }
+  });
+
+  catPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      catPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+}
+
+// Demo: toggle skeleton loading (click header logo to see it)
+document.querySelector('.logo').addEventListener('click', () => {
+  const sk = document.getElementById('skeletonRows');
+  const rl = document.getElementById('rowList');
+  const showing = sk.style.display === 'flex';
+  sk.style.display = showing ? 'none' : 'flex';
+  sk.style.flexDirection = 'column';
+  rl.style.display = showing ? 'block' : 'none';
+});
+
+buildRows();
+setupFilters();
+setupSearch();
+</script>
+</body>
+</html>

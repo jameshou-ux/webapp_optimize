@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction 2 v2 — Spatial Exploration Surface · imToken Web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&display=swap" rel="stylesheet">
+<style>
+/*
+  DIRECTION 2 v2: Spatial Exploration Surface
+  ─────────────────────────────────────────────
+  Design hypothesis:
+  Making Spatial View informative — via a selected panel — makes it
+  the best first discovery experience. The canvas IS the homepage.
+
+  Structural identity: The spatial canvas occupies the full content
+  area. Tabs and the mode switch live in the header so nothing
+  competes for vertical space. The selected panel IS the detail layer
+  — you never leave the map to learn about a collection.
+
+  Differentiators (vs v1):
+  - Tabs + mode switch compressed into a single header row
+  - 65/35 split: spatial canvas + selected panel (PRD §10 proportions)
+  - Campaign hub auto-selected on open; panel shows campaign content
+  - Collection panel shows eyebrow, desc, token rows, CTA, account cue
+  - List mode toggle: same content, card grid layout, panel becomes sidebar
+  - My Holdings anonymous state (tab stays but content is secondary)
+  PRD refs: §6 IA, §10 Spatial View, §11 List View, §13 My Holdings
+*/
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #08090a;
+  --panel: #0f1011;
+  --surface: #191a1b;
+  --text-1: #f7f8f8;
+  --text-2: #d0d6e0;
+  --text-3: #8a8f98;
+  --text-4: #62666d;
+  --brand: #5e6ad2;
+  --accent: #7170ff;
+  --accent-h: #828fff;
+  --border: rgba(255,255,255,0.08);
+  --border-s: rgba(255,255,255,0.05);
+  --pos: #27a644;
+  --neg: #DC2626;
+}
+
+html, body {
+  height: 100%; overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-feature-settings: "cv01","ss03";
+  background: var(--bg); color: var(--text-1);
+  font-size: 14px; line-height: 1.5; min-width: 1100px;
+  display: flex; flex-direction: column;
+}
+
+/* ── Header: all chrome lives here ── */
+.header {
+  display: flex; align-items: center; gap: 0;
+  padding: 0 20px; height: 52px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border); background: var(--panel);
+}
+.logo { font-size: 14px; font-weight: 510; letter-spacing: -.3px; white-space: nowrap; margin-right: 16px; }
+.search-wrap { position: relative; width: 280px; }
+.search-wrap input {
+  width: 100%; height: 34px; border: 1px solid var(--border); border-radius: 6px;
+  padding: 0 12px 0 32px; font-size: 13px; font-family: inherit; font-feature-settings: "cv01","ss03";
+  background: rgba(255,255,255,.04); color: var(--text-1); outline: none; transition: border-color .15s;
+}
+.search-wrap input::placeholder { color: var(--text-4); }
+.search-wrap input:focus { border-color: rgba(255,255,255,.15); }
+.s-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-4); pointer-events: none; }
+
+/* Tabs inside header — saves vertical space for canvas */
+.header-tabs { display: flex; align-items: center; height: 52px; margin: 0 12px; }
+.htab {
+  height: 52px; padding: 0 16px; border: none; background: transparent;
+  font-size: 13px; font-family: inherit; font-feature-settings: "cv01","ss03";
+  font-weight: 510; cursor: pointer; color: var(--text-4);
+  border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s, border-color .15s;
+}
+.htab:hover { color: var(--text-2); }
+.htab.active { color: var(--text-1); border-bottom-color: var(--brand); }
+
+/* View mode switch in header */
+.view-sw { display: flex; background: rgba(255,255,255,.04); border-radius: 7px; padding: 3px; border: 1px solid var(--border-s); margin: 0 12px; }
+.vbtn {
+  padding: 4px 14px; border-radius: 5px; font-size: 12.5px; cursor: pointer;
+  border: none; background: transparent; color: var(--text-4); font-weight: 510;
+  font-family: inherit; font-feature-settings: "cv01","ss03"; line-height: 20px; transition: color .15s;
+}
+.vbtn.active { background: rgba(255,255,255,.08); color: var(--text-1); box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+
+.hsep { flex: 1; }
+.btn-ghost {
+  height: 34px; padding: 0 14px; border: 1px solid var(--border); border-radius: 6px;
+  background: rgba(255,255,255,.02); font-size: 13px; font-family: inherit; font-feature-settings: "cv01","ss03";
+  cursor: pointer; color: var(--text-2); font-weight: 510; transition: border-color .15s;
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,.15); }
+.btn-primary {
+  height: 34px; padding: 0 14px; border: none; border-radius: 6px;
+  background: var(--brand); font-size: 13px; font-family: inherit; font-feature-settings: "cv01","ss03";
+  cursor: pointer; color: #fff; font-weight: 510; transition: background .15s; margin-left: 8px;
+}
+.btn-primary:hover { background: var(--accent-h); }
+.ibtn {
+  width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 6px;
+  background: rgba(255,255,255,.02); cursor: pointer; display: flex;
+  align-items: center; justify-content: center; color: var(--text-4); transition: border-color .15s; margin-left: 8px;
+}
+.ibtn:hover { border-color: rgba(255,255,255,.15); color: var(--text-3); }
+
+/* ── Panes: full height ── */
+.pane { display: none; flex: 1; overflow: hidden; min-height: 0; }
+.pane.active { display: flex; flex-direction: column; }
+
+/* ── SPATIAL PANE ── */
+/* 65/35 split as specified in PRD §10 */
+.spatial-split { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+
+.spatial-canvas {
+  flex: 0 0 66%; border-right: 1px solid var(--border);
+  background: var(--panel); position: relative; overflow: hidden;
+}
+
+/* Canvas hint: only visible before selection */
+.canvas-hint {
+  position: absolute; bottom: 16px; left: 20px; z-index: 2;
+  font-size: 11.5px; color: var(--text-4); pointer-events: none;
+  background: var(--panel); padding: 7px 10px; border: 1px solid var(--border-s); border-radius: 6px;
+  transition: opacity .3s;
+}
+.canvas-hint.hidden { opacity: 0; }
+
+/* Bubbles */
+.bubble {
+  position: absolute; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.09);
+  background: rgba(255,255,255,.03); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transform: translate(-50%, -50%); transition: border-color .15s, background .15s;
+  user-select: none;
+}
+.bubble:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.05); }
+.bubble.selected { border-color: var(--accent); border-width: 2px; box-shadow: 0 0 0 4px rgba(113,112,255,.12); }
+.bubble.is-campaign { background: rgba(94,106,210,.07); border-color: rgba(94,106,210,.28); }
+.bubble.is-campaign.selected { border-color: var(--accent); box-shadow: 0 0 0 5px rgba(113,112,255,.15); }
+
+.b-badge {
+  position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+  background: var(--brand); color: #fff; font-size: 9px; font-weight: 510;
+  padding: 2px 7px; border-radius: 10px; white-space: nowrap; letter-spacing: .3px;
+}
+.b-name { font-size: 11px; font-weight: 510; text-align: center; padding: 0 10px; line-height: 1.3; color: var(--text-2); }
+.b-dots { display: flex; gap: 3px; margin: 4px 0 3px; justify-content: center; flex-wrap: wrap; padding: 0 8px; }
+.bdot { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.b-count { font-size: 10px; color: var(--text-4); }
+
+/* ── Selected Panel (34%): the information layer ── */
+.selected-panel {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg);
+}
+
+/* Empty state before any selection */
+.sp-empty {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 32px; color: var(--text-4);
+}
+.sp-empty svg { margin-bottom: 12px; opacity: .4; }
+.sp-empty-txt { font-size: 12.5px; line-height: 1.5; max-width: 200px; }
+
+/* Filled panel */
+.sp-content { display: flex; flex-direction: column; flex: 1; overflow-y: auto; }
+.sp-content::-webkit-scrollbar { width: 3px; }
+.sp-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,.07); }
+
+.sp-hdr { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.sp-eyebrow { font-size: 10.5px; font-weight: 510; text-transform: uppercase; letter-spacing: .6px; color: var(--text-4); margin-bottom: 5px; }
+.sp-title { font-size: 19px; font-weight: 510; letter-spacing: -.45px; margin-bottom: 6px; }
+.sp-desc { font-size: 12.5px; color: var(--text-3); line-height: 1.55; }
+
+.sp-body { padding: 16px 20px; flex: 1; display: flex; flex-direction: column; gap: 18px; }
+.sp-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.sp-chip { padding: 3px 8px; border: 1px solid var(--border-s); border-radius: 5px; font-size: 11.5px; color: var(--text-4); }
+.sp-chip strong { color: var(--text-2); font-weight: 510; }
+
+.sp-sec-lbl { font-size: 10.5px; font-weight: 510; text-transform: uppercase; letter-spacing: .6px; color: var(--text-4); margin-bottom: 8px; }
+.sp-token-list { display: flex; flex-direction: column; }
+.sp-trow { display: flex; align-items: center; gap: 9px; padding: 9px 0; border-bottom: 1px solid var(--border-s); }
+.sp-trow:last-child { border-bottom: none; }
+.sp-ticon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8.5px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.sp-tname { flex: 1; }
+.sp-tname-p { font-size: 13px; font-weight: 510; }
+.sp-tname-s { font-size: 11px; color: var(--text-4); }
+.sp-tprice { text-align: right; }
+.sp-tprice-v { font-size: 13px; font-weight: 510; }
+.sp-tprice-c { font-size: 11px; }
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+.neu { color: var(--text-4); }
+
+.sp-footer { padding: 14px 20px 20px; border-top: 1px solid var(--border); flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+.sp-btn-p { height: 40px; border: none; border-radius: 8px; background: var(--brand); font-size: 13.5px; font-family: inherit; font-weight: 510; cursor: pointer; color: #fff; transition: background .15s; }
+.sp-btn-p:hover { background: var(--accent-h); }
+.sp-btn-g { height: 38px; border: 1px solid var(--border); border-radius: 8px; background: rgba(255,255,255,.02); font-size: 13px; font-family: inherit; font-weight: 510; cursor: pointer; color: var(--text-2); transition: border-color .15s; }
+.sp-btn-g:hover { border-color: rgba(255,255,255,.15); }
+.sp-cue { font-size: 11.5px; color: var(--text-4); text-align: center; }
+
+/* ── LIST PANE (mode switch): grid + panel sidebar ── */
+.list-split { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+
+.list-scroll {
+  flex: 0 0 66%; border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 18px 20px;
+}
+.list-scroll::-webkit-scrollbar { width: 3px; }
+.list-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.07); }
+
+.list-campaign-banner {
+  display: flex; border: 1px solid var(--border); border-radius: 9px;
+  overflow: hidden; margin-bottom: 18px; align-items: stretch;
+  background: rgba(255,255,255,.02); transition: border-color .15s;
+}
+.list-campaign-banner:hover { border-color: rgba(255,255,255,.14); }
+.lcb-vis { width: 140px; flex-shrink: 0; background: rgba(255,255,255,.03); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; font-size: 11px; color: var(--text-4); border-right: 1px solid var(--border); }
+.lcb-body { flex: 1; padding: 14px 18px; }
+.lcb-eye { font-size: 10px; font-weight: 510; text-transform: uppercase; letter-spacing: .7px; color: var(--text-4); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--pos); }
+.live-txt { font-size: 10px; font-weight: 510; color: var(--pos); }
+.lcb-title { font-size: 14px; font-weight: 510; letter-spacing: -.3px; margin-bottom: 4px; }
+.lcb-desc { font-size: 12px; color: var(--text-3); line-height: 1.5; margin-bottom: 10px; max-width: 400px; }
+.lcb-cta { height: 28px; padding: 0 12px; background: var(--brand); color: #fff; border: none; border-radius: 5px; font-size: 12px; font-family: inherit; font-weight: 510; cursor: pointer; transition: background .15s; }
+.lcb-cta:hover { background: var(--accent-h); }
+
+.list-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.lt-label { font-size: 13.5px; font-weight: 510; }
+.lt-count { font-size: 12.5px; color: var(--text-4); }
+.lt-selected { font-size: 12px; color: var(--text-4); margin-left: auto; }
+.lt-selected strong { color: var(--accent); font-weight: 510; }
+
+.list-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.lcard {
+  border: 1px solid var(--border-s); border-radius: 8px; padding: 13px;
+  cursor: pointer; transition: border-color .15s, background .1s;
+  background: rgba(255,255,255,.02);
+}
+.lcard:hover { border-color: rgba(255,255,255,.12); background: rgba(255,255,255,.03); }
+.lcard.highlighted { border-color: rgba(113,112,255,.3); background: rgba(94,106,210,.05); }
+.lcard-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 510; text-transform: uppercase; letter-spacing: .3px; background: rgba(255,255,255,.05); color: var(--text-3); border: 1px solid var(--border-s); margin-bottom: 6px; }
+.lcard-badge.campaign { background: var(--brand); color: #fff; border-color: var(--brand); }
+.lcard-title { font-size: 12.5px; font-weight: 510; letter-spacing: -.2px; margin-bottom: 3px; }
+.lcard-desc { font-size: 11.5px; color: var(--text-3); line-height: 1.4; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.lcard-icons { display: flex; gap: 3px; margin-bottom: 7px; }
+.licon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; color: #fff; }
+.lcard-meta { display: flex; align-items: center; justify-content: space-between; }
+.lcard-meta-l { font-size: 11px; color: var(--text-4); }
+.lp-v { font-size: 11.5px; font-weight: 510; text-align: right; }
+.lp-c { font-size: 10.5px; text-align: right; }
+
+/* List sidebar panel (34%): same component as spatial panel */
+.list-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+
+/* ── HOLDINGS PANE ── */
+.hld-pane { flex: 1; overflow-y: auto; }
+.hld-inner { max-width: 600px; margin: 0 auto; padding: 80px 24px; text-align: center; }
+.ha-title { font-size: 19px; font-weight: 510; letter-spacing: -.4px; margin-bottom: 8px; }
+.ha-msg { font-size: 13px; color: var(--text-3); max-width: 380px; margin: 0 auto 22px; line-height: 1.6; }
+.ha-actions { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; justify-content: center; }
+.ha-cta { height: 38px; padding: 0 20px; border: none; border-radius: 8px; background: var(--brand); font-size: 13.5px; font-family: inherit; font-weight: 510; cursor: pointer; color: #fff; transition: background .15s; }
+.ha-cta:hover { background: var(--accent-h); }
+.ha-ghost { height: 38px; padding: 0 16px; border: 1px solid var(--border); border-radius: 8px; background: rgba(255,255,255,.02); font-size: 13px; font-family: inherit; font-weight: 510; cursor: pointer; color: var(--text-2); transition: border-color .15s; }
+.ha-ghost:hover { border-color: rgba(255,255,255,.15); }
+.ha-confidence { font-size: 11.5px; color: var(--text-4); margin-bottom: 16px; }
+.ha-links { display: flex; gap: 14px; justify-content: center; }
+.ha-link { font-size: 12.5px; color: var(--accent); font-weight: 510; cursor: pointer; }
+.ha-link:hover { color: var(--accent-h); }
+
+/* Hover tooltip */
+#htip {
+  position: fixed; background: var(--surface); color: var(--text-1);
+  border: 1px solid var(--border); padding: 7px 10px; border-radius: 6px;
+  font-size: 12px; pointer-events: none; z-index: 999; opacity: 0;
+  transition: opacity .1s; max-width: 180px; line-height: 1.4;
+  box-shadow: rgba(0,0,0,.4) 0 2px 6px;
+}
+#htip.show { opacity: 1; }
+#htip strong { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Header: all chrome in one row, maximizing canvas area below -->
+<header class="header">
+  <span class="logo">imToken Web</span>
+  <div class="search-wrap">
+    <svg class="s-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" placeholder="Search tokens, collections, campaigns">
+  </div>
+
+  <div class="header-tabs">
+    <button class="htab active" id="tab-market" onclick="switchTab('market')">Market</button>
+    <button class="htab" id="tab-holdings" onclick="switchTab('holdings')">My Holdings</button>
+  </div>
+
+  <div class="view-sw" id="view-sw">
+    <button class="vbtn active" id="btn-spatial" onclick="setMode('spatial')">Spatial</button>
+    <button class="vbtn" id="btn-list" onclick="setMode('list')">List</button>
+  </div>
+
+  <button class="ibtn" title="Filter">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+    </svg>
+  </button>
+  <div class="hsep"></div>
+  <button class="btn-ghost">Sign in</button>
+  <button class="btn-primary">Create account</button>
+</header>
+
+<!-- ══ MARKET PANE ══ -->
+<div class="pane active" id="pane-market">
+
+  <!-- SPATIAL mode: 65/35 canvas + panel -->
+  <div class="spatial-split" id="spatial-body">
+    <div class="spatial-canvas" id="spatial-canvas">
+      <div class="canvas-hint" id="canvas-hint">
+        Click any bubble to explore it →
+      </div>
+    </div>
+    <div class="selected-panel" id="selected-panel">
+      <div class="sp-empty" id="sp-empty">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="3"/><circle cx="4" cy="6" r="2"/><circle cx="20" cy="6" r="2"/>
+          <circle cx="4" cy="18" r="2"/><circle cx="20" cy="18" r="2"/>
+          <line x1="6" y1="7" x2="10" y2="10"/><line x1="14" y1="10" x2="18" y2="7"/>
+          <line x1="6" y1="17" x2="10" y2="14"/><line x1="14" y1="14" x2="18" y2="17"/>
+        </svg>
+        <div class="sp-empty-txt">Select a collection or campaign hub to see details here</div>
+      </div>
+      <div class="sp-content" id="sp-content" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- LIST mode: 2-col grid + panel sidebar -->
+  <div class="list-split" id="list-body" style="display:none;">
+    <div class="list-scroll">
+      <div class="list-campaign-banner">
+        <div class="lcb-vis">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          <span>Campaign visual</span>
+        </div>
+        <div class="lcb-body">
+          <div class="lcb-eye"><span>Featured campaign</span><span class="live-dot"></span><span class="live-txt">Live now</span></div>
+          <div class="lcb-title">Stock Tokens Launch</div>
+          <div class="lcb-desc">Tokenized equities and real-world asset tokens. No brokerage required.</div>
+          <button class="lcb-cta" onclick="select('stocks')">Explore campaign →</button>
+        </div>
+      </div>
+      <div class="list-toolbar">
+        <span class="lt-label">Collections</span>
+        <span class="lt-count">8</span>
+        <span class="lt-selected" id="lt-selected-lbl"></span>
+      </div>
+      <div class="list-grid" id="list-grid"></div>
+    </div>
+    <!-- Same selected panel component, reused in list mode -->
+    <div class="list-panel" id="list-panel">
+      <div class="sp-empty" id="lp-empty">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="8" width="18" height="13" rx="2"/><path d="M16 8V6a4 4 0 0 0-8 0v2"/>
+        </svg>
+        <div class="sp-empty-txt">Click a collection to see its details here</div>
+      </div>
+      <div class="sp-content" id="lp-content" style="display:none;"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ MY HOLDINGS PANE ══ -->
+<div class="pane" id="pane-holdings">
+  <div class="hld-pane">
+    <div class="hld-inner">
+      <div class="ha-title">My Holdings</div>
+      <div class="ha-msg">Create a passkey account to view your holdings. Explore Market first or create when you are ready.</div>
+      <div class="ha-actions">
+        <button class="ha-cta">Create account</button>
+        <button class="ha-ghost">Sign in</button>
+      </div>
+      <div class="ha-confidence">Passkey account. No seed phrase setup.</div>
+      <div class="ha-links">
+        <a class="ha-link" onclick="switchTab('market')">Explore Market</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="htip"></div>
+
+<script>
+const DATA = [
+  { id:'stocks', name:'Stock Tokens', type:'Campaign', campaign:true,
+    desc:'Tokenized equities and real-world asset tokens representing global stocks on-chain.',
+    count:24, chain:'ETH', updated:'Today',
+    x:50, y:44, size:152,
+    tokens:[
+      {s:'AAPL',n:'Apple',   c:'#555555',p:'$228.40',ch:'+0.6%',neg:false},
+      {s:'TSLA',n:'Tesla',   c:'#CC0000',p:'$249.30',ch:'+1.8%',neg:false},
+      {s:'NVDA',n:'NVIDIA',  c:'#76B900',p:'$124.50',ch:'+4.2%',neg:false},
+    ]},
+  { id:'defi', name:'DeFi Blue Chips', type:'Curated',
+    desc:'Top decentralized finance protocols by market cap and liquidity depth.',
+    count:18, chain:'ETH', updated:'Apr 28',
+    x:23, y:35, size:126,
+    tokens:[
+      {s:'ETH', n:'Ethereum', c:'#627EEA',p:'$2,291', ch:'-0.5%',neg:true },
+      {s:'LINK',n:'Chainlink',c:'#2A5ADA',p:'$13.42', ch:'+1.2%',neg:false},
+      {s:'AAVE',n:'Aave',     c:'#B6509E',p:'$98.30', ch:'+0.8%',neg:false},
+    ]},
+  { id:'l1', name:'Layer 1 Networks', type:'Curated',
+    desc:'Major Layer 1 blockchains powering decentralized ecosystems worldwide.',
+    count:12, chain:'Multi', updated:'Apr 27',
+    x:10, y:59, size:108,
+    tokens:[
+      {s:'BTC',n:'Bitcoin', c:'#F7931A',p:'$68,420',ch:'+2.1%',neg:false},
+      {s:'SOL',n:'Solana',  c:'#9945FF',p:'$172.40',ch:'+3.4%',neg:false},
+      {s:'ADA',n:'Cardano', c:'#0D4EB8',p:'$0.44',  ch:'-0.9%',neg:true },
+    ]},
+  { id:'meta', name:'Metaverse', type:'Curated',
+    desc:'Tokens from virtual worlds, gaming ecosystems, and digital real estate.',
+    count:22, chain:'ETH', updated:'Apr 25',
+    x:35, y:18, size:112,
+    tokens:[
+      {s:'MANA',n:'Decentraland',c:'#FF2D55',p:'$0.38',ch:'-2.1%',neg:true },
+      {s:'SAND',n:'The Sandbox', c:'#04ADEF',p:'$0.41',ch:'+1.6%',neg:false},
+      {s:'AXS', n:'Axie Infinity',c:'#0055D5',p:'$6.22',ch:'-0.7%',neg:true },
+    ]},
+  { id:'gamefi', name:'GameFi', type:'Curated',
+    desc:'Play-to-earn and blockchain gaming tokens across multiple chains.',
+    count:16, chain:'Multi', updated:'Apr 24',
+    x:62, y:68, size:104,
+    tokens:[
+      {s:'IMX', n:'Immutable X',c:'#17B3E0',p:'$1.72', ch:'+5.1%',neg:false},
+      {s:'RON', n:'Ronin',      c:'#0055FF',p:'$2.18', ch:'+2.3%',neg:false},
+      {s:'BEAM',n:'Beam',       c:'#00A0C0',p:'$0.022',ch:'-1.2%',neg:true },
+    ]},
+  { id:'stable', name:'Stablecoins', type:'Curated',
+    desc:'USD-pegged and algorithmic stablecoins for trading and savings.',
+    count:8, chain:'Multi', updated:'Apr 28',
+    x:18, y:76, size:92,
+    tokens:[
+      {s:'USDT',n:'Tether',   c:'#26A17B',p:'$1.00',ch:'0.0%',neg:null},
+      {s:'USDC',n:'USD Coin', c:'#2775CA',p:'$1.00',ch:'0.0%',neg:null},
+    ]},
+  { id:'ai', name:'AI Tokens', type:'Curated',
+    desc:'Tokens powering AI infrastructure, compute networks, and data protocols.',
+    count:14, chain:'ETH', updated:'Apr 26',
+    x:74, y:22, size:104,
+    tokens:[
+      {s:'FET', n:'Fetch.AI',c:'#333333',p:'$1.48',ch:'+3.8%',neg:false},
+      {s:'RNDR',n:'Render',  c:'#E91E8C',p:'$5.34',ch:'+6.2%',neg:false},
+    ]},
+  { id:'social', name:'Social Tokens', type:'Preset',
+    desc:'Creator economy and social protocol tokens.',
+    count:10, chain:'Multi', updated:'Apr 22',
+    x:79, y:62, size:88,
+    tokens:[
+      {s:'DESO',n:'DeSo',c:'#333333',p:'$11.20',ch:'-0.5%',neg:true},
+    ]},
+];
+
+let selected = null;
+let mode = 'spatial';
+
+function buildBubbles() {
+  const canvas = document.getElementById('spatial-canvas');
+  DATA.forEach(col => {
+    const el = document.createElement('div');
+    el.className = 'bubble' + (col.campaign ? ' is-campaign' : '');
+    el.id = 'bub-' + col.id;
+    el.style.cssText = `left:${col.x}%;top:${col.y}%;width:${col.size}px;height:${col.size}px;`;
+    const maxDots = col.size >= 120 ? 3 : 2;
+    const dots = col.tokens.slice(0, maxDots).map(t =>
+      `<div class="bdot" style="background:${t.c}">${t.s.slice(0,2)}</div>`
+    ).join('');
+    el.innerHTML = `
+      ${col.campaign ? '<div class="b-badge">Campaign hub</div>' : ''}
+      <div class="b-name">${col.name}</div>
+      <div class="b-dots">${dots}</div>
+      <div class="b-count">${col.count}</div>`;
+    el.addEventListener('click', () => select(col.id));
+    el.addEventListener('mouseenter', e => tipShow(e, col));
+    el.addEventListener('mousemove', tipMove);
+    el.addEventListener('mouseleave', tipHide);
+    canvas.appendChild(el);
+  });
+}
+
+function buildListGrid() {
+  const grid = document.getElementById('list-grid');
+  DATA.forEach(col => {
+    const el = document.createElement('div');
+    el.className = 'lcard';
+    el.id = 'lc-' + col.id;
+    const bc = col.campaign ? 'lcard-badge campaign' : 'lcard-badge';
+    const icons = col.tokens.slice(0, 3).map(t =>
+      `<div class="licon" style="background:${t.c}">${t.s.slice(0,2)}</div>`
+    ).join('');
+    const ft = col.tokens[0];
+    const cc = ft.neg === null ? 'neu' : ft.neg ? 'neg' : 'pos';
+    el.innerHTML = `
+      <div class="${bc}">${col.type}</div>
+      <div class="lcard-title">${col.name}</div>
+      <div class="lcard-desc">${col.desc}</div>
+      <div class="lcard-icons">${icons}</div>
+      <div class="lcard-meta">
+        <div class="lcard-meta-l">${col.count} tokens · ${col.chain}</div>
+        <div><div class="lp-v">${ft.s} ${ft.p}</div><div class="lp-c ${cc}">${ft.ch}</div></div>
+      </div>`;
+    el.addEventListener('click', () => select(col.id));
+    grid.appendChild(el);
+  });
+}
+
+function panelHTML(col) {
+  const eyebrow = col.campaign ? 'Featured campaign' : ({'Curated':'Curated collection','Preset':'Preset'}[col.type] || col.type);
+  const trows = col.tokens.map(t => {
+    const cc = t.neg === null ? 'neu' : t.neg ? 'neg' : 'pos';
+    return `<div class="sp-trow">
+      <div class="sp-ticon" style="background:${t.c}">${t.s.slice(0,2)}</div>
+      <div class="sp-tname"><div class="sp-tname-p">${t.n}</div><div class="sp-tname-s">${t.s}</div></div>
+      <div class="sp-tprice"><div class="sp-tprice-v">${t.p}</div><div class="sp-tprice-c ${cc}">${t.ch}</div></div>
+    </div>`;
+  }).join('');
+  return `
+    <div class="sp-hdr">
+      <div class="sp-eyebrow">${eyebrow}</div>
+      <div class="sp-title">${col.name}</div>
+      <div class="sp-desc">${col.desc}</div>
+    </div>
+    <div class="sp-body">
+      <div>
+        <div class="sp-chips">
+          <span class="sp-chip"><strong>${col.count}</strong> tokens</span>
+          <span class="sp-chip">${col.chain}</span>
+          <span class="sp-chip">Updated ${col.updated}</span>
+        </div>
+      </div>
+      <div>
+        <div class="sp-sec-lbl">Representative tokens</div>
+        <div class="sp-token-list">${trows}</div>
+      </div>
+    </div>
+    <div class="sp-footer">
+      <button class="sp-btn-p">${col.campaign ? 'Explore campaign' : 'View collection'}</button>
+      <button class="sp-btn-g">Create account</button>
+      <div class="sp-cue">Create with passkey. No seed phrase setup.</div>
+    </div>`;
+}
+
+function select(id) {
+  selected = id;
+  const col = DATA.find(c => c.id === id);
+  if (!col) return;
+
+  document.querySelectorAll('.bubble').forEach(b => b.classList.remove('selected'));
+  const bub = document.getElementById('bub-' + id);
+  if (bub) bub.classList.add('selected');
+
+  document.querySelectorAll('.lcard').forEach(c => c.classList.remove('highlighted'));
+  const lc = document.getElementById('lc-' + id);
+  if (lc) { lc.classList.add('highlighted'); lc.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+
+  const lbl = document.getElementById('lt-selected-lbl');
+  if (lbl) lbl.innerHTML = `Selected: <strong>${col.name}</strong>`;
+
+  document.getElementById('canvas-hint').classList.add('hidden');
+
+  // Update spatial panel
+  const spEmpty = document.getElementById('sp-empty');
+  const spContent = document.getElementById('sp-content');
+  if (spEmpty) spEmpty.style.display = 'none';
+  if (spContent) { spContent.style.display = 'flex'; spContent.style.flexDirection = 'column'; spContent.style.flex = '1'; spContent.innerHTML = panelHTML(col); }
+
+  // Update list panel
+  const lpEmpty = document.getElementById('lp-empty');
+  const lpContent = document.getElementById('lp-content');
+  if (lpEmpty) lpEmpty.style.display = 'none';
+  if (lpContent) { lpContent.style.display = 'flex'; lpContent.style.flexDirection = 'column'; lpContent.style.flex = '1'; lpContent.innerHTML = panelHTML(col); }
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('btn-spatial').classList.toggle('active', m === 'spatial');
+  document.getElementById('btn-list').classList.toggle('active', m === 'list');
+  document.getElementById('spatial-body').style.display = m === 'spatial' ? 'flex' : 'none';
+  document.getElementById('list-body').style.display = m === 'list' ? 'flex' : 'none';
+  // view switch only shows in market tab
+  document.getElementById('view-sw').style.display =
+    document.getElementById('pane-market').style.display !== 'none' || true ? 'flex' : 'none';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.htab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('pane-' + tab).classList.add('active');
+  document.getElementById('view-sw').style.display = tab === 'market' ? 'flex' : 'none';
+}
+
+const tip = document.getElementById('htip');
+function tipShow(e, col) {
+  tip.innerHTML = `<strong>${col.name}</strong>${col.count} tokens · ${col.type}`;
+  tip.classList.add('show'); tipMove(e);
+}
+function tipMove(e) {
+  tip.style.left = (e.clientX + 14) + 'px';
+  tip.style.top = (e.clientY - 38) + 'px';
+}
+function tipHide() { tip.classList.remove('show'); }
+
+buildBubbles();
+buildListGrid();
+// Auto-select the campaign hub on load
+setTimeout(() => select('stocks'), 150);
+</script>
+</body>
+</html>

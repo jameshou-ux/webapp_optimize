@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>imToken Web Homepage Revamp - Progress Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
+  <style>
+    :root {
+      --bg: #FAFAF9;
+      --fg: #111111;
+      --fg-muted: #888888;
+      --fg-faint: #CCCCCA;
+      --border: #E8E8E6;
+      --ghost: rgba(17, 17, 17, 0.032);
+      --accent: #1677ff;
+      --font: 'DM Sans', system-ui, -apple-system, sans-serif;
+      --title-size: clamp(2.75rem, 8vw, 7rem);
+      --h1-size: clamp(1.75rem, 4.5vw, 3.75rem);
+      --label-size: clamp(0.58rem, 0.9vw, 0.72rem);
+      --body-size: clamp(0.8rem, 1.35vw, 1rem);
+      --small-size: clamp(0.65rem, 0.95vw, 0.78rem);
+      --pad: clamp(2.5rem, 6vw, 6.5rem);
+      --gap: clamp(1rem, 2.5vw, 2rem);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg) !important;
+    }
+
+    .reveal {
+      font-family: var(--font) !important;
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--fg) !important;
+      background: var(--bg) !important;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .reveal .slides {
+      text-align: left !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      left: 0 !important;
+      top: 0 !important;
+      transform: none !important;
+    }
+
+    .reveal .slides>section {
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      top: 0 !important;
+      left: 0 !important;
+      padding: var(--pad);
+      padding-bottom: 56px;
+      display: flex !important;
+      flex-direction: column;
+      background: var(--bg);
+      color: var(--fg);
+      overflow: hidden;
+    }
+
+    .reveal .progress,
+    .reveal .controls,
+    .reveal .slide-number {
+      display: none !important;
+    }
+
+    .reveal h1,
+    .reveal h2,
+    .reveal h3,
+    .reveal h4,
+    .reveal h5,
+    .reveal h6 {
+      font-family: var(--font);
+      font-weight: 500;
+      color: var(--fg);
+      text-transform: none;
+      letter-spacing: -0.028em;
+      line-height: 1.08;
+      margin: 0;
+      text-shadow: none;
+    }
+
+    .reveal p,
+    .reveal li,
+    .reveal span {
+      font-family: var(--font);
+      font-weight: 300;
+      color: var(--fg);
+      text-shadow: none;
+      line-height: 1.6;
+    }
+
+    .slide-label {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: clamp(1.75rem, 4.5vw, 4rem);
+      flex-shrink: 0;
+    }
+
+    .label-num {
+      font-size: var(--label-size);
+      font-weight: 400;
+      color: var(--fg-faint);
+      letter-spacing: 0.08em;
+    }
+
+    .label-rule {
+      width: 1.25rem;
+      height: 1px;
+      background: var(--fg-faint);
+      flex-shrink: 0;
+    }
+
+    .label-text {
+      font-size: var(--label-size);
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--fg-muted);
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .t-title {
+      font-size: var(--title-size);
+      font-weight: 500;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      color: var(--fg);
+    }
+
+    .t-h1 {
+      font-size: var(--h1-size);
+      font-weight: 500;
+      line-height: 1.08;
+      letter-spacing: -0.028em;
+      color: var(--fg);
+    }
+
+    .t-sub {
+      font-size: var(--body-size);
+      font-weight: 300;
+      line-height: 1.6;
+      color: var(--fg-muted);
+      max-width: 60ch;
+      margin-top: clamp(0.4rem, 0.8vw, 0.65rem);
+    }
+
+    .t-eyebrow {
+      font-size: var(--label-size);
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--fg-muted);
+      margin-bottom: clamp(1rem, 2vw, 1.5rem);
+    }
+
+    .slide--cover {
+      justify-content: flex-end !important;
+      padding-bottom: calc(var(--pad) * 1.5) !important;
+    }
+
+    .cover-rule {
+      width: clamp(2rem, 5vw, 3.5rem);
+      height: 1px;
+      background: var(--border);
+      margin: clamp(1.25rem, 2.5vw, 2rem) 0;
+    }
+
+    .cover-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .cover-meta span {
+      font-size: var(--small-size);
+      color: var(--fg-muted);
+      font-weight: 300;
+      letter-spacing: 0.04em;
+    }
+
+    .cover-meta .dot {
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: var(--fg-faint);
+    }
+
+    .media-ph {
+      border: 1px solid var(--border);
+      background: var(--ghost);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .media-ph span {
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--fg-faint);
+      font-weight: 400;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+      gap: clamp(0.8rem, 1.8vw, 1.4rem);
+      flex: 1;
+      min-height: 0;
+    }
+
+    .two-col--equal {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .col-copy,
+    .col-media {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.9rem, 1.8vw, 1.4rem);
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .s-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.55rem, 1.2vh, 0.95rem);
+    }
+
+    .s-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      font-size: var(--body-size);
+      line-height: 1.58;
+      color: var(--fg);
+      font-weight: 300;
+    }
+
+    .s-list li::before {
+      content: '';
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--fg-faint);
+      flex-shrink: 0;
+      margin-top: 0.62em;
+    }
+
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: clamp(0.6rem, 1.5vw, 1.2rem);
+      flex: 1;
+      min-height: 0;
+    }
+
+    .pillars--3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .pillars--4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .pillar {
+      border: 1px solid var(--border);
+      padding: clamp(0.9rem, 1.8vw, 1.5rem);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      min-height: 0;
+    }
+
+    .pillar-idx {
+      font-size: var(--label-size);
+      font-weight: 400;
+      color: var(--fg-faint);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.2rem;
+    }
+
+    .pillar-name {
+      font-size: clamp(1.05rem, 2.1vw, 1.7rem);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      color: var(--fg);
+    }
+
+    .pillar-note {
+      font-size: var(--small-size);
+      color: var(--fg-muted);
+      font-weight: 300;
+      line-height: 1.5;
+      margin-top: 0.15rem;
+    }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(0.8rem, 1.8vw, 1.4rem);
+      flex: 1;
+      min-height: 0;
+    }
+
+    .compare-col {
+      border: 1px solid var(--border);
+      padding: clamp(1rem, 1.8vw, 1.4rem);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-height: 0;
+    }
+
+    .compare-title {
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--fg-muted);
+      font-weight: 400;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .learnings {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .learning {
+      display: flex;
+      align-items: flex-start;
+      gap: clamp(0.75rem, 2vw, 1.5rem);
+      padding: clamp(0.7rem, 1.3vh, 1rem) 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .learning:first-child {
+      border-top: 1px solid var(--border);
+    }
+
+    .learning-n {
+      font-size: var(--label-size);
+      color: var(--fg-faint);
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+      width: 1.5rem;
+    }
+
+    .learning-text {
+      font-size: var(--body-size);
+      line-height: 1.55;
+      color: var(--fg);
+      font-weight: 300;
+    }
+
+    #cp {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 1px;
+      background: var(--fg);
+      z-index: 900;
+      width: 0%;
+      transition: width 0.15s ease;
+      pointer-events: none;
+    }
+
+    #cc {
+      position: fixed;
+      bottom: 1.1rem;
+      left: 1.25rem;
+      z-index: 890;
+      font-family: var(--font);
+      font-size: var(--small-size);
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      color: var(--fg-faint);
+      pointer-events: none;
+    }
+
+    #sp {
+      position: fixed;
+      right: 1.25rem;
+      bottom: 1.1rem;
+      z-index: 890;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.45rem;
+    }
+
+    #sp-toggle {
+      min-width: 10rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.55rem;
+      border: 1px solid var(--border);
+      background: rgba(250, 250, 249, 0.94);
+      color: var(--fg);
+      padding: 0.6rem 0.72rem;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: var(--small-size);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      backdrop-filter: blur(10px);
+    }
+
+    #sp-toggle:hover {
+      border-color: rgba(17, 17, 17, 0.3);
+    }
+
+    .sp-chevron {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-right: 1.5px solid var(--fg-muted);
+      border-bottom: 1.5px solid var(--fg-muted);
+      transform: rotate(45deg) translateY(-2px);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    #sp.open .sp-chevron {
+      transform: rotate(-135deg) translateY(-1px);
+    }
+
+    #sp-panel {
+      width: min(22rem, calc(100vw - 2.5rem));
+      max-height: 80dvh;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      background: rgba(250, 250, 249, 0.97);
+      padding: 0.4rem;
+      display: none;
+      backdrop-filter: blur(12px);
+    }
+
+    #sp.open #sp-panel {
+      display: block;
+    }
+
+    .sp-item {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--fg-muted);
+      cursor: pointer;
+      font-family: var(--font);
+      padding: 0.55rem 0.65rem;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .sp-item:hover {
+      background: var(--border);
+      color: var(--fg);
+    }
+
+    .sp-item.on {
+      background: var(--fg);
+      border-color: var(--fg);
+      color: var(--bg);
+    }
+
+    .sp-item-num {
+      font-size: var(--small-size);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .sp-item-title {
+      font-size: 0.6rem;
+      font-weight: 400;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    @media (max-height: 700px) {
+      :root {
+        --pad: clamp(1.5rem, 3vw, 3.5rem);
+        --gap: clamp(0.75rem, 1.5vw, 1.25rem);
+        --h1-size: clamp(1.4rem, 3.5vw, 2.75rem);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .two-col,
+      .two-col--equal,
+      .pillars--3,
+      .pillars--4,
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="cp"></div>
+  <div id="cc">01 / 10</div>
+  <div id="sp">
+    <div id="sp-panel" role="listbox"></div>
+    <button id="sp-toggle" aria-expanded="false">
+      <span id="sp-val">Cover</span>
+      <span class="sp-chevron"></span>
+    </button>
+  </div>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="slide--cover" data-slide-title="Cover">
+        <p class="t-eyebrow">Progress review</p>
+        <h1 class="t-title">imToken Web<br>homepage<br>revamp</h1>
+        <p class="t-sub" style="max-width:44ch;">Current portal issues, direction exploration, and prototype progress
+          for leadership review.</p>
+        <div class="cover-rule"></div>
+        <div class="cover-meta">
+          <span>James Hou</span>
+          <span class="dot"></span>
+          <span>web.token.im</span>
+          <span class="dot"></span>
+          <span>10 slides</span>
+        </div>
+      </section>
+
+      <section data-slide-title="Why This Work">
+        <div class="slide-label">
+          <span class="label-num">02</span><span class="label-rule"></span>
+          <span class="label-text">Context</span>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h2 class="t-h1">The homepage has strong product potential, but value, campaign operation, and discovery flow are not aligned yet</h2>
+            <p class="t-sub">Spatial View is differentiated but under-informative. List View is more operable but less distinctive. Onboarding entry exists, but the AA advantage is still under-explained.</p>
+          </div>
+          <div class="two-col two-col--equal">
+            <div class="col-media">
+              <div class="media-ph"><span>Current Spatial View screenshot</span></div>
+            </div>
+            <div class="col-media">
+              <div class="media-ph"><span>Current List View screenshot</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="Current Gaps">
+        <div class="slide-label">
+          <span class="label-num">03</span><span class="label-rule"></span>
+          <span class="label-text">Issues</span>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h2 class="t-h1">Current portal gaps</h2>
+            <p class="t-sub">Four core problems consistently showed up across audit, live review, and prototype framing.</p>
+          </div>
+          <div class="pillars pillars--4">
+            <div class="pillar">
+              <p class="pillar-idx">01</p>
+              <p class="pillar-name">Value is not clear fast enough</p>
+              <p class="pillar-note">Users see token visuals before they understand why imToken Web matters.</p>
+            </div>
+            <div class="pillar">
+              <p class="pillar-idx">02</p>
+              <p class="pillar-name">Campaign surface is weak</p>
+              <p class="pillar-note">List View has poster-like modules, but weak CTA and weak campaign logic. Spatial View lacks an equivalent layer.</p>
+            </div>
+            <div class="pillar">
+              <p class="pillar-idx">03</p>
+              <p class="pillar-name">Spatial and List are uneven</p>
+              <p class="pillar-note">One is stronger for brand, the other is stronger for operation. They do not yet work as one homepage system.</p>
+            </div>
+            <div class="pillar">
+              <p class="pillar-idx">04</p>
+              <p class="pillar-name">Information and onboarding are too thin</p>
+              <p class="pillar-note">Collections lack enough reason to click, and lightweight passkey onboarding is not framed as a clear advantage.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="Direction Framework">
+        <div class="slide-label">
+          <span class="label-num">04</span><span class="label-rule"></span>
+          <span class="label-text">Framework</span>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h2 class="t-h1">Three parallel directions, not three visual variations</h2>
+            <p class="t-sub">Each direction is a different strategic response to the homepage problem, not one shared wireframe with different emphasis.</p>
+          </div>
+          <div class="pillars pillars--3">
+            <div class="pillar">
+              <p class="pillar-idx">Direction 1</p>
+              <p class="pillar-name">Discovery-first</p>
+              <p class="pillar-note">Best response to weak collection motivation and weak campaign understanding.</p>
+            </div>
+            <div class="pillar">
+              <p class="pillar-idx">Direction 2</p>
+              <p class="pillar-name">Merged Spatial/List</p>
+              <p class="pillar-note">Best response to the split between Spatial and List, using one shared shell and collection sidebar.</p>
+            </div>
+            <div class="pillar">
+              <p class="pillar-idx">Direction 3</p>
+              <p class="pillar-name">Activation-first</p>
+              <p class="pillar-note">Best response to weak onboarding clarity and weak conversion confidence.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="Direction 1">
+        <div class="slide-label">
+          <span class="label-num">05</span><span class="label-rule"></span>
+          <span class="label-text">Direction 1</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-col">
+            <div class="col-copy">
+              <div>
+                <h2 class="t-h1">Discovery-first</h2>
+                <p class="t-sub">Make the homepage primarily a stronger token discovery and campaign surface.</p>
+              </div>
+              <div class="learnings">
+                <div class="learning"><span class="learning-n">P</span>
+                  <p class="learning-text">Problem addressed: collections do not provide enough reason to open, and campaign understanding is weak.</p>
+                </div>
+                <div class="learning"><span class="learning-n">R</span>
+                  <p class="learning-text">Response: richer collection cards, clearer campaign modules, and stronger decision layer before deeper navigation.</p>
+                </div>
+                <div class="learning"><span class="learning-n">W</span>
+                  <p class="learning-text">Why it matters: improves scan-level understanding and makes discovery more actionable.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-media">
+              <div class="media-ph"><span>Direction 1 key screen placeholder</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="Direction 2">
+        <div class="slide-label">
+          <span class="label-num">06</span><span class="label-rule"></span>
+          <span class="label-text">Direction 2</span>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h2 class="t-h1">Merged Spatial/List with persistent collection sidebar</h2>
+            <p class="t-sub">Current V2 direction: Spatial and List become two lenses of one homepage, with the collection sidebar as the continuity layer.</p>
+          </div>
+          <div class="two-col two-col--equal" style="flex:1; min-height:0;">
+            <div class="col-copy">
+              <ul class="s-list">
+                <li>Problem addressed: Spatial and List currently feel uneven and disconnected.</li>
+                <li>Response: one shared shell, one selected collection state, one sidebar across both modes.</li>
+                <li>Mode switch preserves context instead of sending users to a different experience.</li>
+                <li>Campaign hub or featured collection can be auto-selected on open.</li>
+                <li>This is the strongest current V2 prototype insight.</li>
+              </ul>
+            </div>
+            <div class="col-media" style="gap:var(--gap);">
+              <div class="media-ph"><span>Direction 2 Spatial mode with sidebar</span></div>
+              <div class="media-ph"><span>Direction 2 List mode with same sidebar</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="Direction 3">
+        <div class="slide-label">
+          <span class="label-num">07</span><span class="label-rule"></span>
+          <span class="label-text">Direction 3</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-col">
+            <div class="col-copy">
+              <div>
+                <h2 class="t-h1">Activation-first</h2>
+                <p class="t-sub">Make the homepage primarily a lightweight activation and onboarding entry point.</p>
+              </div>
+              <div class="learnings">
+                <div class="learning"><span class="learning-n">P</span>
+                  <p class="learning-text">Problem addressed: the homepage does not clearly communicate lightweight AA onboarding.</p>
+                </div>
+                <div class="learning"><span class="learning-n">R</span>
+                  <p class="learning-text">Response: stronger first-viewport CTA, passkey reassurance, capability cues, and 15s onboarding demo.</p>
+                </div>
+                <div class="learning"><span class="learning-n">W</span>
+                  <p class="learning-text">Why it matters: improves conversion confidence and turns onboarding into a visible product advantage.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-media">
+              <div class="media-ph"><span>Direction 3 key screen placeholder</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="Early Readout">
+        <div class="slide-label">
+          <span class="label-num">08</span><span class="label-rule"></span>
+          <span class="label-text">Readout</span>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h2 class="t-h1">Early readout from the prototype work</h2>
+            <p class="t-sub">The current exploration already points to where each direction is strongest.</p>
+          </div>
+          <div class="compare-grid">
+            <div class="compare-col">
+              <p class="compare-title">What looks strongest so far</p>
+              <ul class="s-list">
+                <li>Richer information clearly improves collection motivation.</li>
+                <li>The merged shell is promising for resolving the current mode split.</li>
+                <li>Activation-first framing is strongest when the goal is to explain the product advantage quickly.</li>
+              </ul>
+            </div>
+            <div class="compare-col">
+              <p class="compare-title">What still needs review</p>
+              <ul class="s-list">
+                <li>Which problem should the homepage solve first: discovery, continuity, or activation?</li>
+                <li>How much homepage real estate should go to onboarding versus exploration?</li>
+                <li>How strongly should Spatial differentiation be protected in the final direction?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="Demo">
+        <div class="slide-label">
+          <span class="label-num">09</span><span class="label-rule"></span>
+          <span class="label-text">Demo</span>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h2 class="t-h1">Prototype demo</h2>
+            <p class="t-sub">Use this slide as a transition into live demo or a recorded walkthrough.</p>
+          </div>
+          <div class="pillars pillars--3">
+            <div class="pillar">
+              <p class="pillar-idx">Demo 01</p>
+              <p class="pillar-name">Discovery-first</p>
+              <p class="pillar-note">Focus on richer collection understanding and campaign clarity.</p>
+            </div>
+            <div class="pillar">
+              <p class="pillar-idx">Demo 02</p>
+              <p class="pillar-name">Merged Spatial/List</p>
+              <p class="pillar-note">Focus on mode continuity and the persistent collection sidebar.</p>
+            </div>
+            <div class="pillar">
+              <p class="pillar-idx">Demo 03</p>
+              <p class="pillar-name">Activation-first</p>
+              <p class="pillar-note">Focus on passkey clarity, capability cues, and onboarding proof.</p>
+            </div>
+          </div>
+          <div class="media-ph"><span>Optional overview image or demo screenshots</span></div>
+        </div>
+      </section>
+
+      <section data-slide-title="Leadership Feedback">
+        <div class="slide-label">
+          <span class="label-num">10</span><span class="label-rule"></span>
+          <span class="label-text">Decision</span>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h2 class="t-h1">Leadership feedback needed</h2>
+            <p class="t-sub">The immediate next step is to align on which homepage problem should lead the next refinement phase.</p>
+          </div>
+          <div class="learnings">
+            <div class="learning"><span class="learning-n">01</span>
+              <p class="learning-text">Which problem should the homepage solve first: discovery, mode continuity, or activation?</p>
+            </div>
+            <div class="learning"><span class="learning-n">02</span>
+              <p class="learning-text">How much should the homepage prioritize Spatial differentiation versus operational clarity?</p>
+            </div>
+            <div class="learning"><span class="learning-n">03</span>
+              <p class="learning-text">Which direction should move into the next refinement phase?</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.js"></script>
+  <script>
+    const SLIDES = [
+      { num: '01', title: 'Cover' },
+      { num: '02', title: 'Why This Work' },
+      { num: '03', title: 'Current Gaps' },
+      { num: '04', title: 'Direction Framework' },
+      { num: '05', title: 'Direction 1' },
+      { num: '06', title: 'Direction 2' },
+      { num: '07', title: 'Direction 3' },
+      { num: '08', title: 'Early Readout' },
+      { num: '09', title: 'Demo' },
+      { num: '10', title: 'Leadership Feedback' }
+    ];
+
+    const TOTAL = SLIDES.length;
+
+    Reveal.initialize({
+      hash: true,
+      history: true,
+      center: false,
+      transition: 'fade',
+      transitionSpeed: 'fast',
+      mouseWheel: true,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      margin: 0,
+      minScale: 1,
+      maxScale: 1,
+      progress: false,
+      controls: false,
+      overview: true,
+      keyboard: true
+    });
+
+    window.addEventListener('resize', () => {
+      Reveal.configure({ width: window.innerWidth, height: window.innerHeight });
+    });
+
+    const cp = document.getElementById('cp');
+    const cc = document.getElementById('cc');
+    const spVal = document.getElementById('sp-val');
+    const spPanel = document.getElementById('sp-panel');
+    const spEl = document.getElementById('sp');
+    const spToggle = document.getElementById('sp-toggle');
+
+    function syncChrome(idx) {
+      const slide = SLIDES[idx] || SLIDES[0];
+      const pct = ((idx + 1) / TOTAL) * 100;
+      cp.style.width = pct + '%';
+      cc.textContent = slide.num + ' / ' + TOTAL;
+      spVal.textContent = slide.title;
+      document.querySelectorAll('.sp-item').forEach((el, i) => {
+        el.classList.toggle('on', i === idx);
+      });
+    }
+
+    Reveal.on('slidechanged', e => syncChrome(e.indexh));
+    Reveal.on('ready', e => syncChrome(e.indexh));
+
+    SLIDES.forEach((slide, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'sp-item';
+      btn.innerHTML = '<span class="sp-item-num">' + slide.num + '</span><span class="sp-item-title">' + slide.title + '</span>';
+      btn.addEventListener('click', () => {
+        Reveal.slide(i);
+        spEl.classList.remove('open');
+        spToggle.setAttribute('aria-expanded', 'false');
+      });
+      spPanel.appendChild(btn);
+    });
+
+    spToggle.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = spEl.classList.toggle('open');
+      spToggle.setAttribute('aria-expanded', open);
+    });
+
+    document.addEventListener('click', e => {
+      if (!spEl.contains(e.target)) {
+        spEl.classList.remove('open');
+        spToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        spEl.classList.remove('open');
+        spToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  </script>
+</body>
+
+</html>

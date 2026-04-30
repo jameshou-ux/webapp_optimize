@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Home of Tokens · 产品诊断与重设计策略</title>
+<style>
+  :root{
+    --bg:#0b1020;
+    --bg-2:#121933;
+    --card:#161f3d;
+    --line:rgba(255,255,255,0.08);
+    --text:#e9ecf6;
+    --muted:#8c94b2;
+    --accent:#6aa2ff;
+    --accent-2:#9b8cff;
+    --warn:#ffb057;
+    --bad:#ff6b7a;
+    --good:#5dd6a4;
+    --chip:#1d2748;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  a{color:var(--accent);text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:56px 24px 96px}
+  header.hero{
+    display:flex;flex-direction:column;gap:18px;
+    padding:40px 40px 36px;border-radius:24px;
+    background:linear-gradient(135deg,#1a2450 0%,#0f1635 60%,#171024 100%);
+    border:1px solid var(--line);position:relative;overflow:hidden;
+  }
+  header.hero::before{
+    content:"";position:absolute;inset:auto -20% -60% auto;width:520px;height:520px;border-radius:50%;
+    background:radial-gradient(closest-side,rgba(155,140,255,0.35),transparent 70%);
+    filter:blur(10px);
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;
+    background:var(--chip);border:1px solid var(--line);font-size:12px;color:var(--muted);width:max-content
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--good)}
+  h1{font-size:40px;margin:0;letter-spacing:-0.02em}
+  h1 span{background:linear-gradient(90deg,#8cb7ff,#b6a2ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);max-width:780px;font-size:16px}
+  .meta{display:flex;flex-wrap:wrap;gap:18px;margin-top:10px;color:var(--muted);font-size:13px}
+  .meta b{color:var(--text);font-weight:600}
+
+  section{margin-top:56px}
+  h2{font-size:24px;margin:0 0 6px;letter-spacing:-0.01em}
+  .lead{color:var(--muted);margin:0 0 22px;max-width:780px}
+
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  @media (max-width:820px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:20px;position:relative;
+  }
+  .card h3{margin:0 0 8px;font-size:16px;letter-spacing:-0.005em}
+  .card p{margin:0;color:var(--muted);font-size:14px}
+
+  .kpi .num{font-size:28px;font-weight:700;letter-spacing:-0.02em}
+  .kpi .label{color:var(--muted);font-size:12px;margin-top:4px}
+  .kpi.good .num{color:var(--good)}
+  .kpi.warn .num{color:var(--warn)}
+  .kpi.bad .num{color:var(--bad)}
+  .kpi.acc .num{color:var(--accent)}
+
+  .list{margin:0;padding:0;list-style:none}
+  .list li{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);color:var(--muted);font-size:14px}
+  .list li:last-child{border-bottom:0}
+  .list li::before{content:"";display:inline-block;margin-top:8px;width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none}
+  .list.bad li::before{background:var(--bad)}
+  .list.warn li::before{background:var(--warn)}
+  .list.good li::before{background:var(--good)}
+
+  .tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;background:var(--chip);color:var(--muted);border:1px solid var(--line);margin-right:6px;margin-bottom:6px}
+  .tag.bad{color:#ffa1aa;border-color:rgba(255,107,122,0.3);background:rgba(255,107,122,0.08)}
+  .tag.good{color:#8fe7c2;border-color:rgba(93,214,164,0.3);background:rgba(93,214,164,0.08)}
+  .tag.warn{color:#ffcb85;border-color:rgba(255,176,87,0.3);background:rgba(255,176,87,0.08)}
+
+  .perspective{display:grid;grid-template-columns:140px 1fr;gap:20px;align-items:flex-start}
+  @media(max-width:820px){.perspective{grid-template-columns:1fr}}
+  .persona{
+    background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center
+  }
+  .persona .emoji{font-size:28px}
+  .persona .role{font-weight:700;margin-top:6px}
+  .persona .who{color:var(--muted);font-size:12px;margin-top:2px}
+
+  .issue{
+    display:grid;grid-template-columns:110px 1fr auto;gap:14px;align-items:flex-start;
+    padding:14px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,0.015);margin-top:10px
+  }
+  .issue .sev{font-size:12px;color:var(--muted);margin-top:2px}
+  .issue h4{margin:0 0 4px;font-size:14px}
+  .issue p{margin:0;color:var(--muted);font-size:13px}
+  .sev-high{color:var(--bad);font-weight:600}
+  .sev-med{color:var(--warn);font-weight:600}
+  .sev-low{color:var(--good);font-weight:600}
+
+  .mock{
+    background:linear-gradient(180deg,#1a2045,#111838);
+    border:1px solid var(--line);border-radius:16px;padding:24px;
+  }
+  .mock h4{margin:0 0 14px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em}
+  .wire{background:#0a0f23;border:1px dashed rgba(255,255,255,0.12);border-radius:10px;padding:16px;margin-bottom:10px}
+  .wire .bar{height:10px;border-radius:6px;background:rgba(255,255,255,0.08);margin:6px 0}
+  .wire .bar.s{width:40%}
+  .wire .bar.m{width:70%}
+  .wire .bar.xl{width:100%;height:16px;background:rgba(139,165,255,0.4)}
+  .wire .cta{display:inline-block;padding:8px 14px;border-radius:8px;background:var(--accent);color:#0b1020;font-weight:700;font-size:12px;margin-top:8px}
+  .wire.flex{display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .wire .tok{display:flex;gap:6px;margin-top:8px}
+  .wire .tok span{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6aa2ff,#9b8cff)}
+
+  .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:14px}
+  @media(max-width:820px){.flow{grid-template-columns:1fr}}
+  .step{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .step .n{font-size:11px;color:var(--muted)}
+  .step h4{margin:6px 0 4px;font-size:14px}
+  .step p{margin:0;color:var(--muted);font-size:12px}
+
+  .table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
+  .table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  .table th{color:var(--muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:0.08em}
+  .table td b{color:var(--text)}
+
+  footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+  .divider{height:1px;background:var(--line);margin:36px 0}
+  .callout{
+    border-left:3px solid var(--accent);background:rgba(106,162,255,0.06);
+    padding:12px 14px;border-radius:0 10px 10px 0;color:var(--muted);font-size:14px
+  }
+  .quote{
+    background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--muted);position:relative
+  }
+  .quote::before{content:"“";font-size:32px;color:var(--accent);position:absolute;top:-6px;left:10px;line-height:1}
+  .quote cite{display:block;margin-top:8px;color:var(--muted);font-size:12px;font-style:normal}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow"><span class="dot"></span>Product Diagnosis · web.token.im</span>
+    <h1><span>Home of Tokens</span><br/>诊断 · 市场反馈 · 重设计策略</h1>
+    <p class="sub">imToken 推出的 Web 版钱包 web.token.im 定位为「Home of Tokens」，以 Passkey + AA 账户 + Send-by-Link 为核心差异化。上线后用户量有限、首页对未注册用户几乎没有价值传递与引导。本报告用 PM / Designer / CEO 三个视角切入，给出一套可执行的 onboarding 内容与设计策略。</p>
+    <div class="meta">
+      <span>评估日期 <b>2026-04-24</b></span>
+      <span>评估对象 <b>web.token.im</b>（Desktop 1512×949）</span>
+      <span>Beta 状态 <b>仍在持续迭代</b></span>
+      <span>支持网络 <b>Arbitrum (主)</b></span>
+    </div>
+  </header>
+
+  <!-- 1. 首屏体验快览 -->
+  <section>
+    <h2>一、首屏体验快览</h2>
+    <p class="lead">Desktop 首次访问时的实际观察：页面加载有约 3 秒白屏，随后进入一个「漂浮气泡」可视化主视觉，没有滚动内容，没有对未注册用户的 CTA。</p>
+    <div class="grid g4">
+      <div class="card kpi bad"><div class="num">~3s</div><div class="label">首屏白屏时间</div></div>
+      <div class="card kpi warn"><div class="num">0</div><div class="label">面向未登录用户的主 CTA</div></div>
+      <div class="card kpi bad"><div class="num">1屏</div><div class="label">整站仅单视口，无滚动内容</div></div>
+      <div class="card kpi warn"><div class="num">&lt;4.5:1</div><div class="label">正文与背景对比度（WCAG 风险）</div></div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card">
+        <h3>页面结构（实际观察）</h3>
+        <ul class="list">
+          <li>Header：Logo / Search / My Holdings / My Collections / Account</li>
+          <li>Hero 文案：「Home of Tokens — Digital assets under control」</li>
+          <li>主视觉：一组漂浮气泡（Bluechip Stables、Yield Stables、Stock Tokens、Arbitrum Ecosystem、DeFi Stables、Regulated Stables…），中央是「My Holdings」气泡</li>
+          <li>初次访问弹出 Welcome modal（Passkey 介绍 + Send by Link），可跳过</li>
+          <li>无 Footer、无产品介绍、无信任背书、无 FAQ</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>产品官方定位（来自官网/帮助中心）</h3>
+        <ul class="list good">
+          <li>非托管、浏览器原生，无需下载、无需助记词</li>
+          <li>Passkey 生物识别登录，抗钓鱼</li>
+          <li>AA 账户 + Paymaster：可用 ERC-20 付 gas</li>
+          <li>Send by Link：红包式分享代币，接收方无需先有钱包</li>
+          <li>Token 分类浏览：稳定币、收益型、股票 Token、DeFi、RWA</li>
+        </ul>
+        <div class="callout" style="margin-top:12px">
+          定位 vs 表达的断裂：官方叙事清晰雄心勃勃，首页却几乎没有把这五件事讲给访客。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 市场 / 社媒反馈 -->
+  <section>
+    <h2>二、市场与社媒反馈</h2>
+    <p class="lead">综合 Trustpilot、G2、SourceForge、App Store / Play Store、Medium、CryptoCompare、TradersUnion 及 Arbitrum 官方博客等公开信息汇总。</p>
+
+    <div class="grid g3">
+      <div class="card">
+        <h3>🟥 负面声音（集中点）</h3>
+        <ul class="list bad">
+          <li>Trustpilot 对 token.im 的整体评分约 <b>1.7 / 5</b>，负面占比显著</li>
+          <li>英文文案存在拼写/语法/口径问题，"made in China" 的感知被放大</li>
+          <li>历史上被第三方诈骗站点冒用与 WalletConnect 连通性问题</li>
+          <li>部分交易/Swap 场景出现空白页、无法提币的反馈</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🟩 正面声音</h3>
+        <ul class="list good">
+          <li>多链 & 入门友好，50+ 网络、预置主流 RPC</li>
+          <li>Passkey + AA 被技术圈认可为「下一代 UX 方向」</li>
+          <li>Devcon 7 Bangkok 上作为赞助商 + 咖啡活动首次发布，技术媒体给予正面报道</li>
+          <li>Help Center 文章帮助度：Quickstart 18/20，公告 8/9，说明用户愿意读</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🟨 结构性挑战</h3>
+        <ul class="list warn">
+          <li>Web3 钱包品类高度拥挤：MetaMask、Phantom、Rainbow、Rabby、Zerion、OKX Wallet…</li>
+          <li>Passkey 叙事已被 Coinbase Smart Wallet、Argent、Safe{Core} 等占用</li>
+          <li>imToken 在西方市场的品牌认知偏低，中国/亚洲认知强但受监管影响</li>
+          <li>Beta 标签 + 仅 Arbitrum，体感「玩具感」重、可信度不足</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="quote" style="margin-top:16px">
+      imToken 在 Medium 上自述：「Tokens 将像电力和互联网一样，渗透到日常生活里。」
+      <cite>— imToken Medium, "Exploration of the Next-Gen Web3 Wallet UX"</cite>
+    </div>
+  </section>
+
+  <!-- 3. 三视角评估 -->
+  <section>
+    <h2>三、PM / Designer / CEO 三视角评估</h2>
+    <p class="lead">同一个首页，不同角色会看到不同问题。下面是三个视角下最扎心的判断。</p>
+
+    <!-- PM -->
+    <div class="perspective">
+      <div class="persona">
+        <div class="emoji">📊</div>
+        <div class="role">Product Manager</div>
+        <div class="who">关心转化与漏斗</div>
+      </div>
+      <div>
+        <div class="issue"><div class="sev sev-high">P0 严重</div>
+          <div><h4>漏斗断点：访客 → 注册 之间缺少驱动力</h4><p>首屏既无价值主张、也无 CTA，对未注册用户等于「空货架」。passkey / AA / send-by-link 这些差异化被藏在 modal 与帮助中心里。</p></div>
+          <div><span class="tag bad">高流失</span></div>
+        </div>
+        <div class="issue"><div class="sev sev-high">P0 严重</div>
+          <div><h4>信息架构错位：「My Holdings」对新用户毫无意义</h4><p>把「我的持仓」放在全站最显眼位置，对未登录用户是 0 数据；Stock Tokens / Yield Stables 等标签没有教学，纯靠猜。</p></div>
+          <div><span class="tag warn">高认知成本</span></div>
+        </div>
+        <div class="issue"><div class="sev sev-med">P1 重要</div>
+          <div><h4>Beta 标签 + 仅 Arbitrum 没有 framing</h4><p>技术限制没有变成产品叙事（如 "Start on Arbitrum, more chains in 2026"），用户感知是「半成品」。</p></div>
+          <div><span class="tag warn">信任风险</span></div>
+        </div>
+        <div class="issue"><div class="sev sev-med">P1 重要</div>
+          <div><h4>缺失激活指标与内嵌遥测</h4><p>看不出有可度量的 activation 事件（create passkey、first receive、first send-by-link）被用来驱动新手引导分支。</p></div>
+          <div><span class="tag">留存风险</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Designer -->
+    <div class="perspective">
+      <div class="persona">
+        <div class="emoji">🎨</div>
+        <div class="role">Designer</div>
+        <div class="who">关心层级与可读性</div>
+      </div>
+      <div>
+        <div class="issue"><div class="sev sev-high">P0 严重</div>
+          <div><h4>视觉层级缺失，气泡把注意力吃光</h4><p>标题、气泡、入口按钮争夺同一个视觉中心；大量低饱和浅灰文字 &lt; 4.5:1 对比度，标签几乎不可读。</p></div>
+          <div><span class="tag bad">可访问性</span></div>
+        </div>
+        <div class="issue"><div class="sev sev-high">P0 严重</div>
+          <div><h4>没有一个主 CTA 按钮</h4><p>首屏没有任何 Filled Button。Create Wallet / Get Started 这类关键入口完全缺席，靠 Header 里的 Account 图标承担注册动作，极易错过。</p></div>
+          <div><span class="tag bad">转化设计</span></div>
+        </div>
+        <div class="issue"><div class="sev sev-med">P1 重要</div>
+          <div><h4>主视觉动效「装饰大于叙事」</h4><p>漂浮气泡漂亮但不传达产品能力，既不是真实数据、也没有引导用户点哪一个；对新用户是 "看不懂"。</p></div>
+          <div><span class="tag warn">叙事弱</span></div>
+        </div>
+        <div class="issue"><div class="sev sev-low">P2 优化</div>
+          <div><h4>首屏白屏时间长 + 无骨架屏</h4><p>~3 秒白屏期间无任何 skeleton / 静态文案兜底，品牌印象从「慢」开始。</p></div>
+          <div><span class="tag">性能感知</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- CEO -->
+    <div class="perspective">
+      <div class="persona">
+        <div class="emoji">👑</div>
+        <div class="role">CEO</div>
+        <div class="who">关心定位与增长</div>
+      </div>
+      <div>
+        <div class="issue"><div class="sev sev-high">P0 严重</div>
+          <div><h4>「Home of Tokens」没有落成一个可感知的品牌叙事</h4><p>口号停留在 Slogan 层面，没有被翻译成 3 句让西方记者也能引用的价值主张。对比 Coinbase Smart Wallet、Rainbow、Phantom 都有清晰一句话定位。</p></div>
+          <div><span class="tag bad">品牌</span></div>
+        </div>
+        <div class="issue"><div class="sev sev-high">P0 严重</div>
+          <div><h4>GTM 漏斗没闭环：Devcon 曝光没接住</h4><p>Bangkok Devcon 7 发布，但首页没有「Claim free token」「From Devcon」专属入口接住那波流量；活动结束，流量回落。</p></div>
+          <div><span class="tag bad">增长</span></div>
+        </div>
+        <div class="issue"><div class="sev sev-med">P1 重要</div>
+          <div><h4>产品定位与商业模型暧昧</h4><p>到底是「入门级钱包」「稳定币/RWA 消费入口」还是「AA 账户基础设施」？首页同时塞了三个叙事，结果谁都讲不透。</p></div>
+          <div><span class="tag warn">定位</span></div>
+        </div>
+        <div class="issue"><div class="sev sev-med">P1 重要</div>
+          <div><h4>区域品牌感拖累国际化</h4><p>中文风格 + 英文翻译瑕疵叠加过往负面评价，让海外用户不容易给信任。首页需要主动承担「国际化去标签化」的工作。</p></div>
+          <div><span class="tag warn">信任</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 策略重设计 -->
+  <section>
+    <h2>四、策略重设计：从 Visualization 页 → Onboarding 页</h2>
+    <p class="lead">核心原则：首页对<b>未注册用户</b>是「说服 + 转化」，对<b>已登录用户</b>才是现在的「资产/分类浏览」。不要再用一个页面同时服务两类人。</p>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3>定位一句话（建议）</h3>
+        <p style="color:var(--text);font-size:16px;line-height:1.6">
+          「在浏览器里，用指纹就能拥有一个钱包；用链接就能把代币发给任何人。」
+        </p>
+        <p style="margin-top:8px">相比现在的 "Digital assets under control"，更具体、更动词、更可验证。</p>
+      </div>
+      <div class="card">
+        <h3>访客状态分层</h3>
+        <ul class="list">
+          <li><b>Anonymous 未登录</b>：主打 Hero + 3 大能力 + 30 秒 Demo + CTA</li>
+          <li><b>Just Created 刚注册</b>：引导完成首次接收/Send-by-link/Explore</li>
+          <li><b>Returning 老用户</b>：才进入当前的 Tokens 浏览器视图</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="height:18px"></div>
+
+    <!-- Content blueprint -->
+    <div class="card">
+      <h3>4.1 Content 蓝图（Above-the-fold → 滚动）</h3>
+      <table class="table">
+        <thead><tr><th>区块</th><th>内容</th><th>目的</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>Hero</b></td>
+            <td>标题："Your wallet, without the wallet part."<br/>副标题：Passkey 登录，无需助记词；发送代币只需一条链接。</td>
+            <td>30 秒内让访客看懂产品 & 差异化</td>
+          </tr>
+          <tr>
+            <td><b>主 CTA</b></td>
+            <td>「Create wallet in 10 seconds」+ 「Send yourself $1 to try」</td>
+            <td>低阈值首次激活</td>
+          </tr>
+          <tr>
+            <td><b>3 大能力</b></td>
+            <td>① Passkey security (no seed phrase) ② Gas in USDT (Paymaster) ③ Send-by-Link (red packet for tokens)</td>
+            <td>把埋在帮助中心的差异化显性化</td>
+          </tr>
+          <tr>
+            <td><b>30s Demo</b></td>
+            <td>一个循环动效 / 短视频：指纹 → 钱包开通 → 贴一个链接 → 朋友领到 USDT</td>
+            <td>让访客"相信"而不是"理解"</td>
+          </tr>
+          <tr>
+            <td><b>Token 探索预览</b></td>
+            <td>保留现在的气泡视觉，但作为 "Explore the Token Universe" 的 preview，附带真实价格 & 点击进详情</td>
+            <td>复用资产、且让视觉有功能性</td>
+          </tr>
+          <tr>
+            <td><b>信任带</b></td>
+            <td>Arbitrum / Ethereum / Tokenlon 等生态 logo，审计报告、passkey WebAuthn 说明</td>
+            <td>对冲 "Made in China" 偏见</td>
+          </tr>
+          <tr>
+            <td><b>Beta 叙事</b></td>
+            <td>清晰 roadmap：Q2 加入 Optimism / Base，Q3 加入 Linea / zkSync 等</td>
+            <td>把 Beta 限制变成进度感</td>
+          </tr>
+          <tr>
+            <td><b>FAQ + Footer</b></td>
+            <td>Passkey 是什么？丢了手机怎么办？为什么只支持 Arbitrum？</td>
+            <td>扫除首次尝试前的阻力问题</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="height:18px"></div>
+
+    <div class="card">
+      <h3>4.2 Onboarding 流程（5 步最小可行路径）</h3>
+      <div class="flow">
+        <div class="step"><div class="n">Step 01</div><h4>Land</h4><p>Hero 内嵌 "Create in 10s" 按钮，无需跳转</p></div>
+        <div class="step"><div class="n">Step 02</div><h4>Passkey</h4><p>起名 + 指纹确认，强调「没有助记词」安心感</p></div>
+        <div class="step"><div class="n">Step 03</div><h4>First Taste</h4><p>赠送 0.5 USDT gas 额度 / 触发一次真实 on-chain 体验</p></div>
+        <div class="step"><div class="n">Step 04</div><h4>Send-by-Link</h4><p>引导生成一条给朋友的 red-packet 链接（病毒增长循环）</p></div>
+        <div class="step"><div class="n">Step 05</div><h4>Habit Hook</h4><p>完成后展示个性化的 Token Collections，绑定 push/邮件</p></div>
+      </div>
+      <div class="callout" style="margin-top:12px">
+        这套五步是一个<b>同时承担激活与增长</b>的 loop：Step 4 的 Send-by-Link 让每一个新用户都是潜在的拉新节点。
+      </div>
+    </div>
+
+    <div style="height:18px"></div>
+
+    <!-- Design blueprint -->
+    <div class="card">
+      <h3>4.3 Design 系统调整要点</h3>
+      <div class="grid g3" style="margin-top:6px">
+        <div>
+          <div class="tag">Typography</div>
+          <p style="color:var(--muted);font-size:13px">正文对比度 ≥ 7:1；主标题 56–72px；小标签最低 14px；全站字号阶梯化。</p>
+        </div>
+        <div>
+          <div class="tag">Color</div>
+          <p style="color:var(--muted);font-size:13px">保留 Token 渐变蓝紫色作为品牌色，但加入明确的 primary button fill、error、success 语义色。</p>
+        </div>
+        <div>
+          <div class="tag">Motion</div>
+          <p style="color:var(--muted);font-size:13px">气泡动效移到 "Explore" 区块，做成「围绕你的资产」的呼吸感，而不是占住首屏。</p>
+        </div>
+        <div>
+          <div class="tag">Components</div>
+          <p style="color:var(--muted);font-size:13px">新增：Empty Hero、Feature Card、Demo Player、Trust Bar、Roadmap、FAQ Accordion。</p>
+        </div>
+        <div>
+          <div class="tag">States</div>
+          <p style="color:var(--muted);font-size:13px">首页必须有三态：Anonymous / Onboarding / Returning，分别走不同布局。</p>
+        </div>
+        <div>
+          <div class="tag">Performance</div>
+          <p style="color:var(--muted);font-size:13px">静态 Hero 首屏 &lt; 1s；气泡动画懒加载；加 skeleton 过渡。</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:18px"></div>
+
+    <!-- Wireframe mock -->
+    <div class="mock">
+      <h4>4.4 线框示意：未登录用户的首屏重设计</h4>
+      <div class="wire flex">
+        <div style="flex:1">
+          <div style="font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase">Home of Tokens · Beta</div>
+          <div class="bar xl" style="margin-top:10px"></div>
+          <div class="bar m"></div>
+          <div class="bar s"></div>
+          <a class="cta">Create wallet in 10s</a>
+          <span style="display:inline-block;margin-left:8px;color:var(--muted);font-size:12px;vertical-align:middle">or try a demo →</span>
+        </div>
+        <div style="flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+          <div class="wire" style="margin:0"><div style="font-size:12px">🔐 Passkey login</div><div class="bar s"></div></div>
+          <div class="wire" style="margin:0"><div style="font-size:12px">⛽️ Gas in USDT</div><div class="bar s"></div></div>
+          <div class="wire" style="margin:0"><div style="font-size:12px">🎁 Send by link</div><div class="bar s"></div></div>
+          <div class="wire" style="margin:0"><div style="font-size:12px">🌐 Arbitrum now</div><div class="bar s"></div></div>
+        </div>
+      </div>
+      <div class="wire">
+        <div style="font-size:12px;color:var(--muted)">Explore the token universe — 保留气泡，但附真实价格 & 可点击</div>
+        <div class="tok"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+      <div class="wire flex">
+        <div style="font-size:12px;color:var(--muted)">Trust bar：Arbitrum · Tokenlon · WebAuthn · Audit by …</div>
+        <div style="font-size:12px;color:var(--muted)">Roadmap Q2→Q3</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 优先级落地 -->
+  <section>
+    <h2>五、落地优先级（2 个 sprint 内可上线）</h2>
+    <p class="lead">按「成本 / 价值」排序，前两周砍掉最痛的点，后两周铺开叙事层。</p>
+    <table class="table">
+      <thead><tr><th>优先级</th><th>动作</th><th>负责</th><th>产出</th></tr></thead>
+      <tbody>
+        <tr><td><span class="sev-high">P0</span></td><td>新增未登录用户 Hero（标题 + 副标题 + 主 CTA + 3 能力卡）</td><td>PM + Design + FE</td><td>首屏转化漏斗建立</td></tr>
+        <tr><td><span class="sev-high">P0</span></td><td>增加 "Create wallet in 10s" 填充按钮，行为可埋点</td><td>Design + FE</td><td>激活率可量化</td></tr>
+        <tr><td><span class="sev-high">P0</span></td><td>正文/标签对比度修复到 WCAG AA</td><td>Design</td><td>可读性 + 可访问性</td></tr>
+        <tr><td><span class="sev-med">P1</span></td><td>30s Demo 动效或短视频</td><td>Design + Motion</td><td>差异化可感知</td></tr>
+        <tr><td><span class="sev-med">P1</span></td><td>Send-by-Link 作为 onboarding 第 4 步，打通增长闭环</td><td>PM + FE</td><td>K 因子 &gt; 1 的机会</td></tr>
+        <tr><td><span class="sev-med">P1</span></td><td>Trust Bar + Roadmap + FAQ（抗 "Beta 焦虑"）</td><td>Design + Content</td><td>信任补齐</td></tr>
+        <tr><td><span class="sev-low">P2</span></td><td>气泡动效下移到 "Explore" 区块，加入真实价格联动</td><td>Design + Data</td><td>功能性装饰</td></tr>
+        <tr><td><span class="sev-low">P2</span></td><td>加入三态页面：Anonymous / Onboarding / Returning</td><td>PM + Design + FE</td><td>IA 清晰化</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 6. 一句话总结 -->
+  <section>
+    <h2>六、一句话总结</h2>
+    <div class="callout" style="font-size:16px;color:var(--text)">
+      <b>现在的首页在对老用户讲话，却把 99% 的新访客当成已经相信你的人。</b>把首页重新当成「产品白皮书的 10 秒版」，让 Passkey、Gas 抽象化、Send-by-Link 这三件事显性化，Home of Tokens 才真正成立。
+    </div>
+  </section>
+
+  <footer>
+    <div>资料来源：web.token.im 实地访问、imToken Help Center（Announcement、Quickstart、AA×Passkey 文章）、Trustpilot、G2、SourceForge、Play Store、TradersUnion、Arbitrum 官方博客。</div>
+    <div>© 产品诊断草案 · 供 Wilson 内部讨论</div>
+  </footer>
+</div>
+</body>
+</html>

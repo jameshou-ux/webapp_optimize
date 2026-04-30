@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction 2 — Dual Lens · imToken Web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&display=swap" rel="stylesheet">
+<style>
+/*
+  DIRECTION 2: One Content Model, Two Homepage Lenses
+  ─────────────────────────────────────────────────────
+  Design thesis: Spatial View and List View are two lenses on the same data.
+  The split-screen layout makes this relationship visible and learnable.
+  Clicking a bubble highlights the matching card in the list panel,
+  showing users that both modes show the same content.
+  The mode switch communicates a change in viewing lens, not just layout.
+*/
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #08090a;
+  --panel: #0f1011;
+  --surface: #191a1b;
+  --text-1: #f7f8f8;
+  --text-2: #d0d6e0;
+  --text-3: #8a8f98;
+  --text-4: #62666d;
+  --brand: #5e6ad2;
+  --accent: #7170ff;
+  --accent-h: #828fff;
+  --border: rgba(255,255,255,0.08);
+  --border-subtle: rgba(255,255,255,0.05);
+  --pos: #27a644;
+  --neg: #DC2626;
+}
+
+body {
+  font-family: 'Inter', 'SF Pro Display', -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: "cv01", "ss03";
+  background: var(--bg); color: var(--text-1); font-size: 14px; line-height: 1.5;
+  min-width: 1100px; overflow: hidden; height: 100vh;
+}
+
+/* ─── Header ─── */
+.header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 20px; height: 52px; border-bottom: 1px solid var(--border);
+  background: var(--panel); z-index: 100; flex-shrink: 0;
+}
+
+.logo { font-size: 14px; font-weight: 510; letter-spacing: -0.3px; color: var(--text-1); margin-right: 4px; }
+
+.search-wrap { max-width: 360px; flex: 1; position: relative; }
+
+.search-wrap input {
+  width: 100%; height: 34px; border: 1px solid var(--border); border-radius: 6px;
+  padding: 0 12px 0 34px; font-size: 13px; font-family: inherit; font-feature-settings: "cv01", "ss03";
+  background: rgba(255,255,255,0.04); color: var(--text-1); outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-wrap input::placeholder { color: var(--text-4); }
+.search-wrap input:focus { border-color: rgba(255,255,255,0.15); }
+
+.search-wrap svg {
+  position: absolute; left: 10px; top: 50%;
+  transform: translateY(-50%); color: var(--text-4); pointer-events: none;
+}
+
+/* Mode switch is the focal element in this direction */
+.mode-lens {
+  margin: 0 auto;
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.04); border-radius: 8px; padding: 3px; gap: 2px;
+  border: 1px solid var(--border-subtle);
+}
+
+.lens-btn {
+  padding: 5px 20px; border-radius: 6px; font-size: 13px;
+  cursor: pointer; border: none; background: transparent;
+  color: var(--text-4); font-weight: 510; font-family: inherit; font-feature-settings: "cv01", "ss03";
+  line-height: 22px;
+  display: flex; align-items: center; gap: 7px;
+  transition: all 0.15s;
+}
+
+.lens-btn.active { background: rgba(255,255,255,0.08); color: var(--text-1); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
+.lens-btn svg { flex-shrink: 0; }
+
+.lens-sep {
+  font-size: 12px; color: rgba(255,255,255,0.15); font-weight: 400; padding: 0 2px;
+  pointer-events: none; align-self: center;
+}
+
+.hright { display: flex; align-items: center; gap: 8px; }
+
+.btn-ghost {
+  height: 34px; padding: 0 14px; border: 1px solid var(--border); border-radius: 6px;
+  background: rgba(255,255,255,0.02); font-size: 13px; font-family: inherit; font-feature-settings: "cv01", "ss03";
+  cursor: pointer; color: var(--text-2); font-weight: 510;
+  transition: border-color 0.15s;
+}
+
+.btn-ghost:hover { border-color: rgba(255,255,255,0.15); }
+
+.btn-primary {
+  height: 34px; padding: 0 14px; border: none; border-radius: 6px;
+  background: var(--brand); font-size: 13px; font-family: inherit; font-feature-settings: "cv01", "ss03";
+  cursor: pointer; color: #fff; font-weight: 510;
+  transition: background 0.15s;
+}
+
+.btn-primary:hover { background: var(--accent-h); }
+
+/* ─── Content: split layout ─── */
+.split {
+  display: flex; height: calc(100vh - 52px);
+}
+
+/* ─── Left: Spatial canvas ─── */
+.spatial-pane {
+  flex: 0 0 58%; border-right: 1px solid var(--border);
+  background: var(--panel); position: relative; overflow: hidden;
+}
+
+.spatial-label {
+  position: absolute; top: 16px; left: 20px; z-index: 5;
+  font-size: 11px; font-weight: 510; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--text-4); pointer-events: none;
+}
+
+.spatial-sub {
+  position: absolute; top: 33px; left: 20px; z-index: 5;
+  font-size: 12px; color: var(--text-4); pointer-events: none;
+}
+
+/* Bubbles */
+.bubble {
+  position: absolute; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04); cursor: pointer; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; transform: translate(-50%, -50%);
+  transition: border-color 0.15s, background 0.15s; user-select: none;
+}
+
+.bubble:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
+
+.bubble.selected {
+  border-color: var(--accent); border-width: 2px;
+  box-shadow: 0 0 0 4px rgba(113,112,255,0.12);
+}
+
+.bubble.is-campaign { background: rgba(94,106,210,0.08); border-color: rgba(94,106,210,0.3); }
+
+.b-badge {
+  position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+  background: var(--brand); color: #fff; font-size: 9px; font-weight: 510;
+  padding: 2px 6px; border-radius: 10px; white-space: nowrap;
+  text-transform: uppercase; letter-spacing: 0.3px;
+}
+
+.b-name {
+  font-size: 11px; font-weight: 510; text-align: center;
+  padding: 0 10px; line-height: 1.3; color: var(--text-2);
+}
+
+.b-dots { display: flex; gap: 3px; margin: 4px 0 3px; justify-content: center; flex-wrap: wrap; padding: 0 8px; }
+
+.bdot {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+
+.b-count { font-size: 10px; color: var(--text-4); }
+
+/* ─── Right: List panel ─── */
+.list-pane {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--bg);
+}
+
+.list-header {
+  padding: 16px 18px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+
+.list-label {
+  font-size: 11px; font-weight: 510; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--text-4); margin-bottom: 2px;
+}
+
+.list-sub { font-size: 12.5px; color: var(--text-3); }
+
+.list-scroll { flex: 1; overflow-y: auto; padding: 12px 14px; }
+.list-scroll::-webkit-scrollbar { width: 3px; }
+.list-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+/* Compact list cards */
+.lcard {
+  border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px 14px;
+  margin-bottom: 8px; cursor: pointer; transition: border-color 0.15s, background 0.1s;
+  position: relative; background: rgba(255,255,255,0.02);
+}
+
+.lcard:hover { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.03); }
+
+.lcard.highlighted {
+  border-color: rgba(113,112,255,0.35); background: rgba(94,106,210,0.06);
+}
+
+.lcard-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+
+.lcard-icons { display: flex; gap: 3px; flex-shrink: 0; }
+
+.licon {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7.5px; font-weight: 700; color: #fff;
+}
+
+.lcard-info { flex: 1; min-width: 0; }
+
+.lcard-badge {
+  display: inline-block; padding: 2px 6px; border-radius: 3px;
+  font-size: 10px; font-weight: 510; text-transform: uppercase;
+  letter-spacing: 0.3px; background: rgba(255,255,255,0.05); color: var(--text-3); margin-bottom: 3px;
+  border: 1px solid var(--border-subtle);
+}
+
+.lcard-badge.campaign { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+.lcard-title { font-size: 13px; font-weight: 510; letter-spacing: -0.2px; color: var(--text-1); }
+.lcard-desc  { font-size: 11.5px; color: var(--text-3); line-height: 1.4; }
+
+.lcard-meta {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.lcard-meta-l { font-size: 11.5px; color: var(--text-4); }
+
+.lcard-price { text-align: right; }
+.lprice-val  { font-size: 12px; font-weight: 510; color: var(--text-1); }
+.lprice-ch   { font-size: 11px; }
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+.neu { color: var(--text-4); }
+
+.match-indicator {
+  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 60%; background: var(--accent); border-radius: 0 2px 2px 0;
+  opacity: 0; transition: opacity 0.15s;
+}
+
+.lcard.highlighted .match-indicator { opacity: 1; }
+
+/* Hover tooltip on bubble */
+#htip {
+  position: fixed; background: var(--surface); color: var(--text-1);
+  border: 1px solid var(--border);
+  padding: 7px 10px; border-radius: 6px; font-size: 12px;
+  pointer-events: none; z-index: 999; opacity: 0;
+  transition: opacity 0.1s; max-width: 180px; line-height: 1.4;
+  box-shadow: rgba(0,0,0,0.4) 0px 2px 4px;
+}
+
+#htip.show { opacity: 1; }
+#htip strong { display: block; color: var(--text-1); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <span class="logo">imToken Web</span>
+
+  <div class="search-wrap">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" placeholder="Search tokens, collections, campaigns">
+  </div>
+
+  <!-- Mode switch as the central design element -->
+  <div class="mode-lens" id="modeLens">
+    <button class="lens-btn active" id="btnSpatial" onclick="setMode('spatial')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/><circle cx="4" cy="6" r="2"/><circle cx="20" cy="6" r="2"/>
+        <circle cx="4" cy="18" r="2"/><circle cx="20" cy="18" r="2"/>
+        <line x1="6" y1="7" x2="10" y2="10"/><line x1="14" y1="10" x2="18" y2="7"/>
+        <line x1="6" y1="17" x2="10" y2="14"/><line x1="14" y1="14" x2="18" y2="17"/>
+      </svg>
+      Explore map
+    </button>
+    <button class="lens-btn" id="btnList" onclick="setMode('list')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+        <line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+        <line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      Scan list
+    </button>
+  </div>
+
+  <div class="hright">
+    <button class="btn-ghost">Sign in</button>
+    <button class="btn-primary">Create account</button>
+  </div>
+</header>
+
+<div class="split">
+
+  <!-- Left: Spatial canvas -->
+  <div class="spatial-pane" id="spatialPane">
+    <div class="spatial-label">Explore lens</div>
+    <div class="spatial-sub">Click a collection to see matching details →</div>
+  </div>
+
+  <!-- Right: List panel -->
+  <div class="list-pane">
+    <div class="list-header">
+      <div class="list-label">Scan lens</div>
+      <div class="list-sub">Same collections · richer detail</div>
+    </div>
+    <div class="list-scroll" id="listScroll"></div>
+  </div>
+
+</div>
+
+<div id="htip"></div>
+
+<script>
+const DATA = [
+  {
+    id: 'stocks', name: 'Stock Tokens', type: 'Campaign', campaign: true,
+    desc: 'Tokenized equities and real-world asset tokens representing global stocks.',
+    count: 24, chain: 'ETH', updated: 'Today',
+    x: 60, y: 44, size: 138,
+    tokens: [
+      { s: 'AAPL', c: '#555555', p: '$228.40', ch: '+0.6%', neg: false },
+      { s: 'TSLA', c: '#CC0000', p: '$249.30', ch: '+1.8%', neg: false },
+      { s: 'NVDA', c: '#76B900', p: '$124.50', ch: '+4.2%', neg: false },
+    ],
+  },
+  {
+    id: 'defi', name: 'DeFi Blue Chips', type: 'Curated',
+    desc: 'Top decentralized finance protocols by market cap and liquidity.',
+    count: 18, chain: 'ETH', updated: 'Oct 1',
+    x: 26, y: 36, size: 128,
+    tokens: [
+      { s: 'ETH',  c: '#627EEA', p: '$2,291', ch: '-0.5%', neg: true  },
+      { s: 'LINK', c: '#2A5ADA', p: '$13.42', ch: '+1.2%', neg: false },
+      { s: 'AAVE', c: '#B6509E', p: '$98.30', ch: '+0.8%', neg: false },
+    ],
+  },
+  {
+    id: 'l1', name: 'Layer 1 Networks', type: 'Curated',
+    desc: 'Major Layer 1 blockchains powering decentralized ecosystems.',
+    count: 12, chain: 'Multi', updated: 'Oct 2',
+    x: 11, y: 56, size: 110,
+    tokens: [
+      { s: 'BTC', c: '#F7931A', p: '$68,420', ch: '+2.1%', neg: false },
+      { s: 'SOL', c: '#9945FF', p: '$172.40', ch: '+3.4%', neg: false },
+      { s: 'ADA', c: '#0D4EB8', p: '$0.44',   ch: '-0.9%', neg: true  },
+    ],
+  },
+  {
+    id: 'meta', name: 'Metaverse', type: 'Curated',
+    desc: 'Tokens from virtual worlds, gaming ecosystems, and digital real estate.',
+    count: 22, chain: 'ETH', updated: 'Sep 30',
+    x: 43, y: 19, size: 112,
+    tokens: [
+      { s: 'MANA', c: '#FF2D55', p: '$0.38', ch: '-2.1%', neg: true  },
+      { s: 'SAND', c: '#04ADEF', p: '$0.41', ch: '+1.6%', neg: false },
+      { s: 'AXS',  c: '#0055D5', p: '$6.22', ch: '-0.7%', neg: true  },
+    ],
+  },
+  {
+    id: 'gamefi', name: 'GameFi', type: 'Curated',
+    desc: 'Play-to-earn and blockchain gaming tokens.',
+    count: 16, chain: 'Multi', updated: 'Sep 28',
+    x: 55, y: 70, size: 104,
+    tokens: [
+      { s: 'IMX',  c: '#17B3E0', p: '$1.72',  ch: '+5.1%', neg: false },
+      { s: 'RON',  c: '#0055FF', p: '$2.18',  ch: '+2.3%', neg: false },
+      { s: 'BEAM', c: '#00A0C0', p: '$0.022', ch: '-1.2%', neg: true  },
+    ],
+  },
+  {
+    id: 'stable', name: 'Stablecoins', type: 'Curated',
+    desc: 'USD-pegged and algorithmic stablecoins for trading and savings.',
+    count: 8, chain: 'Multi', updated: 'Oct 2',
+    x: 18, y: 74, size: 94,
+    tokens: [
+      { s: 'USDT', c: '#26A17B', p: '$1.00', ch: '0.0%', neg: null },
+      { s: 'USDC', c: '#2775CA', p: '$1.00', ch: '0.0%', neg: null },
+    ],
+  },
+  {
+    id: 'ai', name: 'AI Tokens', type: 'Curated',
+    desc: 'Tokens powering AI infrastructure and compute networks.',
+    count: 14, chain: 'ETH', updated: 'Oct 1',
+    x: 76, y: 22, size: 106,
+    tokens: [
+      { s: 'FET',  c: '#333333', p: '$1.48', ch: '+3.8%', neg: false },
+      { s: 'RNDR', c: '#E91E8C', p: '$5.34', ch: '+6.2%', neg: false },
+    ],
+  },
+  {
+    id: 'social', name: 'Social Tokens', type: 'Preset',
+    desc: 'Creator economy and social protocol tokens.',
+    count: 10, chain: 'Multi', updated: 'Sep 25',
+    x: 80, y: 64, size: 90,
+    tokens: [
+      { s: 'DESO', c: '#333333', p: '$11.20', ch: '-0.5%', neg: true  },
+    ],
+  },
+];
+
+let selected = 'defi';
+let mode = 'spatial'; // spatial | list
+
+// Build spatial bubbles
+function buildBubbles() {
+  const canvas = document.getElementById('spatialPane');
+  DATA.forEach(col => {
+    const el = document.createElement('div');
+    el.className = 'bubble' + (col.campaign ? ' is-campaign' : '') + (col.id === selected ? ' selected' : '');
+    el.id = 'bub-' + col.id;
+    el.style.cssText = `left:${col.x}%;top:${col.y}%;width:${col.size}px;height:${col.size}px;`;
+
+    const maxDots = col.size >= 120 ? 3 : 2;
+    const dots = col.tokens.slice(0, maxDots).map(t =>
+      `<div class="bdot" style="background:${t.c}">${t.s.slice(0,2)}</div>`
+    ).join('');
+
+    el.innerHTML = `
+      ${col.campaign ? '<div class="b-badge">Campaign</div>' : ''}
+      <div class="b-name">${col.name}</div>
+      <div class="b-dots">${dots}</div>
+      <div class="b-count">${col.count}</div>
+    `;
+
+    el.addEventListener('click', () => select(col.id));
+    el.addEventListener('mouseenter', e => tipShow(e, col));
+    el.addEventListener('mousemove', tipMove);
+    el.addEventListener('mouseleave', tipHide);
+    canvas.appendChild(el);
+  });
+}
+
+// Build list cards
+function buildList() {
+  const scroll = document.getElementById('listScroll');
+  DATA.forEach(col => {
+    const el = document.createElement('div');
+    el.className = 'lcard' + (col.id === selected ? ' highlighted' : '');
+    el.id = 'lc-' + col.id;
+
+    const badgeCls = col.campaign ? 'lcard-badge campaign' : 'lcard-badge';
+
+    const icons = col.tokens.slice(0, 3).map(t =>
+      `<div class="licon" style="background:${t.c}">${t.s.slice(0,2)}</div>`
+    ).join('');
+
+    const firstToken = col.tokens[0];
+    const chCls = firstToken.neg === null ? 'neu' : firstToken.neg ? 'neg' : 'pos';
+
+    el.innerHTML = `
+      <div class="match-indicator"></div>
+      <div class="lcard-top">
+        <div class="lcard-icons">${icons}</div>
+        <div class="lcard-info">
+          <div class="${badgeCls}">${col.type}</div>
+          <div class="lcard-title">${col.name}</div>
+          <div class="lcard-desc">${col.desc.slice(0, 72)}…</div>
+        </div>
+      </div>
+      <div class="lcard-meta">
+        <div class="lcard-meta-l">${col.count} tokens · ${col.chain} · ${col.updated}</div>
+        <div class="lcard-price">
+          <div class="lprice-val">${firstToken.s} ${firstToken.p}</div>
+          <div class="lprice-ch ${chCls}">${firstToken.ch}</div>
+        </div>
+      </div>
+    `;
+
+    el.addEventListener('click', () => select(col.id));
+    scroll.appendChild(el);
+  });
+}
+
+function select(id) {
+  selected = id;
+  // Update bubble
+  document.querySelectorAll('.bubble').forEach(b => b.classList.remove('selected'));
+  const bub = document.getElementById('bub-' + id);
+  if (bub) bub.classList.add('selected');
+  // Update list card
+  document.querySelectorAll('.lcard').forEach(c => c.classList.remove('highlighted'));
+  const lc = document.getElementById('lc-' + id);
+  if (lc) {
+    lc.classList.add('highlighted');
+    lc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('btnSpatial').classList.toggle('active', m === 'spatial');
+  document.getElementById('btnList').classList.toggle('active', m === 'list');
+}
+
+// Tooltip
+const tip = document.getElementById('htip');
+function tipShow(e, col) {
+  tip.innerHTML = `<strong>${col.name}</strong>${col.count} tokens · ${col.type}`;
+  tip.classList.add('show');
+  tipMove(e);
+}
+function tipMove(e) {
+  tip.style.left = (e.clientX + 14) + 'px';
+  tip.style.top = (e.clientY - 36) + 'px';
+}
+function tipHide() { tip.classList.remove('show'); }
+
+buildBubbles();
+buildList();
+</script>
+</body>
+</html>

@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>imToken Web 首页改版 - 进展汇报</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
+  <style>
+    :root {
+      --bg: #FAFAF9;
+      --fg: #111111;
+      --fg-muted: #888888;
+      --fg-faint: #CCCCCA;
+      --border: #E8E8E6;
+      --ghost: rgba(17, 17, 17, 0.032);
+      --accent: #1677ff;
+      --font: 'DM Sans', system-ui, -apple-system, sans-serif;
+      --title-size: clamp(2.75rem, 8vw, 7rem);
+      --h1-size: clamp(1.75rem, 4.5vw, 3.75rem);
+      --label-size: clamp(0.58rem, 0.9vw, 0.72rem);
+      --body-size: clamp(0.8rem, 1.35vw, 1rem);
+      --small-size: clamp(0.65rem, 0.95vw, 0.78rem);
+      --pad: clamp(2.5rem, 6vw, 6.5rem);
+      --gap: clamp(1rem, 2.5vw, 2rem);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg) !important;
+    }
+
+    .reveal {
+      font-family: var(--font) !important;
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--fg) !important;
+      background: var(--bg) !important;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .reveal .slides {
+      text-align: left !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      left: 0 !important;
+      top: 0 !important;
+      transform: none !important;
+    }
+
+    .reveal .slides>section {
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      top: 0 !important;
+      left: 0 !important;
+      padding: var(--pad);
+      padding-bottom: 56px;
+      display: flex !important;
+      flex-direction: column;
+      background: var(--bg);
+      color: var(--fg);
+      overflow: hidden;
+    }
+
+    .reveal .progress,
+    .reveal .controls,
+    .reveal .slide-number {
+      display: none !important;
+    }
+
+    .reveal h1,
+    .reveal h2,
+    .reveal h3,
+    .reveal h4,
+    .reveal h5,
+    .reveal h6 {
+      font-family: var(--font);
+      font-weight: 500;
+      color: var(--fg);
+      text-transform: none;
+      letter-spacing: -0.028em;
+      line-height: 1.08;
+      margin: 0;
+      text-shadow: none;
+    }
+
+    .reveal p,
+    .reveal li,
+    .reveal span {
+      font-family: var(--font);
+      font-weight: 300;
+      color: var(--fg);
+      text-shadow: none;
+      line-height: 1.6;
+    }
+
+    .slide-label {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: clamp(1.75rem, 4.5vw, 4rem);
+      flex-shrink: 0;
+    }
+
+    .label-num {
+      font-size: var(--label-size);
+      font-weight: 400;
+      color: var(--fg-faint);
+      letter-spacing: 0.08em;
+    }
+
+    .label-rule {
+      width: 1.25rem;
+      height: 1px;
+      background: var(--fg-faint);
+      flex-shrink: 0;
+    }
+
+    .label-text {
+      font-size: var(--label-size);
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--fg-muted);
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .t-title {
+      font-size: var(--title-size);
+      font-weight: 500;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      color: var(--fg);
+    }
+
+    .t-h1 {
+      font-size: var(--h1-size);
+      font-weight: 500;
+      line-height: 1.08;
+      letter-spacing: -0.028em;
+      color: var(--fg);
+    }
+
+    .t-sub {
+      font-size: var(--body-size);
+      font-weight: 300;
+      line-height: 1.6;
+      color: var(--fg-muted);
+      max-width: 60ch;
+      margin-top: clamp(0.4rem, 0.8vw, 0.65rem);
+    }
+
+    .t-eyebrow {
+      font-size: var(--label-size);
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--fg-muted);
+      margin-bottom: clamp(1rem, 2vw, 1.5rem);
+    }
+
+    .slide--cover {
+      justify-content: flex-end !important;
+      padding-bottom: calc(var(--pad) * 1.5) !important;
+    }
+
+    .cover-rule {
+      width: clamp(2rem, 5vw, 3.5rem);
+      height: 1px;
+      background: var(--border);
+      margin: clamp(1.25rem, 2.5vw, 2rem) 0;
+    }
+
+    .cover-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .cover-meta span {
+      font-size: var(--small-size);
+      color: var(--fg-muted);
+      font-weight: 300;
+      letter-spacing: 0.04em;
+    }
+
+    .cover-meta .dot {
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: var(--fg-faint);
+    }
+
+    .media-ph {
+      border: 1px solid var(--border);
+      background: var(--ghost);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .media-ph span {
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--fg-faint);
+      font-weight: 400;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+      gap: clamp(0.8rem, 1.8vw, 1.4rem);
+      flex: 1;
+      min-height: 0;
+    }
+
+    .two-col--equal {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .col-copy,
+    .col-media {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.9rem, 1.8vw, 1.4rem);
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .s-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.55rem, 1.2vh, 0.95rem);
+    }
+
+    .s-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      font-size: var(--body-size);
+      line-height: 1.58;
+      color: var(--fg);
+      font-weight: 300;
+    }
+
+    .s-list li::before {
+      content: '';
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--fg-faint);
+      flex-shrink: 0;
+      margin-top: 0.62em;
+    }
+
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: clamp(0.6rem, 1.5vw, 1.2rem);
+      flex: 1;
+      min-height: 0;
+    }
+
+    .pillars--3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .pillars--4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .pillar {
+      border: 1px solid var(--border);
+      padding: clamp(0.9rem, 1.8vw, 1.5rem);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      min-height: 0;
+    }
+
+    .pillar-idx {
+      font-size: var(--label-size);
+      font-weight: 400;
+      color: var(--fg-faint);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.2rem;
+    }
+
+    .pillar-name {
+      font-size: clamp(1.05rem, 2.1vw, 1.7rem);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      color: var(--fg);
+    }
+
+    .pillar-note {
+      font-size: var(--small-size);
+      color: var(--fg-muted);
+      font-weight: 300;
+      line-height: 1.5;
+      margin-top: 0.15rem;
+    }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(0.8rem, 1.8vw, 1.4rem);
+      flex: 1;
+      min-height: 0;
+    }
+
+    .compare-col {
+      border: 1px solid var(--border);
+      padding: clamp(1rem, 1.8vw, 1.4rem);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-height: 0;
+    }
+
+    .compare-title {
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--fg-muted);
+      font-weight: 400;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .priority-wrap {
+      flex: 1;
+      min-height: 0;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .priority-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .priority-table thead th {
+      font-size: var(--label-size);
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: var(--fg-muted);
+      text-align: left;
+      padding: 0.8rem 0.95rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(17, 17, 17, 0.02);
+    }
+
+    .priority-table tbody td {
+      vertical-align: top;
+      padding: 0.78rem 0.95rem;
+      border-bottom: 1px solid var(--border);
+      font-size: var(--small-size);
+      line-height: 1.5;
+      color: var(--fg);
+      font-weight: 300;
+    }
+
+    .priority-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .priority-table th:nth-child(1),
+    .priority-table td:nth-child(1) {
+      width: 10%;
+    }
+
+    .priority-table th:nth-child(2),
+    .priority-table td:nth-child(2) {
+      width: 40%;
+    }
+
+    .priority-table th:nth-child(3),
+    .priority-table td:nth-child(3) {
+      width: 22%;
+    }
+
+    .priority-table th:nth-child(4),
+    .priority-table td:nth-child(4) {
+      width: 28%;
+    }
+
+    .sev-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.5rem;
+      padding: 0.22rem 0.45rem;
+      border: 1px solid var(--border);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      line-height: 1;
+    }
+
+    .sev-pill--high {
+      border-color: rgba(185, 28, 28, 0.22);
+      color: #b91c1c;
+      background: rgba(185, 28, 28, 0.06);
+    }
+
+    .sev-pill--med {
+      border-color: rgba(180, 83, 9, 0.22);
+      color: #b45309;
+      background: rgba(180, 83, 9, 0.06);
+    }
+
+    .sev-pill--low {
+      border-color: rgba(55, 65, 81, 0.18);
+      color: #4b5563;
+      background: rgba(55, 65, 81, 0.05);
+    }
+
+    .learnings {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .learning {
+      display: flex;
+      align-items: flex-start;
+      gap: clamp(0.75rem, 2vw, 1.5rem);
+      padding: clamp(0.7rem, 1.3vh, 1rem) 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .learning:first-child {
+      border-top: 1px solid var(--border);
+    }
+
+    .learning-n {
+      font-size: var(--label-size);
+      color: var(--fg-faint);
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+      width: 1.5rem;
+    }
+
+    .learning-text {
+      font-size: var(--body-size);
+      line-height: 1.55;
+      color: var(--fg);
+      font-weight: 300;
+    }
+
+    #cp {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 1px;
+      background: var(--fg);
+      z-index: 900;
+      width: 0%;
+      transition: width 0.15s ease;
+      pointer-events: none;
+    }
+
+    #cc {
+      position: fixed;
+      bottom: 1.1rem;
+      left: 1.25rem;
+      z-index: 890;
+      font-family: var(--font);
+      font-size: var(--small-size);
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      color: var(--fg-faint);
+      pointer-events: none;
+    }
+
+    #sp {
+      position: fixed;
+      right: 1.25rem;
+      bottom: 1.1rem;
+      z-index: 890;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.45rem;
+    }
+
+    #sp-toggle {
+      min-width: 10rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.55rem;
+      border: 1px solid var(--border);
+      background: rgba(250, 250, 249, 0.94);
+      color: var(--fg);
+      padding: 0.6rem 0.72rem;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: var(--small-size);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      backdrop-filter: blur(10px);
+    }
+
+    #sp-toggle:hover {
+      border-color: rgba(17, 17, 17, 0.3);
+    }
+
+    .sp-chevron {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-right: 1.5px solid var(--fg-muted);
+      border-bottom: 1.5px solid var(--fg-muted);
+      transform: rotate(45deg) translateY(-2px);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    #sp.open .sp-chevron {
+      transform: rotate(-135deg) translateY(-1px);
+    }
+
+    #sp-panel {
+      width: min(22rem, calc(100vw - 2.5rem));
+      max-height: 80dvh;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      background: rgba(250, 250, 249, 0.97);
+      padding: 0.4rem;
+      display: none;
+      backdrop-filter: blur(12px);
+    }
+
+    #sp.open #sp-panel {
+      display: block;
+    }
+
+    .sp-item {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--fg-muted);
+      cursor: pointer;
+      font-family: var(--font);
+      padding: 0.55rem 0.65rem;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .sp-item:hover {
+      background: var(--border);
+      color: var(--fg);
+    }
+
+    .sp-item.on {
+      background: var(--fg);
+      border-color: var(--fg);
+      color: var(--bg);
+    }
+
+    .sp-item-num {
+      font-size: var(--small-size);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .sp-item-title {
+      font-size: 0.6rem;
+      font-weight: 400;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    @media (max-height: 700px) {
+      :root {
+        --pad: clamp(1.5rem, 3vw, 3.5rem);
+        --gap: clamp(0.75rem, 1.5vw, 1.25rem);
+        --h1-size: clamp(1.4rem, 3.5vw, 2.75rem);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .two-col,
+      .two-col--equal,
+      .pillars--3,
+      .pillars--4,
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="cp"></div>
+  <div id="cc">01 / 09</div>
+  <div id="sp">
+    <div id="sp-panel" role="listbox"></div>
+    <button id="sp-toggle" aria-expanded="false">
+      <span id="sp-val">封面</span>
+      <span class="sp-chevron"></span>
+    </button>
+  </div>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="slide--cover" data-slide-title="封面">
+        <p class="t-eyebrow">进展汇报</p>
+        <h1 class="t-title">imToken Web<br>首页改版<br>进展</h1>
+        <p class="t-sub" style="max-width:44ch;">当前门户问题、方向探索与原型进展，供管理层评审。</p>
+        <div class="cover-rule"></div>
+        <div class="cover-meta">
+          <span>James Hou</span>
+          <span class="dot"></span>
+          <span>web.token.im</span>
+          <span class="dot"></span>
+          <span>8页</span>
+        </div>
+      </section>
+
+      <section data-slide-title="为什么做这件事">
+        <div class="slide-label">
+          <span class="label-num">02</span><span class="label-rule"></span>
+          <span class="label-text">背景</span>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h2 class="t-h1">首页具备很强的产品潜力，但价值表达、活动运营与发现流程仍未对齐</h2>
+            <p class="t-sub">Spatial View 有差异化，但信息支撑不足。List View 更适合运营，但辨识度较弱。首页已有注册入口，但 AA 的轻量化优势仍未被清楚表达。</p>
+          </div>
+          <div class="two-col two-col--equal">
+            <div class="col-media">
+              <div class="media-ph"><img src="assets/web-token-spatial-reference.png" style="width:100%;height:100%;object-fit:cover;display:block;" alt="当前 Spatial View 截图"></div>
+            </div>
+            <div class="col-media">
+              <div class="media-ph">留白，可替换为 List View 或流程截图</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="当前问题">
+        <div class="slide-label">
+          <span class="label-num">03</span><span class="label-rule"></span>
+          <span class="label-text">问题</span>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h2 class="t-h1">当前门户问题</h2>
+            <p class="t-sub">在审计、现网检查与原型探索中，反复出现的核心问题集中在这四点。</p>
+          </div>
+          <div class="pillars pillars--4">
+            <div class="pillar">
+              <p class="pillar-idx">01</p>
+              <p class="pillar-name">价值表达不够快</p>
+              <p class="pillar-note">用户先看到 token 视觉，再去猜 imToken Web 到底解决什么问题。</p>
+            </div>
+            <div class="pillar">
+              <p class="pillar-idx">02</p>
+              <p class="pillar-name">活动承载能力弱</p>
+              <p class="pillar-note">List View 有海报和精选位，但 CTA 与活动逻辑都偏弱；Spatial View 也缺少对应的活动层。</p>
+            </div>
+            <div class="pillar">
+              <p class="pillar-idx">03</p>
+              <p class="pillar-name">Spatial 与 List 能力不均衡</p>
+              <p class="pillar-note">一个更适合品牌表达，一个更适合运营承载，但两者还没有形成一个统一的首页系统。</p>
+            </div>
+            <div class="pillar">
+              <p class="pillar-idx">04</p>
+              <p class="pillar-name">信息与 onboarding 都偏薄</p>
+              <p class="pillar-note">Collection 缺少足够的点击动机，轻量 passkey onboarding 也没有被塑造成明确优势。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="方向框架">
+        <div class="slide-label">
+          <span class="label-num">04</span><span class="label-rule"></span>
+          <span class="label-text">框架</span>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h2 class="t-h1">三个潜在改进方向</h2>
+            <p class="t-sub">聚集低成本改造，不引入新功能和依赖。</p>
+          </div>
+          <div class="pillars pillars--3">
+            <div class="pillar">
+              <p class="pillar-idx">方向 1</p>
+              <p class="pillar-name">发现优先</p>
+              <p class="pillar-note">最直接回应 collection 缺乏动机、campaign 理解不足的问题。</p>
+            </div>
+            <div class="pillar">
+              <p class="pillar-idx">方向 2</p>
+              <p class="pillar-name">融合 Spatial/List</p>
+              <p class="pillar-note">最直接回应 Spatial 与 List 割裂的问题，用统一外壳和 collection 侧栏建立连续性。</p>
+            </div>
+            <div class="pillar">
+              <p class="pillar-idx">方向 3</p>
+              <p class="pillar-name">激活优先</p>
+              <p class="pillar-note">最直接回应 onboarding 表达不清和转化信心不足的问题。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="方向 1">
+        <div class="slide-label">
+          <span class="label-num">05</span><span class="label-rule"></span>
+          <span class="label-text">方向 1</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-col">
+            <div class="col-copy">
+              <div>
+                <h2 class="t-h1">发现优先更便于探索</h2>
+                <p class="t-sub">让首页首先成为更强的 token 发现与 campaign 承载界面。</p>
+              </div>
+              <div class="learnings">
+                <div class="learning"><span class="learning-n">P</span>
+                  <p class="learning-text">对应问题：用户没有足够理由点进 collection，campaign 也缺少明确理解。</p>
+                </div>
+                <div class="learning"><span class="learning-n">R</span>
+                  <p class="learning-text">设计回应：更丰富的 collection 卡片、更清晰的 campaign 模块，以及进入深层页面前更强的决策层。</p>
+                </div>
+                <div class="learning"><span class="learning-n">W</span>
+                  <p class="learning-text">价值：提升扫读层的理解效率，让发现行为更容易转化为下一步动作。</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-media">
+              <div class="media-ph" style="padding:0; overflow:hidden; display:flex; align-items:center; justify-content:center; border:none; background:transparent;">
+                <video src="assets/D1.webm" autoplay muted loop playsinline style="width:100%; height:auto; max-height:100%; object-fit:contain; display:block;"></video>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="方向 2">
+        <div class="slide-label">
+          <span class="label-num">06</span><span class="label-rule"></span>
+          <span class="label-text">方向 2</span>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h2 class="t-h1">融合 Spatial/List 与持续 collection 侧栏</h2>
+            <p class="t-sub">当前 V2 方向：让 Spatial 和 List 成为同一个首页系统的两种视角，以 collection 侧栏作为连续性的核心。</p>
+          </div>
+          <div class="two-col two-col--equal" style="flex:1; min-height:0;">
+            <div class="col-copy">
+              <ul class="s-list">
+                <li>对应问题：Spatial 与 List 当前既不均衡，也不连续。</li>
+                <li>设计回应：统一外壳、统一选中状态、统一侧栏，同时覆盖两种模式。</li>
+                <li>模式切换保留上下文，而不是把用户送去另一个割裂的体验。</li>
+                <li>进入页面时可默认选中活动 hub 或精选 collection。</li>
+                <li>这是当前 V2 原型中最有价值的洞察。</li>
+              </ul>
+            </div>
+            <div class="col-media">
+              <div class="media-ph" style="padding:0; overflow:hidden; display:flex; align-items:center; justify-content:center; border:none; background:transparent;">
+                <video src="assets/D2.webm" autoplay muted loop playsinline style="width:100%; height:auto; max-height:100%; object-fit:contain; display:block;"></video>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="方向 3">
+        <div class="slide-label">
+          <span class="label-num">07</span><span class="label-rule"></span>
+          <span class="label-text">方向 3</span>
+        </div>
+        <div class="slide-body">
+          <div class="two-col">
+            <div class="col-copy">
+              <div>
+                <h2 class="t-h1">激活优先</h2>
+                <p class="t-sub">让首页首先成为轻量激活与 onboarding 入口。</p>
+              </div>
+              <div class="learnings">
+                <div class="learning"><span class="learning-n">P</span>
+                  <p class="learning-text">对应问题：首页没有把轻量 AA onboarding 讲清楚。</p>
+                </div>
+                <div class="learning"><span class="learning-n">R</span>
+                  <p class="learning-text">设计回应：更强的一屏 CTA、passkey 信心提示、能力提示卡，以及 15 秒 onboarding demo。</p>
+                </div>
+                <div class="learning"><span class="learning-n">W</span>
+                  <p class="learning-text">价值：提升转化信心，并把 onboarding 变成可见的产品优势。</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-media">
+              <div class="media-ph" style="padding:0; overflow:hidden; display:flex; align-items:center; justify-content:center; border:none; background:transparent;">
+                <video src="assets/D3.webm" autoplay muted loop playsinline style="width:100%; height:auto; max-height:100%; object-fit:contain; display:block;"></video>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-slide-title="阶段结论">
+        <div class="slide-label">
+          <span class="label-num">08</span><span class="label-rule"></span>
+          <span class="label-text">结论</span>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h2 class="t-h1">落地优先级</h2>
+            <p class="t-sub">结合 <code>imtoken-web-evaluation.html</code> 中明确列出的优先项，先把 2 个 sprint 内最关键的改造动作排清楚。</p>
+          </div>
+          <div class="priority-wrap">
+            <table class="priority-table">
+              <thead>
+                <tr>
+                  <th>优先级</th>
+                  <th>动作</th>
+                  <th>负责</th>
+                  <th>产出</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="sev-pill sev-pill--high">P0</span></td>
+                  <td>新增未登录用户 Hero（标题 + 副标题 + 主 CTA + 3 能力卡）</td>
+                  <td>PM + Design + FE</td>
+                  <td>首屏转化漏斗建立</td>
+                </tr>
+                <tr>
+                  <td><span class="sev-pill sev-pill--high">P0</span></td>
+                  <td>增加 “Create wallet in 10s” 填充按钮，行为可埋点</td>
+                  <td>Design + FE</td>
+                  <td>激活率可量化</td>
+                </tr>
+                <tr>
+                  <td><span class="sev-pill sev-pill--high">P0</span></td>
+                  <td>正文 / 标签对比度修复到 WCAG AA</td>
+                  <td>Design</td>
+                  <td>可读性 + 可访问性</td>
+                </tr>
+                <tr>
+                  <td><span class="sev-pill sev-pill--med">P1</span></td>
+                  <td>30s Demo 动效或短视频</td>
+                  <td>Design + Motion</td>
+                  <td>差异化可感知</td>
+                </tr>
+                <tr>
+                  <td><span class="sev-pill sev-pill--med">P1</span></td>
+                  <td>Send-by-Link 作为 onboarding 第 4 步，打通增长闭环</td>
+                  <td>PM + FE</td>
+                  <td>K 因子 &gt; 1 的机会</td>
+                </tr>
+                <tr>
+                  <td><span class="sev-pill sev-pill--med">P1</span></td>
+                  <td>Trust Bar + Roadmap + FAQ（抗 “Beta 焦虑”）</td>
+                  <td>Design + Content</td>
+                  <td>信任补齐</td>
+                </tr>
+                <tr>
+                  <td><span class="sev-pill sev-pill--low">P2</span></td>
+                  <td>气泡动效下移到 “Explore” 区块，加入真实价格联动</td>
+                  <td>Design + Data</td>
+                  <td>功能性装饰</td>
+                </tr>
+                <tr>
+                  <td><span class="sev-pill sev-pill--low">P2</span></td>
+                  <td>加入三态页面：Anonymous / Onboarding / Returning</td>
+                  <td>PM + Design + FE</td>
+                  <td>IA 清晰化</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.js"></script>
+  <script>
+    const SLIDES = [
+      { num: '01', title: '封面' },
+      { num: '02', title: '为什么做这件事' },
+      { num: '03', title: '当前问题' },
+      { num: '04', title: '方向框架' },
+      { num: '05', title: '方向 1' },
+      { num: '06', title: '方向 2' },
+      { num: '07', title: '方向 3' },
+      { num: '08', title: '阶段结论' }
+    ];
+
+    const TOTAL = SLIDES.length;
+
+    Reveal.initialize({
+      hash: true,
+      history: true,
+      center: false,
+      transition: 'fade',
+      transitionSpeed: 'fast',
+      mouseWheel: true,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      margin: 0,
+      minScale: 1,
+      maxScale: 1,
+      progress: false,
+      controls: false,
+      overview: true,
+      keyboard: true
+    });
+
+    window.addEventListener('resize', () => {
+      Reveal.configure({ width: window.innerWidth, height: window.innerHeight });
+    });
+
+    const cp = document.getElementById('cp');
+    const cc = document.getElementById('cc');
+    const spVal = document.getElementById('sp-val');
+    const spPanel = document.getElementById('sp-panel');
+    const spEl = document.getElementById('sp');
+    const spToggle = document.getElementById('sp-toggle');
+
+    function syncChrome(idx) {
+      const slide = SLIDES[idx] || SLIDES[0];
+      const pct = ((idx + 1) / TOTAL) * 100;
+      cp.style.width = pct + '%';
+      cc.textContent = slide.num + ' / ' + TOTAL;
+      spVal.textContent = slide.title;
+      document.querySelectorAll('.sp-item').forEach((el, i) => {
+        el.classList.toggle('on', i === idx);
+      });
+    }
+
+    Reveal.on('slidechanged', e => syncChrome(e.indexh));
+    Reveal.on('ready', e => syncChrome(e.indexh));
+
+    SLIDES.forEach((slide, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'sp-item';
+      btn.innerHTML = '<span class="sp-item-num">' + slide.num + '</span><span class="sp-item-title">' + slide.title + '</span>';
+      btn.addEventListener('click', () => {
+        Reveal.slide(i);
+        spEl.classList.remove('open');
+        spToggle.setAttribute('aria-expanded', 'false');
+      });
+      spPanel.appendChild(btn);
+    });
+
+    spToggle.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = spEl.classList.toggle('open');
+      spToggle.setAttribute('aria-expanded', open);
+    });
+
+    document.addEventListener('click', e => {
+      if (!spEl.contains(e.target)) {
+        spEl.classList.remove('open');
+        spToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        spEl.classList.remove('open');
+        spToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  </script>
+</body>
+
+</html>
