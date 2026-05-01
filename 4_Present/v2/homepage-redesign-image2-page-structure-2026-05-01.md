@@ -1,7 +1,7 @@
 # imToken Web 首页改版 · Image2 草图生成页面结构文档
 
-日期：2026-04-30  
-来源：`4_Present/v2/homepage-redesign-outline-2026-04-30.md`  
+日期：2026-05-01  
+来源：`4_Present/v2/homepage-redesign-outline-2026-05-01.md`  
 用途：供后续输入 image2 / 图像生成模型，生成更详细的低保真或中保真页面草图。  
 产品目标：让 imToken Web 首页从「已理解产品的人使用的 Token 可视化页」转向「匿名访客也能理解、信任并愿意开始的 Token 浏览器入口」。
 
