@@ -216,6 +216,17 @@
   details summary::-webkit-details-marker { display: none; }
   .details-body { padding: 20px 0 4px; }
 
+  /* ── Section-level fold (h2 as summary) ── */
+  details.section-fold > summary {
+    background: none; box-shadow: none; border-radius: 0; padding: 4px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "PingFang SC", sans-serif;
+    font-size: 28px; font-weight: 300; letter-spacing: -0.02em; line-height: 1.25;
+    color: var(--text); gap: 12px;
+  }
+  details.section-fold > summary:hover { background: none; color: var(--muted); }
+  details.section-fold > summary span { color: var(--dim); }
+  details.section-fold > summary::before { width: 14px; height: 14px; margin-top: 8px; }
+
   /* ── Direction options ── */
   .dir-block {
     border-radius: 16px; padding: 22px 24px; margin-top: 14px;
@@ -384,18 +395,21 @@
 <!-- ── 2. 核心能力 ── -->
 <section class="section">
   <div class="sec-label"><span>02</span>核心能力与价值主张</div>
-  <h2>五项核心能力，<span>每一项都是差异化所在</span></h2>
-
-  <table class="tbl" style="margin-top:18px">
-    <thead><tr><th>能力</th><th>对用户意味着什么</th></tr></thead>
-    <tbody>
-      <tr><td>浏览器原生访问</td><td>无需安装 App 或插件，任意现代浏览器 + 网络即可全功能使用</td></tr>
-      <tr><td>Passkey 账户</td><td>用指纹/面容 10 秒创建钱包，无助记词焦虑</td></tr>
-      <tr><td>Send by Link</td><td>生成可领取链接；接收方无需提前有钱包，点击即可创建账户并领取</td></tr>
-      <tr><td>Gas 抽象 / Paymaster</td><td>用 USDT 等稳定币支付 Gas，无需先购买 ETH</td></tr>
-      <tr><td>Token Collection 模型</td><td>按主题策展 Token——通过 Collection 探索 Token 宇宙，而非面对原始链地址</td></tr>
-    </tbody>
-  </table>
+  <details class="section-fold">
+    <summary>五项核心能力，<span>每一项都是差异化所在</span></summary>
+    <div class="details-body">
+      <table class="tbl" style="margin-top:0">
+        <thead><tr><th>能力</th><th>对用户意味着什么</th></tr></thead>
+        <tbody>
+          <tr><td>浏览器原生访问</td><td>无需安装 App 或插件，任意现代浏览器 + 网络即可全功能使用</td></tr>
+          <tr><td>Passkey 账户</td><td>用指纹/面容 10 秒创建钱包，无助记词焦虑</td></tr>
+          <tr><td>Send by Link</td><td>生成可领取链接；接收方无需提前有钱包，点击即可创建账户并领取</td></tr>
+          <tr><td>Gas 抽象 / Paymaster</td><td>用 USDT 等稳定币支付 Gas，无需先购买 ETH</td></tr>
+          <tr><td>Token Collection 模型</td><td>按主题策展 Token——通过 Collection 探索 Token 宇宙，而非面对原始链地址</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 
 </section>
 
