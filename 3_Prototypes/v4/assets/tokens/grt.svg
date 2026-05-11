@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-labelledby="title desc">
+  <title id="title">The Graph token icon</title>
+  <desc id="desc">Generated token badge for GRT.</desc>
+  <defs>
+    <linearGradient id="bg" x1="16" y1="12" x2="72" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9b86f3"/>
+      <stop offset=".54" stop-color="#6747ED"/>
+      <stop offset="1" stop-color="#4e36b4"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="24" y1="20" x2="62" y2="62" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".68"/>
+    </linearGradient>
+    <filter id="shadow" x="-12" y="-10" width="112" height="112" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#4e36b4" flood-opacity=".25"/>
+    </filter>
+  </defs>
+  <circle cx="44" cy="44" r="38" fill="url(#bg)" filter="url(#shadow)"/>
+  <circle cx="31" cy="25" r="24" fill="#fff" opacity=".16"/>
+  <g color="#4e36b4"><circle cx="40" cy="40" r="16" fill="none" stroke="#fff" stroke-width="6"/><path d="M53 53 65 65" stroke="#fff" stroke-width="6" stroke-linecap="round"/></g>
+</svg>

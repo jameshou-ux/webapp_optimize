@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-labelledby="title desc">
+  <title id="title">Bittensor token icon</title>
+  <desc id="desc">Generated token badge for TAO.</desc>
+  <defs>
+    <linearGradient id="bg" x1="16" y1="12" x2="72" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#787878"/>
+      <stop offset=".54" stop-color="#333333"/>
+      <stop offset="1" stop-color="#272727"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="24" y1="20" x2="62" y2="62" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".68"/>
+    </linearGradient>
+    <filter id="shadow" x="-12" y="-10" width="112" height="112" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#272727" flood-opacity=".25"/>
+    </filter>
+  </defs>
+  <circle cx="44" cy="44" r="38" fill="url(#bg)" filter="url(#shadow)"/>
+  <circle cx="31" cy="25" r="24" fill="#fff" opacity=".16"/>
+  <g color="#272727"><path d="M22 27h44M44 27v38M31 65h26" stroke="#fff" stroke-width="6" stroke-linecap="round"/><circle cx="44" cy="44" r="8" fill="#fff" opacity=".75"/></g>
+</svg>

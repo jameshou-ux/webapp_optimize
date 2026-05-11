@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>imToken Web V4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #F0F1F3;
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── FRAMES ── */
+.page-frame {
+  position: fixed;
+  inset: 0;
+  width: 100%; height: 100%;
+  border: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.25, 0, 0.1, 1);
+}
+.page-frame.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ── WIDGET ── */
+#widget {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 99999;
+  user-select: none;
+}
+
+/* Trigger pill */
+.widget-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 40px;
+  padding: 0 14px 0 11px;
+  background: rgba(249,253,255,.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(17,29,74,.1);
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow:
+    0 2px 8px rgba(17,29,74,.08),
+    0 0 0 0.5px rgba(17,29,74,.06);
+  transition: background .15s, box-shadow .15s, transform .12s;
+}
+.widget-trigger:hover {
+  background: rgba(255,255,255,.97);
+  box-shadow: 0 4px 16px rgba(17,29,74,.12), 0 0 0 0.5px rgba(17,29,74,.08);
+}
+.widget-trigger:active { transform: scale(.97); }
+
+.wt-page-icon {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  background: rgba(0,127,255,.1);
+  flex-shrink: 0;
+  transition: background .2s;
+}
+
+.wt-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111d4a;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+
+.wt-chevron {
+  color: rgba(17,29,74,.4);
+  flex-shrink: 0;
+  transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+}
+#widget.open .wt-chevron { transform: rotate(180deg); }
+
+/* Active dot on trigger */
+.wt-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #007fff;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity .2s, transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+#widget.open .wt-dot { opacity: 0; }
+
+/* Panel */
+.widget-panel {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  width: 232px;
+  background: rgba(249,253,255,.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(17,29,74,.09);
+  border-radius: 16px;
+  padding: 6px;
+  box-shadow:
+    0 8px 32px rgba(17,29,74,.12),
+    0 2px 8px rgba(17,29,74,.06),
+    0 0 0 0.5px rgba(17,29,74,.06);
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  transform-origin: bottom left;
+  pointer-events: none;
+  transition:
+    opacity .2s ease,
+    transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+#widget.open .widget-panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+.wp-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: rgba(17,29,74,.35);
+  padding: 8px 10px 6px;
+}
+
+.wp-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .12s;
+  position: relative;
+}
+.wp-item:hover { background: rgba(17,29,74,.04); }
+.wp-item.active { background: rgba(0,127,255,.07); }
+
+.wpi-icon {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  background: rgba(17,29,74,.05);
+  transition: background .15s;
+}
+.wp-item.active .wpi-icon { background: rgba(0,127,255,.1); }
+
+.wpi-text { flex: 1; min-width: 0; }
+.wpi-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111d4a;
+  letter-spacing: -0.2px;
+  line-height: 1.3;
+}
+.wpi-desc {
+  font-size: 11px;
+  color: rgba(17,29,74,.4);
+  margin-top: 1px;
+  line-height: 1.3;
+}
+.wp-item.active .wpi-name { color: #007fff; }
+
+.wpi-active-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #007fff;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity .2s, transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+.wp-item.active .wpi-active-dot {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Divider between items */
+.wp-divider {
+  height: 1px;
+  background: rgba(17,29,74,.06);
+  margin: 2px 4px;
+}
+
+/* Page transition overlay (brief flash during switch) */
+#switch-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(249,253,255,.6);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 99998;
+  transition: opacity .15s;
+}
+#switch-overlay.flash { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- PAGE FRAMES -->
+<iframe
+  id="frame-onboarding"
+  class="page-frame active"
+  src="onboarding.html"
+  title="Onboarding"
+></iframe>
+
+<iframe
+  id="frame-homepage"
+  class="page-frame"
+  src="v4-prototype.html"
+  title="Homepage"
+></iframe>
+
+<!-- TRANSITION OVERLAY -->
+<div id="switch-overlay"></div>
+
+<!-- NAV WIDGET -->
+<div id="widget">
+
+  <!-- Expanded panel (above trigger) -->
+  <div class="widget-panel" id="widgetPanel">
+    <div class="wp-section-label">Prototype pages</div>
+
+    <div class="wp-item active" data-page="onboarding" id="item-onboarding">
+      <div class="wpi-icon">✦</div>
+      <div class="wpi-text">
+        <div class="wpi-name">Onboarding</div>
+        <div class="wpi-desc">Welcome scroll experience</div>
+      </div>
+      <div class="wpi-active-dot"></div>
+    </div>
+
+    <div class="wp-divider"></div>
+
+    <div class="wp-item" data-page="homepage" id="item-homepage">
+      <div class="wpi-icon">◈</div>
+      <div class="wpi-text">
+        <div class="wpi-name">Homepage</div>
+        <div class="wpi-desc">Token portal · spatial view</div>
+      </div>
+      <div class="wpi-active-dot"></div>
+    </div>
+  </div>
+
+  <!-- Trigger pill -->
+  <div class="widget-trigger" id="widgetTrigger">
+    <div class="wt-page-icon" id="wtIcon">✦</div>
+    <span class="wt-label" id="wtLabel">Onboarding</span>
+    <svg class="wt-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"/>
+    </svg>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const widget    = document.getElementById('widget');
+  const trigger   = document.getElementById('widgetTrigger');
+  const panel     = document.getElementById('widgetPanel');
+  const wtLabel   = document.getElementById('wtLabel');
+  const wtIcon    = document.getElementById('wtIcon');
+  const overlay   = document.getElementById('switch-overlay');
+
+  const pages = {
+    onboarding: {
+      frame:  document.getElementById('frame-onboarding'),
+      item:   document.getElementById('item-onboarding'),
+      label:  'Onboarding',
+      icon:   '✦',
+    },
+    homepage: {
+      frame:  document.getElementById('frame-homepage'),
+      item:   document.getElementById('item-homepage'),
+      label:  'Homepage',
+      icon:   '◈',
+    },
+  };
+
+  let current = 'onboarding';
+  let open    = false;
+
+  /* ── Toggle panel ── */
+  function togglePanel() {
+    open = !open;
+    widget.classList.toggle('open', open);
+  }
+
+  function closePanel() {
+    open = false;
+    widget.classList.remove('open');
+  }
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    togglePanel();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!widget.contains(e.target)) closePanel();
+  });
+
+  /* ── Switch page ── */
+  function switchTo(pageKey) {
+    if (pageKey === current) { closePanel(); return; }
+
+    // Brief overlay flash
+    overlay.classList.add('flash');
+
+    setTimeout(() => {
+      // Deactivate current
+      pages[current].frame.classList.remove('active');
+      pages[current].item.classList.remove('active');
+
+      // Activate target
+      current = pageKey;
+      pages[current].frame.classList.add('active');
+      pages[current].item.classList.add('active');
+
+      // Update trigger
+      wtLabel.textContent = pages[current].label;
+      wtIcon.textContent  = pages[current].icon;
+
+      overlay.classList.remove('flash');
+      closePanel();
+    }, 120);
+  }
+
+  Object.entries(pages).forEach(([key, p]) => {
+    p.item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      switchTo(key);
+    });
+  });
+
+  /* ── Keyboard shortcut: [ and ] to cycle pages ── */
+  const pageOrder = ['onboarding', 'homepage'];
+  document.addEventListener('keydown', (e) => {
+    if (e.key === ']' || (e.key === 'ArrowRight' && e.altKey)) {
+      const idx = pageOrder.indexOf(current);
+      switchTo(pageOrder[(idx + 1) % pageOrder.length]);
+    } else if (e.key === '[' || (e.key === 'ArrowLeft' && e.altKey)) {
+      const idx = pageOrder.indexOf(current);
+      switchTo(pageOrder[(idx - 1 + pageOrder.length) % pageOrder.length]);
+    } else if (e.key === 'Escape') {
+      closePanel();
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>imToken Web V4 — Interactive Prototype</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter',sans-serif;
+  background:linear-gradient(169deg,#F9FDFF 12%,#F0F1F3 62%);
+  overflow:hidden;height:100vh
+}
+svg{display:block}
+
+/* ── Design tokens ── */
+:root{
+  --core:#111d4a;
+  --primary:#007fff;
+  --secondary:rgba(17,29,74,.45);
+  --surface:rgba(249,253,255,.88);
+  --border:rgba(17,29,74,.08);
+  --bubble-bg:rgba(17,29,74,.04);
+  --bubble-border:rgba(17,29,74,.09);
+  --bubble-text:#111d4a;
+}
+
+/* ── Scale wrapper ── */
+#scale-wrapper{width:1440px;height:836px;transform-origin:top left;overflow:hidden;position:fixed;top:60px;left:0;z-index:1}
+
+/* ── Proto ── */
+#proto{width:1440px;height:836px;display:flex;flex-direction:column;background:transparent}
+
+/* ── Nav ── */
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  height:60px;padding:0 28px;
+  background:rgba(249,253,255,.92);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.nav-logo{
+  display:flex;align-items:center;cursor:pointer;color:var(--core);
+  transition:opacity .15s
+}
+.nav-logo:hover{opacity:.75}
+.nav-right{display:flex;align-items:center;gap:6px}
+.nav-icon-btn{
+  width:40px;height:40px;border:none;background:transparent;border-radius:10px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--core);opacity:.65;transition:background .15s,opacity .15s
+}
+.nav-icon-btn:hover{background:rgba(17,29,74,.06);opacity:1}
+.nav-sep{width:1px;height:18px;background:var(--border);margin:0 8px}
+.nav-signin{
+  height:40px;padding:0 16px;background:transparent;border:none;
+  font-size:14px;font-weight:500;color:var(--core);cursor:pointer;border-radius:9999px;
+  transition:background .15s;opacity:.8
+}
+.nav-signin:hover{background:rgba(17,29,74,.06);opacity:1}
+.nav-create{
+  position:relative;height:40px;width:148px;
+  background:linear-gradient(#fff,#fff) padding-box,
+             linear-gradient(90deg,#007fff,#7b61ff) border-box;
+  border:1.5px solid transparent;border-radius:9999px;
+  font-size:14px;font-weight:500;color:var(--core);cursor:pointer;
+  transition:background .2s,opacity .15s;
+}
+.nav-create:hover{background:linear-gradient(rgba(0,127,255,.04),rgba(0,127,255,.04)) padding-box,linear-gradient(90deg,#007fff,#7b61ff) border-box}
+
+/* ── Main area ── */
+#main{flex:1;position:relative;overflow:hidden}
+
+/* ── Spatial canvas — full-width behind everything ── */
+#spatial-canvas{
+  position:absolute;inset:0;z-index:0;
+  cursor:grab;overflow:hidden;
+  background:transparent
+}
+#spatial-canvas.dragging{cursor:grabbing}
+
+/* Prevent bubble events in the left panel zone */
+#bubble-container{
+  position:absolute;inset:0;
+  transform-origin:0 0;
+  /* no transition here — applied via JS for pan/zoom */
+}
+
+/* ── Bubbles (light mode frosted glass) ── */
+.bubble{
+  position:absolute;border-radius:50%;cursor:pointer;
+  transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;user-select:none;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid var(--bubble-border);
+  background:var(--bubble-bg);
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),
+             box-shadow .2s ease,
+             background .2s ease,
+             border-color .2s ease,
+             opacity .25s ease
+}
+.bubble:hover{
+  transform:translate(-50%,-50%) scale(1.06);
+  background:rgba(0,127,255,.08);
+  border-color:rgba(0,127,255,.25);
+  box-shadow:0 8px 32px rgba(0,127,255,.1)
+}
+.bubble.selected{
+  background:rgba(0,127,255,.1)!important;
+  border-color:rgba(0,127,255,.4)!important;
+  box-shadow:0 0 0 3px rgba(0,127,255,.18),0 8px 32px rgba(0,127,255,.15)!important
+}
+.bubble.dimmed{opacity:.25}
+/* Campaign bubble gets a subtle gradient fill */
+.bubble.campaign{
+  background:linear-gradient(135deg,rgba(0,127,255,.09),rgba(123,97,255,.07));
+  border-color:rgba(0,127,255,.18)
+}
+.bubble.campaign:hover{
+  background:linear-gradient(135deg,rgba(0,127,255,.13),rgba(123,97,255,.11));
+  border-color:rgba(0,127,255,.3)
+}
+.bub-name{
+  font-size:12px;font-weight:600;color:var(--core);
+  line-height:1.3;pointer-events:none;padding:0 12px;letter-spacing:-.2px
+}
+.bub-count{font-size:10px;color:var(--secondary);margin-top:3px;pointer-events:none}
+.bub-dots{display:flex;gap:4px;margin-top:6px;pointer-events:none}
+.bub-dot{border-radius:50%}
+
+/* Zoom reset button */
+#zoom-reset{
+  position:absolute;bottom:20px;right:20px;z-index:30;
+  height:34px;padding:0 14px;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(10px);
+  border:1px solid var(--border);border-radius:9999px;
+  font-size:12px;font-weight:500;color:var(--secondary);
+  cursor:pointer;display:none;align-items:center;gap:6px;
+  transition:opacity .2s,background .15s
+}
+#zoom-reset:hover{background:#fff;color:var(--core)}
+#zoom-reset.visible{display:flex}
+
+/* ── Left glass panel — overlaid on spatial canvas ── */
+#left{
+  position:absolute;left:0;top:0;bottom:0;width:460px;
+  z-index:10;
+  /* Glass background that fades at the right edge */
+  background:linear-gradient(
+    to right,
+    rgba(249,253,255,.9) 0%,
+    rgba(249,253,255,.88) 72%,
+    rgba(249,253,255,.5) 88%,
+    rgba(249,253,255,0) 100%
+  );
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  /* Ensure no hard right border */
+  overflow:visible;
+  /* Pointer events only for actual content */
+  pointer-events:none
+}
+/* Content inside left panel has pointer events */
+#left-home,#left-detail{pointer-events:auto}
+
+#left-home,#left-detail{
+  position:absolute;inset:0;
+  padding:48px 48px 40px;
+  display:flex;flex-direction:column;
+  max-width:420px; /* content doesn't reach the faded edge */
+  transition:opacity .3s ease,transform .3s ease
+}
+#left-detail{overflow-y:auto;padding-right:44px}
+
+/* Left panel states */
+#proto[data-left="home"] #left-home{opacity:1;transform:translateX(0);pointer-events:auto}
+#proto[data-left="home"] #left-detail{opacity:0;transform:translateX(24px);pointer-events:none}
+#proto[data-left="detail"] #left-home{opacity:0;transform:translateX(-24px);pointer-events:none}
+#proto[data-left="detail"] #left-detail{opacity:1;transform:translateX(0);pointer-events:auto}
+
+/* ── Home: title & subtitle ── */
+.page-title{
+  font-size:42px;font-weight:700;color:var(--core);
+  line-height:1.1;letter-spacing:-1.5px;margin-bottom:14px;
+  text-shadow:0 2px 12px rgba(17,29,74,.06)
+}
+.page-title .grad{
+  background:linear-gradient(to right,#0cc5ff,#8f5cf1);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;display:inline
+}
+.page-sub{
+  font-size:14px;color:var(--secondary);line-height:1.6;
+  margin-bottom:36px;max-width:300px;letter-spacing:.01em
+}
+
+/* ── Auth visibility ── */
+.anon-only{display:flex}
+.si-only{display:none}
+#proto[data-auth="signedin"] .anon-only{display:none!important}
+#proto[data-auth="signedin"] .si-only{display:flex!important}
+
+/* ── CTA bundle ── */
+.cta-bundle{flex-direction:column;gap:10px;max-width:280px}
+.btn-primary-lg{
+  height:48px;padding:0 24px;
+  background:linear-gradient(135deg,#007fff,#6050f0);
+  color:#fff;border:none;border-radius:12px;
+  font-size:15px;font-weight:600;cursor:pointer;
+  transition:opacity .15s,transform .1s;letter-spacing:-.1px
+}
+.btn-primary-lg:hover{opacity:.9}
+.btn-primary-lg:active{transform:scale(.98)}
+.btn-outline-lg{
+  height:48px;padding:0 24px;background:rgba(255,255,255,.7);
+  color:var(--core);
+  border:1.5px solid rgba(17,29,74,.12);
+  border-radius:12px;font-size:15px;font-weight:500;cursor:pointer;
+  transition:background .15s,border-color .15s;backdrop-filter:blur(8px)
+}
+.btn-outline-lg:hover{background:rgba(255,255,255,.9);border-color:rgba(17,29,74,.2)}
+
+/* ── Card rail ── */
+.card-rail{flex-direction:column;flex:1;min-height:0}
+.rail-label{
+  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;
+  color:rgba(17,29,74,.35);margin-bottom:12px
+}
+.card-track{
+  display:flex;flex-direction:column;gap:10px;
+  overflow-y:auto;padding-bottom:8px;
+  scrollbar-width:none;-ms-overflow-style:none
+}
+.card-track::-webkit-scrollbar{display:none}
+.rail-card{
+  flex-shrink:0;width:100%;max-width:300px;
+  border-radius:14px;padding:16px 18px;
+  cursor:pointer;position:relative;
+  transition:transform .15s,box-shadow .15s;
+  background:rgba(255,255,255,.75);
+  border:1px solid rgba(17,29,74,.07);
+  backdrop-filter:blur(12px);
+}
+.rail-card:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(17,29,74,.08)}
+.rail-card.campaign{
+  background:linear-gradient(135deg,rgba(0,127,255,.08),rgba(123,97,255,.06));
+  border-color:rgba(0,127,255,.12)
+}
+.rail-card.action{
+  background:linear-gradient(135deg,rgba(0,200,120,.06),rgba(0,127,255,.05));
+  border-color:rgba(0,180,100,.12)
+}
+.rc-row{display:flex;align-items:center;gap:10px}
+.rc-icon{
+  width:36px;height:36px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0
+}
+.rc-icon.camp{background:rgba(0,127,255,.1)}
+.rc-icon.coll{background:rgba(17,29,74,.06)}
+.rc-icon.act{background:rgba(0,180,100,.1)}
+.rc-text{flex:1}
+.rc-title{font-size:13px;font-weight:600;color:var(--core);line-height:1.35}
+.rc-sub{font-size:11px;color:var(--secondary);margin-top:2px;line-height:1.35}
+.rc-arrow{color:rgba(17,29,74,.3);flex-shrink:0}
+
+/* ── Detail: back & header ── */
+.back-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:transparent;border:none;font-size:13px;font-weight:500;
+  color:var(--secondary);cursor:pointer;padding:0;margin-bottom:24px;
+  transition:color .15s;pointer-events:auto
+}
+.back-btn:hover{color:var(--core)}
+.coll-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(0,127,255,.08);color:#006ce0;
+  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;
+  padding:4px 10px;border-radius:20px;margin-bottom:14px;width:fit-content
+}
+.coll-name{
+  font-size:26px;font-weight:700;color:var(--core);
+  letter-spacing:-.7px;line-height:1.15;margin-bottom:8px
+}
+.coll-desc{font-size:13px;color:var(--secondary);line-height:1.55;margin-bottom:24px;max-width:320px}
+
+/* ── Token list ── */
+.token-row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 10px;margin:0 -10px;border-radius:8px;cursor:pointer;
+  border-bottom:1px solid rgba(17,29,74,.05);transition:background .1s
+}
+.token-row:last-child{border-bottom:none}
+.token-row:hover{background:rgba(17,29,74,.03)}
+.tok-icon{
+  width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;flex-shrink:0
+}
+.tok-name{font-size:14px;font-weight:600;color:var(--core)}
+.tok-sym{font-size:11px;color:var(--secondary);margin-top:1px}
+.tok-right{margin-left:auto;text-align:right}
+.tok-price{font-size:13px;font-weight:600;color:var(--core)}
+.tok-chg{font-size:11px;margin-top:2px}
+.tok-chg.pos{color:#16A34A}
+.tok-chg.neg{color:#DC2626}
+
+/* ── Detail CTAs ── */
+.detail-ctas{display:flex;gap:8px;margin-top:20px;flex-shrink:0;max-width:320px}
+.det-btn{
+  flex:1;height:36px;border:1.5px solid rgba(17,29,74,.1);background:rgba(255,255,255,.7);
+  border-radius:8px;font-size:12px;font-weight:500;color:var(--core);cursor:pointer;
+  transition:background .15s,border-color .15s;backdrop-filter:blur(8px)
+}
+.det-btn:hover{background:rgba(255,255,255,.9);border-color:rgba(17,29,74,.18)}
+.det-btn.prim{
+  background:linear-gradient(135deg,#007fff,#6050f0);
+  color:#fff;border-color:transparent
+}
+.det-btn.prim:hover{opacity:.9}
+
+/* ── View toggle ── */
+.view-toggle{
+  position:fixed;top:72px;right:16px;z-index:1001;
+  display:flex;gap:3px;padding:4px;border-radius:10px;
+  background:rgba(255,255,255,.8);backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--border);
+  transition:background .3s,border-color .3s
+}
+.tgl{
+  width:32px;height:32px;border:none;background:transparent;border-radius:7px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(17,29,74,.4);transition:background .15s,color .15s
+}
+.tgl.active{background:rgba(17,29,74,.08);color:var(--core)}
+.tgl:not(.active):hover{background:rgba(17,29,74,.05);color:var(--core)}
+
+/* In list view — toggle adapts */
+.view-toggle.list-mode{background:rgba(255,255,255,.95);border-color:rgba(17,29,74,.1)}
+
+/* ── List view ── */
+#list-view{
+  position:fixed;
+  left:0;right:0;top:60px;bottom:0;
+  background:#F8F8FA;
+  overflow-y:auto;padding:24px 28px;
+  transition:opacity .3s ease;z-index:900;
+  opacity:0;pointer-events:none;
+  border-left:1px solid rgba(17,29,74,.07)
+}
+#list-view.visible{opacity:1;pointer-events:all}
+
+.lv-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:14px;border-bottom:1px solid rgba(17,29,74,.08);margin-bottom:12px
+}
+.lv-title{font-size:15px;font-weight:600;color:var(--core)}
+.lv-count{font-size:13px;color:var(--secondary)}
+.lv-table{width:100%;border-collapse:separate;border-spacing:0 8px}
+.lv-table thead th{
+  text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.07em;color:rgba(17,29,74,.35);padding:4px 12px
+}
+.lv-table thead th:last-child{text-align:right}
+.lv-row{
+  background:rgba(255,255,255,.85);border-radius:12px;cursor:pointer;
+  transition:transform .15s,box-shadow .15s,background .15s
+}
+.lv-row.selected{background:#fff;box-shadow:0 0 0 1.5px rgba(0,127,255,.3),0 4px 16px rgba(0,127,255,.08)}
+.lv-row:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 16px rgba(17,29,74,.06);
+  background:#fff
+}
+.lv-row td{padding:13px 12px;font-size:14px;color:var(--core)}
+.lv-row td:first-child{border-radius:12px 0 0 12px}
+.lv-row td:last-child{border-radius:0 12px 12px 0;text-align:right}
+.lv-info{display:flex;align-items:center;gap:12px}
+.lv-icon{
+  width:38px;height:38px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0
+}
+.lv-cname{font-weight:600;font-size:14px;color:var(--core)}
+.lv-ctok{font-size:11px;color:var(--secondary);margin-top:2px}
+.lv-chg{font-size:14px;font-weight:600}
+.lv-chg.pos{color:#16A34A}
+.lv-chg.neg{color:#DC2626}
+.lv-open{
+  display:inline-flex;align-items:center;gap:4px;
+  height:28px;padding:0 12px;
+  background:transparent;border:1.5px solid rgba(17,29,74,.1);border-radius:7px;
+  font-size:11px;font-weight:500;color:var(--secondary);cursor:pointer;
+  transition:background .15s,border-color .15s
+}
+.lv-open:hover{background:rgba(17,29,74,.04);border-color:rgba(17,29,74,.18);color:var(--core)}
+
+/* ── Spatial header label ── */
+.sp-header{
+  position:absolute;top:24px;left:480px;z-index:1;pointer-events:none;
+  transition:opacity .3s
+}
+#proto[data-view="list"] .sp-header{opacity:0}
+.sp-title{font-size:13px;font-weight:500;color:rgba(17,29,74,.45);letter-spacing:.01em}
+
+/* ── Hint tooltip ── */
+.sp-hint{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  z-index:1;pointer-events:none;
+  font-size:12px;color:rgba(17,29,74,.35);letter-spacing:.02em;
+  display:flex;align-items:center;gap:6px;
+  transition:opacity .5s
+}
+.sp-hint.hidden{opacity:0}
+</style>
+</head>
+<body>
+<nav id="nav">
+  <!-- imToken wave logo (exact SVG from web.token.im) -->
+  <div class="nav-logo">
+    <svg viewBox="0 0 24 18" fill="none" xmlns="http://www.w3.org/2000/svg" width="32" height="22">
+      <path d="M23.9376 1.2256C24.7291 11.7803 17.8385 16.7693 11.6608 17.301C5.91766 17.7963 0.511572 14.3218 0.0372375 8.9831C-0.353781 4.57269 2.41459 2.69414 4.59028 2.50734C6.82751 2.31383 8.70781 3.83315 8.87065 5.67242C9.02782 7.4408 7.90684 8.24548 7.12764 8.31253C6.51129 8.36618 5.73588 7.99737 5.66582 7.2061C5.60617 6.52595 5.86843 6.43399 5.80405 5.71169C5.69043 4.42612 4.55146 4.27668 3.92848 4.32937C3.1739 4.39451 1.80487 5.26145 1.99706 7.42068C2.1902 9.59907 4.31098 11.3195 7.09166 11.0801C10.092 10.8224 12.1815 8.52137 12.3387 5.29498C12.3368 5.12509 12.3735 4.95615 12.4449 4.80142C12.4795 4.72677 12.5171 4.66315 12.5593 4.60143C12.6231 4.50741 12.7037 4.40399 12.8084 4.29115C12.8907 4.20004 12.9844 4.10712 13.0895 4.00749C14.3998 2.78994 19.1204 -0.0820066 23.5854 0.827091C23.6801 0.847208 23.7653 0.896063 23.8288 0.96791C23.8922 1.03976 23.9301 1.12885 23.9376 1.22368V1.2256Z" fill="currentColor"/>
+    </svg>
+  </div>
+
+  <div class="nav-right">
+    <!-- Search -->
+    <button class="nav-icon-btn" title="Search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+    </button>
+    <!-- Settings -->
+    <button class="nav-icon-btn" title="Settings">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+    <div class="nav-sep"></div>
+    <button class="nav-signin" id="signInBtn">Sign in</button>
+    <button class="nav-create" id="createBtn">Create account</button>
+  </div>
+</nav>
+<div id="scale-wrapper">
+<div id="proto" data-auth="anonymous" data-view="spatial" data-left="home">
+
+<!-- ── Main ── -->
+<div id="main">
+
+  <!-- Full-width spatial canvas (z-index: 0, behind everything) -->
+  <div id="spatial-canvas">
+    <div id="bubble-container"></div>
+
+    <!-- Spatial header label (shown in right area) -->
+    <div class="sp-header">
+      <div class="sp-title">8 collections · drag to explore</div>
+    </div>
+
+    <!-- Hint -->
+    <div class="sp-hint" id="spHint">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l4-4 4 4M9 5v14M15 15l4 4 4-4M19 19V5"/></svg>
+      Drag to pan · Scroll to zoom
+    </div>
+  </div>
+
+  <!-- Zoom reset -->
+  <button id="zoom-reset">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3H3v7h18V3zM21 14H3v7h18v-7z"/></svg>
+    Reset view
+  </button>
+
+  <!-- Left glass panel -->
+  <div id="left">
+
+    <!-- Home state -->
+    <div id="left-home">
+      <h1 class="page-title">Home of <span class="grad">Tokens</span></h1>
+      <p class="page-sub">Browse any token collection from your browser — no wallet, no friction.</p>
+
+      <!-- Anonymous CTAs -->
+      <div class="cta-bundle anon-only">
+        <button class="btn-primary-lg" id="createBtnLeft">Create account</button>
+        <button class="btn-outline-lg" id="signInBtnLeft">Sign in</button>
+      </div>
+
+      <!-- Signed-in card rail -->
+      <div class="card-rail si-only">
+        <div class="rail-label">For you</div>
+        <div class="card-track">
+          <div class="rail-card campaign">
+            <div class="rc-row">
+              <div class="rc-icon camp">🔥</div>
+              <div class="rc-text">
+                <div class="rc-title">DeFi Summer 2026 is live</div>
+                <div class="rc-sub">12% avg returns · 124 tokens</div>
+              </div>
+              <svg class="rc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="rail-card">
+            <div class="rc-row">
+              <div class="rc-icon coll">💎</div>
+              <div class="rc-text">
+                <div class="rc-title">DeFi Blue Chips</div>
+                <div class="rc-sub">18 curated tokens · Trending</div>
+              </div>
+              <svg class="rc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="rail-card action">
+            <div class="rc-row">
+              <div class="rc-icon act">🔗</div>
+              <div class="rc-text">
+                <div class="rc-title">Send by Link</div>
+                <div class="rc-sub">Share without wallet addresses</div>
+              </div>
+              <svg class="rc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Collection detail state -->
+    <div id="left-detail">
+      <button class="back-btn" id="backBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Collections
+      </button>
+      <div class="coll-badge" id="collBadge">★ Campaign</div>
+      <div class="coll-name" id="collName">DeFi Summer 2026</div>
+      <div class="coll-desc" id="collDesc">The hottest DeFi protocols this season — curated for yield seekers.</div>
+      <div id="tokenList"></div>
+      <div class="detail-ctas">
+        <button class="det-btn">Share</button>
+        <button class="det-btn">Copy</button>
+        <button class="det-btn prim">Modify</button>
+      </div>
+    </div>
+
+  </div><!-- /left -->
+
+
+</div><!-- /main -->
+</div><!-- /proto -->
+</div><!-- /scale-wrapper -->
+
+<!-- View toggle — fixed outside scale wrapper, always at top-right of right rail -->
+<div class="view-toggle">
+  <button class="tgl active" data-v="spatial" title="Spatial view">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="2.5"/>
+      <circle cx="4.5" cy="4.5" r="2"/><circle cx="19.5" cy="4.5" r="2"/>
+      <circle cx="19.5" cy="19.5" r="2"/><circle cx="4.5" cy="19.5" r="2"/>
+    </svg>
+  </button>
+  <button class="tgl" data-v="list" title="List view">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+      <line x1="8" y1="18" x2="21" y2="18"/>
+      <circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/>
+    </svg>
+  </button>
+</div>
+
+<!-- List view — fixed outside scale wrapper, fills viewport below nav -->
+<div id="list-view">
+  <div class="lv-header">
+    <div class="lv-title">Token Collections</div>
+    <div class="lv-count">8 collections</div>
+  </div>
+  <table class="lv-table">
+    <thead><tr>
+      <th>Collection</th><th>Tokens</th><th>Avg 24h</th><th></th>
+    </tr></thead>
+    <tbody id="list-tbody"></tbody>
+  </table>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────
+// Positions are in a 1440×836 coordinate space (full viewport below nav)
+const COLLECTIONS = [
+  {
+    name:"DeFi Summer 2026", cx:780, cy:440, r:130,
+    campaign:true, tokens:124,
+    lightBg:"rgba(0,127,255,.07)", lightBorder:"rgba(0,127,255,.18)",
+    dots:["#007fff","#7b61ff","#00c888"],
+    avgChange:"+9.4%", pos:true,
+    desc:"The hottest DeFi protocols this season — curated for yield seekers.",
+    emoji:"🌊"
+  },
+  {
+    name:"DeFi Blue Chips", cx:200, cy:340, r:82,
+    tokens:18,
+    lightBg:"rgba(29,78,216,.05)", lightBorder:"rgba(29,78,216,.12)",
+    avgChange:"+4.2%", pos:true,
+    desc:"Established DeFi leaders with deep liquidity and strong fundamentals.",
+    emoji:"💎"
+  },
+  {
+    name:"GameFi", cx:1140, cy:255, r:68,
+    tokens:16,
+    lightBg:"rgba(180,83,9,.05)", lightBorder:"rgba(180,83,9,.12)",
+    avgChange:"+7.1%", pos:true,
+    desc:"Gaming tokens and metaverse assets riding the play-to-earn wave.",
+    emoji:"🎮"
+  },
+  {
+    name:"AI Tokens", cx:1290, cy:470, r:58,
+    tokens:12,
+    lightBg:"rgba(6,182,212,.05)", lightBorder:"rgba(6,182,212,.14)",
+    avgChange:"+15.3%", pos:true,
+    desc:"AI and machine learning protocol tokens leading the next cycle.",
+    emoji:"🤖"
+  },
+  {
+    name:"Base Ecosystem", cx:95, cy:580, r:60,
+    tokens:16,
+    lightBg:"rgba(37,99,235,.05)", lightBorder:"rgba(37,99,235,.12)",
+    avgChange:"+2.8%", pos:true,
+    desc:"Protocols and tokens native to the Base L2 ecosystem.",
+    emoji:"🔵"
+  },
+  {
+    name:"Yield Stablecoins", cx:510, cy:205, r:55,
+    tokens:6,
+    lightBg:"rgba(5,150,105,.05)", lightBorder:"rgba(5,150,105,.12)",
+    avgChange:"+0.3%", pos:true,
+    desc:"Yield-bearing stablecoin strategies across major DeFi protocols.",
+    emoji:"💰"
+  },
+  {
+    name:"Layer 2 Leaders", cx:990, cy:620, r:58,
+    tokens:10,
+    lightBg:"rgba(109,40,217,.05)", lightBorder:"rgba(109,40,217,.12)",
+    avgChange:"-1.4%", pos:false,
+    desc:"The leading Layer 2 scaling solutions and their native tokens.",
+    emoji:"⚡"
+  },
+  {
+    name:"Real World Assets", cx:640, cy:690, r:50,
+    tokens:7,
+    lightBg:"rgba(194,65,12,.05)", lightBorder:"rgba(194,65,12,.12)",
+    avgChange:"+3.6%", pos:true,
+    desc:"Tokenized real-world assets bringing traditional finance on-chain.",
+    emoji:"🏦"
+  }
+];
+
+const TOKENS = [
+  {name:"Uniswap",  sym:"UNI",  price:"$7.82",  chg:"+12.3%",pos:true, color:"#FF4592"},
+  {name:"Aave",     sym:"AAVE", price:"$104.20",chg:"+8.7%", pos:true, color:"#8A45F0"},
+  {name:"Maker",    sym:"MKR",  price:"$2,840",  chg:"+5.2%", pos:true, color:"#4DB89A"},
+  {name:"Curve",    sym:"CRV",  price:"$0.64",   chg:"-2.1%", pos:false,color:"#F09020"},
+  {name:"Compound", sym:"COMP", price:"$51.30",  chg:"+3.8%", pos:true, color:"#27B768"},
+];
+
+// ── State ─────────────────────────────────────────────────────────────────
+const proto = document.getElementById('proto');
+let selectedIdx = null;
+let panX=0, panY=0, zoom=1;
+let isDragging=false, dragStartX=0, dragStartY=0, dragStartPanX=0, dragStartPanY=0;
+let hintDismissed=false;
+
+function setState(obj){
+  Object.entries(obj).forEach(([k,v]) => proto.dataset[k]=v);
+}
+
+// ── Scale ─────────────────────────────────────────────────────────────────
+function scaleProto(){
+  const NAV_H = 60;
+  const sw = document.getElementById('scale-wrapper');
+  const s = Math.max(window.innerWidth / 1440, (window.innerHeight - NAV_H) / 836);
+  sw.style.transform = `scale(${s})`;
+  document.getElementById('list-view').style.left = Math.round(460 * s) + 'px';
+}
+window.addEventListener('resize', scaleProto);
+scaleProto();
+
+// ── Bubbles ───────────────────────────────────────────────────────────────
+function buildBubbles(){
+  const bc = document.getElementById('bubble-container');
+  bc.innerHTML='';
+  COLLECTIONS.forEach((c,i)=>{
+    const el = document.createElement('div');
+    el.className='bubble'+(c.campaign?' campaign':'');
+    el.dataset.i=i;
+
+    el.style.left = c.cx+'px';
+    el.style.top  = c.cy+'px';
+    el.style.width  = (c.r*2)+'px';
+    el.style.height = (c.r*2)+'px';
+    if(c.lightBg)    el.style.background    = c.lightBg;
+    if(c.lightBorder) el.style.borderColor  = c.lightBorder;
+
+    const nm=document.createElement('div');
+    nm.className='bub-name';
+    nm.style.fontSize = Math.max(9,Math.min(13,c.r*.12))+'px';
+    nm.textContent=c.name;
+    el.appendChild(nm);
+
+    const ct=document.createElement('div');
+    ct.className='bub-count';
+    ct.style.fontSize = Math.max(8,Math.min(11,c.r*.09))+'px';
+    ct.textContent=c.tokens+' tokens';
+    el.appendChild(ct);
+
+    if(c.dots){
+      const dw=document.createElement('div');
+      dw.className='bub-dots';
+      const ds=Math.max(5,c.r*.065);
+      c.dots.forEach(dc=>{
+        const d=document.createElement('div');
+        d.className='bub-dot';
+        d.style.cssText=`width:${ds}px;height:${ds}px;background:${dc};opacity:.7`;
+        dw.appendChild(d);
+      });
+      el.appendChild(dw);
+    }
+
+    // Only allow clicking bubbles in right area (left panel content handles its own area)
+    el.addEventListener('click', (e)=>{
+      // Bubbles under the left panel aren't interactive (panel content is on top)
+      selectCollection(i);
+    });
+
+    bc.appendChild(el);
+  });
+  applyTransform(false);
+  updateBubbleState();
+}
+
+// ── Pan + Zoom ────────────────────────────────────────────────────────────
+const LEFT_PANEL_W = 460;
+
+function applyTransform(animated){
+  const bc = document.getElementById('bubble-container');
+  bc.style.transition = animated ? 'transform .4s cubic-bezier(.22,1,.36,1)' : 'none';
+  bc.style.transform = `translate(${panX}px,${panY}px) scale(${zoom})`;
+  // Show/hide reset button
+  const isDirty = Math.abs(panX)>5 || Math.abs(panY)>5 || Math.abs(zoom-1)>.02;
+  document.getElementById('zoom-reset').classList.toggle('visible', isDirty);
+}
+
+const canvas = document.getElementById('spatial-canvas');
+
+canvas.addEventListener('mousedown',(e)=>{
+  if(e.target.closest('#left')) return;
+  if(e.button!==0) return;
+  isDragging=true;
+  dragStartX=e.clientX; dragStartY=e.clientY;
+  dragStartPanX=panX; dragStartPanY=panY;
+  canvas.classList.add('dragging');
+  dismissHint();
+});
+
+window.addEventListener('mousemove',(e)=>{
+  if(!isDragging) return;
+  panX = dragStartPanX + (e.clientX-dragStartX);
+  panY = dragStartPanY + (e.clientY-dragStartY);
+  applyTransform(false);
+});
+
+window.addEventListener('mouseup',()=>{
+  isDragging=false;
+  canvas.classList.remove('dragging');
+});
+
+canvas.addEventListener('wheel',(e)=>{
+  if(e.target.closest('#left')) return;
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  // Scale from actual screen coords to proto coords (accounting for scale-wrapper transform)
+  const scaleRatio = 1440/window.innerWidth;
+  const mouseX = (e.clientX - rect.left) * scaleRatio;
+  const mouseY = (e.clientY - rect.top)  * scaleRatio;
+  const factor = e.deltaY < 0 ? 1.1 : 0.909;
+  const newZoom = Math.min(Math.max(zoom*factor, 0.25), 4);
+  // Zoom centered on cursor
+  panX = mouseX - (mouseX - panX) * (newZoom/zoom);
+  panY = mouseY - (mouseY - panY) * (newZoom/zoom);
+  zoom = newZoom;
+  applyTransform(false);
+  dismissHint();
+},{passive:false});
+
+// Double-click to reset
+canvas.addEventListener('dblclick',(e)=>{
+  if(e.target.closest('#left')) return;
+  resetView();
+});
+
+document.getElementById('zoom-reset').addEventListener('click', resetView);
+
+function resetView(){
+  panX=0; panY=0; zoom=1;
+  applyTransform(true);
+}
+
+// ── Hint dismiss ──────────────────────────────────────────────────────────
+function dismissHint(){
+  if(hintDismissed) return;
+  hintDismissed=true;
+  document.getElementById('spHint').classList.add('hidden');
+}
+
+// Auto-dismiss hint after 4s
+setTimeout(dismissHint, 4000);
+
+// ── Bubble selection ──────────────────────────────────────────────────────
+function updateBubbleState(){
+  document.querySelectorAll('.bubble').forEach(b=>{
+    const i=parseInt(b.dataset.i);
+    b.classList.remove('selected','dimmed');
+    if(selectedIdx!==null){
+      if(i===selectedIdx) b.classList.add('selected');
+      else b.classList.add('dimmed');
+    }
+  });
+}
+
+function updateListState(){
+  document.querySelectorAll('.lv-row').forEach(row=>{
+    row.classList.toggle('selected', parseInt(row.dataset.i)===selectedIdx);
+  });
+}
+
+function selectCollection(i){
+  selectedIdx=i;
+  const c=COLLECTIONS[i];
+  document.getElementById('collBadge').style.display = c.campaign?'':'none';
+  document.getElementById('collName').textContent=c.name;
+  document.getElementById('collDesc').textContent=c.desc;
+  document.getElementById('tokenList').innerHTML=TOKENS.map(t=>`
+    <div class="token-row">
+      <div class="tok-icon" style="background:${t.color}">${t.sym[0]}</div>
+      <div>
+        <div class="tok-name">${t.name}</div>
+        <div class="tok-sym">${t.sym}</div>
+      </div>
+      <div class="tok-right">
+        <div class="tok-price">${t.price}</div>
+        <div class="tok-chg ${t.pos?'pos':'neg'}">${t.chg}</div>
+      </div>
+    </div>`).join('');
+  updateBubbleState();
+  updateListState();
+  setState({left:'detail'});
+}
+
+// ── List view ─────────────────────────────────────────────────────────────
+function buildList(){
+  document.getElementById('list-tbody').innerHTML=COLLECTIONS.map((c,i)=>`
+    <tr class="lv-row" data-i="${i}">
+      <td>
+        <div class="lv-info">
+          <div class="lv-icon" style="background:${c.lightBg||'rgba(17,29,74,.05)'}">${c.emoji}</div>
+          <div>
+            <div class="lv-cname">${c.name}</div>
+            <div class="lv-ctok">${c.tokens} tokens${c.campaign?' · Campaign':''}</div>
+          </div>
+        </div>
+      </td>
+      <td style="color:rgba(17,29,74,.6);font-weight:500">${c.tokens}</td>
+      <td><span class="lv-chg ${c.pos?'pos':'neg'}">${c.avgChange}</span></td>
+      <td><button class="lv-open">View</button></td>
+    </tr>`).join('');
+  document.querySelectorAll('.lv-row').forEach(row=>{
+    row.addEventListener('click',()=>selectCollection(parseInt(row.dataset.i)));
+  });
+}
+
+// ── Events ────────────────────────────────────────────────────────────────
+[document.getElementById('createBtn'), document.getElementById('createBtnLeft')]
+  .forEach(b=>b.addEventListener('click',()=>setState({auth:'signedin'})));
+[document.getElementById('signInBtn'), document.getElementById('signInBtnLeft')]
+  .forEach(b=>b.addEventListener('click',()=>setState({auth:'signedin'})));
+
+document.getElementById('backBtn').addEventListener('click',()=>{
+  selectedIdx=null;
+  updateBubbleState();
+  updateListState();
+  setState({left:'home'});
+});
+
+document.querySelectorAll('.tgl').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const v=btn.dataset.v;
+    setState({view:v});
+    document.querySelectorAll('.tgl').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const lv = document.getElementById('list-view');
+    const vt = document.querySelector('.view-toggle');
+    const sc = document.getElementById('spatial-canvas');
+    const isList = v === 'list';
+    lv.classList.toggle('visible', isList);
+    vt.classList.toggle('list-mode', isList);
+    sc.style.visibility = isList ? 'hidden' : '';
+    dismissHint();
+  });
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────
+buildList();
+buildBubbles();
+</script>
+</body>
+</html>

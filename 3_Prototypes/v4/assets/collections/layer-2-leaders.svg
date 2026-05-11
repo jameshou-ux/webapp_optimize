@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-labelledby="title desc">
+  <title id="title">Layer 2 Leaders collection icon</title>
+  <desc id="desc">Generated collection badge for Layer 2 Leaders.</desc>
+  <defs>
+    <linearGradient id="bg" x1="16" y1="12" x2="72" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#64bbf4"/>
+      <stop offset=".56" stop-color="#6d28d9"/>
+      <stop offset="1" stop-color="#531ea5"/>
+    </linearGradient>
+    <filter id="shadow" x="-12" y="-10" width="112" height="112" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#531ea5" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <rect x="9" y="9" width="70" height="70" rx="18" fill="url(#bg)" filter="url(#shadow)"/>
+  <circle cx="28" cy="24" r="22" fill="#fff" opacity=".15"/>
+  <g color="#531ea5"><path d="M24 56 44 20l20 36H24Z" fill="#fff"/><path d="M34 56 44 38l10 18H34Z" fill="currentColor" opacity=".22"/><path d="M27 66h34" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".78"/></g>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-labelledby="title desc">
+  <title id="title">Optimism token icon</title>
+  <desc id="desc">Generated token badge for OP.</desc>
+  <defs>
+    <linearGradient id="bg" x1="16" y1="12" x2="72" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff596c"/>
+      <stop offset=".54" stop-color="#FF0420"/>
+      <stop offset="1" stop-color="#c20318"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="24" y1="20" x2="62" y2="62" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".68"/>
+    </linearGradient>
+    <filter id="shadow" x="-12" y="-10" width="112" height="112" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#c20318" flood-opacity=".25"/>
+    </filter>
+  </defs>
+  <circle cx="44" cy="44" r="38" fill="url(#bg)" filter="url(#shadow)"/>
+  <circle cx="31" cy="25" r="24" fill="#fff" opacity=".16"/>
+  <g color="#c20318"><path d="M23 44c0-9 6-15 16-15h10c10 0 16 6 16 15s-6 15-16 15H39c-10 0-16-6-16-15Z" fill="#fff"/><path d="M35 44h18" stroke="currentColor" stroke-width="5" stroke-linecap="round" opacity=".24"/></g>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-labelledby="title desc">
+  <title id="title">Base Ecosystem collection icon</title>
+  <desc id="desc">Generated collection badge for Base Ecosystem.</desc>
+  <defs>
+    <linearGradient id="bg" x1="16" y1="12" x2="72" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8dbefb"/>
+      <stop offset=".56" stop-color="#0052ff"/>
+      <stop offset="1" stop-color="#003ec2"/>
+    </linearGradient>
+    <filter id="shadow" x="-12" y="-10" width="112" height="112" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#003ec2" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <rect x="9" y="9" width="70" height="70" rx="18" fill="url(#bg)" filter="url(#shadow)"/>
+  <circle cx="28" cy="24" r="22" fill="#fff" opacity=".15"/>
+  <g color="#003ec2"><circle cx="44" cy="44" r="24" fill="none" stroke="#fff" stroke-width="8"/><path d="M44 20c13 0 24 11 24 24H44V20Z" fill="#fff" opacity=".9"/></g>
+</svg>

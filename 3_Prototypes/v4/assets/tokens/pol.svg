@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-labelledby="title desc">
+  <title id="title">Polygon token icon</title>
+  <desc id="desc">Generated token badge for POL.</desc>
+  <defs>
+    <linearGradient id="bg" x1="16" y1="12" x2="72" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ad86ee"/>
+      <stop offset=".54" stop-color="#8247E5"/>
+      <stop offset="1" stop-color="#6336ae"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="24" y1="20" x2="62" y2="62" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".68"/>
+    </linearGradient>
+    <filter id="shadow" x="-12" y="-10" width="112" height="112" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#6336ae" flood-opacity=".25"/>
+    </filter>
+  </defs>
+  <circle cx="44" cy="44" r="38" fill="url(#bg)" filter="url(#shadow)"/>
+  <circle cx="31" cy="25" r="24" fill="#fff" opacity=".16"/>
+  <g color="#6336ae"><path d="m24 35 14-8 14 8v18l-14 8-14-8V35Z" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round"/><path d="m50 35 14-8 14 8v18l-14 8-14-8" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round" opacity=".72"/></g>
+</svg>

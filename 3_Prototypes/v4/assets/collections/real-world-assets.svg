@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-labelledby="title desc">
+  <title id="title">Real World Assets collection icon</title>
+  <desc id="desc">Generated collection badge for Real World Assets.</desc>
+  <defs>
+    <linearGradient id="bg" x1="16" y1="12" x2="72" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5a85e5"/>
+      <stop offset=".56" stop-color="#c2410c"/>
+      <stop offset="1" stop-color="#933109"/>
+    </linearGradient>
+    <filter id="shadow" x="-12" y="-10" width="112" height="112" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#933109" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <rect x="9" y="9" width="70" height="70" rx="18" fill="url(#bg)" filter="url(#shadow)"/>
+  <circle cx="28" cy="24" r="22" fill="#fff" opacity=".15"/>
+  <g color="#933109"><path d="M44 19 66 32H22L44 19Z" fill="#fff"/><path d="M27 37h34M31 37v20M44 37v20M57 37v20M25 62h38" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M31 37v20M44 37v20M57 37v20" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".22"/></g>
+</svg>

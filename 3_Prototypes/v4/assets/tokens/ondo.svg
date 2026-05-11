@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-labelledby="title desc">
+  <title id="title">Ondo Finance token icon</title>
+  <desc id="desc">Generated token badge for ONDO.</desc>
+  <defs>
+    <linearGradient id="bg" x1="16" y1="12" x2="72" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#688fe7"/>
+      <stop offset=".54" stop-color="#1A56DB"/>
+      <stop offset="1" stop-color="#1441a6"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="24" y1="20" x2="62" y2="62" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".68"/>
+    </linearGradient>
+    <filter id="shadow" x="-12" y="-10" width="112" height="112" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#1441a6" flood-opacity=".25"/>
+    </filter>
+  </defs>
+  <circle cx="44" cy="44" r="38" fill="url(#bg)" filter="url(#shadow)"/>
+  <circle cx="31" cy="25" r="24" fill="#fff" opacity=".16"/>
+  <g color="#1441a6"><text x="44" y="50" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800" fill="#fff">ONDO</text></g>
+</svg>

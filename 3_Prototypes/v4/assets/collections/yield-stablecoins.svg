@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-labelledby="title desc">
+  <title id="title">Yield Stablecoins collection icon</title>
+  <desc id="desc">Generated collection badge for Yield Stablecoins.</desc>
+  <defs>
+    <linearGradient id="bg" x1="16" y1="12" x2="72" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f8c36f"/>
+      <stop offset=".56" stop-color="#059669"/>
+      <stop offset="1" stop-color="#047250"/>
+    </linearGradient>
+    <filter id="shadow" x="-12" y="-10" width="112" height="112" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#047250" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <rect x="9" y="9" width="70" height="70" rx="18" fill="url(#bg)" filter="url(#shadow)"/>
+  <circle cx="28" cy="24" r="22" fill="#fff" opacity=".15"/>
+  <g color="#047250"><circle cx="44" cy="44" r="24" fill="#fff"/><path d="M44 28v32M34 36c0-5 5-8 11-8 5 0 9 2 11 5M54 52c0 5-5 8-11 8-5 0-9-2-11-5" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" opacity=".26"/></g>
+</svg>
