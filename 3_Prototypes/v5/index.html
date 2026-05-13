@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>imToken Web V5 — Unsigned Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* ── Linear-inspired light design tokens ── */
+
+  /* Backgrounds — neutral light stacking model */
+  --bg-page:#f7f8f8;
+  --bg-panel:#ffffff;
+  --bg-surface:#f3f4f5;
+  --bg-hover:#e9ecef;
+
+  /* Cards — solid light surfaces with subtle hover */
+  --card-bg:#ffffff;
+  --card-bg-hover:#f5f6f7;
+  --card-bg-active:#eef0f2;
+
+  /* Text hierarchy */
+  --text-primary:#0f172a;
+  --text-secondary:#334155;
+  --text-muted:#64748b;
+  --text-subtle:#94a3b8;
+
+  /* Brand accent — the only chromatic color */
+  --accent:#5e6ad2;
+  --accent-bright:#7170ff;
+  --accent-hover:#828fff;
+  --accent-subtle:rgba(113,112,255,0.08);
+  --accent-subtle-hover:rgba(113,112,255,0.14);
+
+  /* Status */
+  --green:#27a644;
+  --red:#f04438;
+
+  /* Borders — cool gray lines */
+  --border:#d0d6e0;
+  --border-subtle:#e6e6e6;
+  --border-strong:#b8c0cc;
+
+  /* Spacing — 8px grid */
+  --sp-4:4px;--sp-8:8px;--sp-12:12px;--sp-16:16px;--sp-20:20px;
+  --sp-24:24px;--sp-32:32px;--sp-40:40px;--sp-48:48px;--sp-64:64px;
+
+  /* Radius — Linear scale */
+  --r-micro:2px;--r-sm:4px;--r-md:6px;--r-lg:8px;--r-xl:12px;--r-full:9999px;
+
+  /* Typography — Inter Variable with OpenType features */
+  --font:'Inter Variable','Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-features:"cv01","ss03";
+
+  /* Dimensions */
+  --nav-height:68px;
+  --panel-width:760px;
+  --page-max:1200px;
+  --page-gutter:32px;
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);
+  font-feature-settings:var(--font-features);
+  background:var(--bg-page);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  color:var(--text-primary);
+  min-height:100vh;
+}
+svg{display:block}
+button{font-family:var(--font);font-feature-settings:var(--font-features)}
+
+/* ── NAV ── */
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:2000;
+  height:var(--nav-height);
+  background:#fff;
+  border-bottom:1px solid #e6e6e6;
+}
+.nav-shell{
+  height:100%;
+  max-width:1200px;
+  margin:0 auto;
+  padding:0 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+.nav-logo{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:22px;flex-shrink:0;color:var(--text-primary);
+  cursor:pointer;transition:opacity .15s;
+}
+.nav-logo:hover{opacity:.7}
+.nav-logo img{width:32px;height:22px;display:block}
+.nav-right{
+  display:flex;align-items:center;gap:20px;
+  font-family:'Noto Sans',var(--font);
+}
+.nav-icon-btn{
+  width:24px;height:24px;border:none;background:transparent;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:#b0b7c3;transition:opacity .15s,color .15s;
+  flex-shrink:0;
+}
+.nav-icon-btn:hover{color:#8490a4}
+.nav-icon-btn img{width:24px;height:24px;display:block}
+.nav-sep{width:1px;height:18px;background:#e6e6e6}
+.nav-signin{
+  height:44px;min-width:144px;padding:0 16px;background:#fff;
+  border:1px solid #ecedf0;border-radius:9999px;
+  font-family:'Noto Sans',var(--font);
+  font-size:14px;font-weight:500;line-height:1.4;color:#111d4a;
+  cursor:pointer;transition:background .15s,border-color .15s,color .15s;
+}
+.nav-signin:hover{background:rgba(17,29,74,0.04);border-color:#d0d2db}
+.nav-create{
+  height:44px;min-width:144px;padding:0 16px;background:#fff;
+  border:1px solid #007fff;border-radius:9999px;
+  font-family:'Noto Sans',var(--font);
+  font-size:14px;font-weight:400;color:#111d4a;cursor:pointer;
+  transition:background .15s,border-color .15s;white-space:nowrap;
+}
+.nav-create:hover{background:rgba(0,127,255,0.04);border-color:#1f86ff}
+
+/* ── PAGE SHELL ── */
+#dashboard{padding-top:calc(var(--nav-height) + 40px);padding-bottom:80px;min-height:100vh}
+.page-container{max-width:var(--page-max);margin:0 auto;padding:0 var(--page-gutter)}
+
+/* ── SECTION LAYOUT ── */
+.dashboard-section{margin-bottom:var(--sp-48)}
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:var(--sp-20);
+}
+.section-title{
+  font-size:20px;font-weight:590;color:var(--text-primary);
+  line-height:1.3;letter-spacing:-0.24px;
+}
+.section-action{
+  height:32px;padding:0 10px;background:var(--card-bg);
+  border:1px solid var(--border);border-radius:var(--r-full);
+  font-size:12px;font-weight:510;color:var(--text-muted);cursor:pointer;
+  display:flex;align-items:center;gap:var(--sp-4);
+  transition:background .15s,border-color .15s,color .15s;
+}
+.section-action:hover{background:var(--card-bg-hover);border-color:var(--border-strong);color:var(--text-secondary)}
+
+/* ── HORIZONTAL SCROLL RAIL ── */
+.scroll-rail{
+  display:flex;gap:var(--sp-12);overflow-x:auto;scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  padding-bottom:var(--sp-4);
+}
+.scroll-rail::-webkit-scrollbar{display:none}
+.scroll-rail > *{scroll-snap-align:start;flex-shrink:0}
+
+/* ── TRENDING TOKEN CARD ── */
+.trending-card{
+  flex:0 0 calc((100% - 24px) / 3);min-width:320px;min-height:236px;background:var(--card-bg);
+  border:1px solid var(--border);border-radius:var(--r-xl);
+  display:flex;overflow:hidden;transition:background .2s,border-color .2s,box-shadow .2s;
+}
+.trending-card:hover{background:var(--card-bg-hover);border-color:var(--border-strong);box-shadow:0 8px 24px rgba(15,23,42,.06)}
+.tc-left{
+  flex:0 0 164px;padding:var(--sp-20);background:transparent;border:none;
+  display:flex;flex-direction:column;align-items:flex-start;gap:var(--sp-8);
+  cursor:pointer;border-right:1px solid var(--border-subtle);transition:background .15s;
+}
+.tc-left-spacer{flex:1}
+.tc-meta{display:flex;align-items:center;gap:var(--sp-8)}
+.tc-left:hover{background:transparent}
+.tc-left .token-icon{border:1px solid rgba(15,23,42,.08)}
+.tc-left:focus-visible{outline:2px solid var(--accent-bright);outline-offset:-2px}
+.token-icon{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:590;font-feature-settings:var(--font-features);
+  color:#fff;flex-shrink:0;
+}
+.tc-token-name{font-size:15px;font-weight:590;color:var(--text-primary);line-height:1.3;letter-spacing:-0.165px}
+.tc-token-sym{font-size:12px;color:var(--text-muted)}
+.tc-change{font-size:12px;font-weight:510;margin-top:2px}
+.tc-change.pos{color:var(--green)}
+.tc-change.neg{color:var(--red)}
+.tc-right{flex:1;display:flex;flex-direction:column;border-left:1px solid var(--border-subtle);overflow:hidden}
+.tc-coll-item{
+  flex:1;padding:var(--sp-12) var(--sp-16);background:transparent;border:none;text-align:left;
+  display:flex;flex-direction:column;gap:5px;cursor:pointer;transition:background .15s;min-height:0;
+  border-bottom:1px solid var(--border-subtle);font-family:var(--font);font-feature-settings:var(--font-features);
+}
+.tc-coll-item:last-child{border-bottom:none}
+.tc-coll-item:hover{background:var(--accent-subtle)}
+.tc-coll-item:focus-visible{outline:2px solid var(--accent-bright);outline-offset:-2px}
+.tc-ci-header{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-8)}
+.tc-ci-name{font-size:12px;font-weight:590;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-ci-arrow{color:var(--text-subtle);flex-shrink:0;transition:transform .15s,color .15s}
+.tc-coll-item:hover .tc-ci-arrow{transform:translateX(2px);color:var(--accent-bright)}
+.tc-ci-desc{font-size:11px;color:var(--text-muted);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.collection-rect{
+  flex:1;padding:var(--sp-12) var(--sp-16);background:transparent;
+  display:flex;align-items:center;justify-content:space-between;gap:var(--sp-8);
+  cursor:pointer;transition:background .15s;min-height:0;
+  border-bottom:1px solid var(--border-subtle);
+}
+.collection-rect:last-child{border-bottom:none}
+.collection-rect:hover{background:var(--accent-subtle)}
+.collection-rect:focus-visible{outline:2px solid var(--accent-bright);outline-offset:-2px}
+.cr-body{flex:1;min-width:0}
+.cr-name{font-size:12px;font-weight:590;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr-desc{font-size:11px;color:var(--text-muted);margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.4}
+.cr-arrow{color:var(--text-subtle);flex-shrink:0;transition:transform .15s,color .15s}
+.collection-rect:hover .cr-arrow{transform:translateX(2px);color:var(--accent-bright)}
+
+/* ── RECOMMENDATION CARD ── */
+.rec-card{
+  flex:0 0 calc((100% - 24px) / 3);min-width:280px;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r-xl);
+  padding:var(--sp-20);display:flex;flex-direction:column;gap:var(--sp-16);
+  transition:background .2s,border-color .2s;
+}
+.rec-card:hover{background:var(--card-bg-hover);border-color:var(--border-strong)}
+.rc-title{font-size:15px;font-weight:590;color:var(--text-primary);line-height:1.3;letter-spacing:-0.165px}
+.rc-desc{font-size:13px;color:var(--text-muted);line-height:1.5;letter-spacing:-0.13px;margin-top:2px}
+.rc-groups{display:flex;flex-direction:column;gap:var(--sp-8)}
+.collection-group{
+  padding:var(--sp-12);background:var(--bg-surface);border:1px solid var(--border-subtle);
+  border-radius:var(--r-lg);display:flex;align-items:center;gap:var(--sp-12);
+  cursor:pointer;transition:background .15s,border-color .15s;
+}
+.collection-group:hover{background:var(--accent-subtle);border-color:rgba(113,112,255,0.2)}
+.collection-group:focus-visible{outline:2px solid var(--accent-bright);outline-offset:-2px}
+.cg-icons{display:flex;flex-direction:row-reverse;flex-shrink:0;margin-left:auto}
+.cg-icons .token-icon{width:22px;height:22px;font-size:7px;margin-left:-5px;border:1.5px solid var(--bg-surface)}
+.cg-icons .token-icon:last-child{margin-left:0}
+.cg-body{flex:1;min-width:0;text-align:left}
+.cg-name{font-size:12px;font-weight:590;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cg-meta{font-size:11px;color:var(--text-muted);margin-top:2px}
+.cg-arrow{color:var(--text-subtle);flex-shrink:0;transition:transform .15s,color .15s}
+.collection-group:hover .cg-arrow{transform:translateX(2px);color:var(--accent-bright)}
+
+/* ── ALL COLLECTIONS LIST ── */
+.collections-list{
+  background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r-xl);
+  overflow:hidden;
+}
+.coll-list-header{
+  display:grid;grid-template-columns:2fr 80px 90px 90px 44px;gap:var(--sp-16);align-items:center;
+  padding:var(--sp-12) var(--sp-20);border-bottom:1px solid var(--border-subtle);background:var(--bg-panel);
+}
+.coll-list-header span{font-size:11px;font-weight:510;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.06em}
+.coll-list-header span:last-child{text-align:right}
+.coll-row{
+  display:grid;grid-template-columns:2fr 80px 90px 90px 44px;gap:var(--sp-16);align-items:center;
+  padding:var(--sp-16) var(--sp-20);border-bottom:1px solid var(--border-subtle);
+  cursor:pointer;transition:background .15s;
+}
+.coll-row:last-child{border-bottom:none}
+.coll-row:hover{background:var(--card-bg-hover)}
+.coll-row:focus-visible{outline:2px solid var(--accent-bright);outline-offset:-2px;z-index:1;position:relative}
+.cr-coll-identity{display:flex;align-items:center;gap:var(--sp-12);min-width:0}
+.coll-icon{
+  width:40px;height:40px;border-radius:var(--r-lg);background:var(--bg-surface);
+  flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border-subtle);
+}
+.coll-icon img{width:100%;height:100%;object-fit:cover}
+.cr-coll-info{min-width:0}
+.coll-row-name{font-size:14px;font-weight:510;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.coll-row-desc{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.coll-row-tokens{font-size:13px;color:var(--text-muted);font-weight:510}
+.coll-row-icons{display:flex;flex-direction:row-reverse}
+.coll-row-icons .token-icon{width:20px;height:20px;font-size:6px;margin-left:-4px;border:1.5px solid var(--bg-page)}
+.coll-row-icons .token-icon:last-child{margin-left:0}
+.coll-row-change{font-size:13px;font-weight:510}
+.coll-row-change.pos{color:var(--green)}
+.coll-row-change.neg{color:var(--red)}
+.coll-row-view{display:flex;align-items:center;justify-content:flex-end}
+.view-arrow{
+  width:28px;height:28px;border-radius:var(--r-md);background:var(--card-bg);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;color:var(--text-subtle);cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.coll-row:hover .view-arrow{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ── PANEL BACKDROP ── */
+#panel-backdrop{position:fixed;inset:0;z-index:2900;background:rgba(0,0,0,0.85);opacity:0;pointer-events:none;transition:opacity .3s ease}
+#panel-backdrop.visible{opacity:1;pointer-events:all}
+
+/* ── COLLECTION DETAIL PANEL ── */
+#collection-panel{
+  position:fixed;top:0;right:0;bottom:0;z-index:3000;width:var(--panel-width);
+  background:var(--bg-panel);border-left:1px solid var(--border);
+  box-shadow:-12px 0 40px rgba(15,23,42,0.08);display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .35s cubic-bezier(0.25,0,0.1,1);overflow:hidden;
+}
+#collection-panel.open{transform:translateX(0)}
+#collection-panel:focus{outline:none}
+.panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:var(--sp-16) var(--sp-20);border-bottom:1px solid var(--border-subtle);
+  flex-shrink:0;min-height:var(--nav-height);background:var(--bg-panel);z-index:1;
+}
+.panel-close{
+  width:32px;height:32px;background:var(--card-bg);border:1px solid var(--border);
+  border-radius:var(--r-md);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);transition:background .15s,color .15s;
+}
+.panel-close:hover{background:var(--card-bg-hover);color:var(--text-primary)}
+.panel-breadcrumb{font-size:12px;color:var(--text-subtle);font-weight:510;letter-spacing:-0.13px}
+.panel-body{flex:1;display:flex;overflow:hidden}
+
+.panel-left{width:340px;flex-shrink:0;border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;overflow:hidden}
+.panel-left-scroll{flex:1;overflow-y:auto;padding-bottom:88px}
+.panel-left-scroll::-webkit-scrollbar{width:3px}
+.panel-left-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+.panel-cover{width:100%;height:160px;background:var(--bg-surface);overflow:hidden;flex-shrink:0}
+.panel-cover img{width:100%;height:100%;object-fit:cover}
+
+.panel-collection-info{padding:var(--sp-20);display:flex;flex-direction:column;gap:var(--sp-12)}
+.panel-coll-name{font-size:20px;font-weight:590;color:var(--text-primary);line-height:1.3;letter-spacing:-0.24px}
+.panel-coll-desc{font-size:14px;color:var(--text-secondary);line-height:1.5;letter-spacing:-0.182px}
+
+.panel-meta{display:flex;flex-direction:column;gap:var(--sp-8);padding:var(--sp-16) var(--sp-20);border-top:1px solid var(--border-subtle)}
+.panel-meta-label{font-size:11px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.06em;font-weight:510;margin-bottom:var(--sp-4)}
+.meta-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;letter-spacing:-0.13px}
+.meta-row .ml{color:var(--text-muted)}
+.meta-row .mv{color:var(--text-secondary);font-weight:510}
+
+.panel-related{padding:var(--sp-16) var(--sp-20);border-top:1px solid var(--border-subtle)}
+.panel-related-title{font-size:11px;font-weight:510;color:var(--text-subtle);margin-bottom:var(--sp-12);text-transform:uppercase;letter-spacing:.06em}
+.related-list{display:flex;flex-direction:column;gap:var(--sp-8)}
+.related-row{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--sp-8);
+  padding:var(--sp-8) var(--sp-12);border-radius:var(--r-lg);cursor:pointer;
+  border:1px solid transparent;transition:background .15s,border-color .15s;background:transparent;
+}
+.related-row:hover{background:var(--accent-subtle);border-color:rgba(113,112,255,0.12)}
+.related-row:focus-visible{outline:2px solid var(--accent-bright);outline-offset:-2px}
+.rr-name{font-size:13px;font-weight:510;color:var(--text-secondary);letter-spacing:-0.13px}
+.rr-meta{font-size:11px;color:var(--text-muted);margin-top:1px}
+.rr-arrow{color:var(--text-subtle);transition:transform .15s,color .15s}
+.related-row:hover .rr-arrow{transform:translateX(2px);color:var(--accent-bright)}
+
+.panel-cta{
+  position:absolute;bottom:0;left:0;width:340px;
+  padding:var(--sp-16) var(--sp-20);background:var(--bg-panel);
+  border-top:1px solid var(--border-subtle);display:flex;gap:var(--sp-8);
+}
+.cta-btn{
+  flex:1;height:44px;border-radius:9999px;font-size:14px;font-weight:500;
+  cursor:pointer;transition:background .15s,border-color .15s,filter .15s;
+  font-family:var(--font);font-feature-settings:var(--font-features);
+}
+.cta-copy{
+  background:radial-gradient(ellipse at 75% 25%, rgba(12,197,255,0.85) 0%, #007FFF 100%);
+  border:1px solid rgba(255,255,255,0.5);color:#fff;font-size:16px;font-weight:400;
+}
+.cta-copy:hover{filter:brightness(1.08)}
+.cta-edit{background:transparent;border:1px solid #ECEDF0;color:#111D4A}
+.cta-edit:hover{background:rgba(17,29,74,0.04);border-color:#D0D2DB}
+.cta-delete{background:transparent;border:1px solid #ECEDF0;color:var(--red)}
+.cta-delete:hover{background:rgba(243,99,111,0.08);border-color:rgba(243,99,111,0.4)}
+
+.panel-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.panel-tokens-header{
+  padding:var(--sp-16) var(--sp-20);border-bottom:1px solid var(--border-subtle);flex-shrink:0;
+  display:flex;flex-direction:column;gap:4px;
+}
+.panel-tokens-title{font-size:15px;font-weight:590;color:var(--text-primary);letter-spacing:-0.165px}
+.panel-token-intro{font-size:13px;color:var(--text-muted);line-height:1.45;letter-spacing:-0.13px}
+.panel-tokens-list{flex:1;overflow-y:auto}
+.panel-tokens-list::-webkit-scrollbar{width:3px}
+.panel-tokens-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+.token-row{
+  display:flex;align-items:center;gap:var(--sp-16);padding:var(--sp-16) var(--sp-20);
+  border-bottom:1px solid var(--border-subtle);cursor:pointer;transition:background .15s;
+  min-height:128px;
+}
+.token-row:last-child{border-bottom:none}
+.token-row:hover{background:var(--card-bg-hover)}
+.token-row:focus-visible{outline:2px solid var(--accent-bright);outline-offset:-2px;z-index:1;position:relative}
+.panel-tokens-list .token-icon{
+  width:96px;height:96px;border-radius:18px;
+  font-size:24px;
+}
+.tr-info{flex:1;min-width:0}
+.tr-name{font-size:14px;font-weight:510;color:var(--text-primary);letter-spacing:-0.182px}
+.tr-full{font-size:11px;color:var(--text-muted);margin-top:2px}
+.tr-price-block{text-align:right}
+.tr-price{font-size:14px;font-weight:510;color:var(--text-primary);letter-spacing:-0.182px}
+.tr-change{font-size:11px;font-weight:510;margin-top:2px}
+.tr-change.pos{color:var(--green)}
+.tr-change.neg{color:var(--red)}
+.tr-arrow{
+  width:26px;height:26px;border-radius:var(--r-sm);background:var(--card-bg);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;color:var(--text-subtle);cursor:pointer;flex-shrink:0;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.token-row:hover .tr-arrow{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ── PASSKEY MODAL ── */
+#passkey-modal{
+  position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s ease;
+}
+#passkey-modal.open{opacity:1;pointer-events:all}
+.passkey-sheet{
+  background:var(--bg-panel);border:1px solid var(--border);border-radius:22px;
+  padding:36px 28px;width:100%;max-width:420px;position:relative;
+  transform:translateY(16px) scale(0.97);transition:transform .35s cubic-bezier(0.34,1.56,0.64,1);
+}
+#passkey-modal.open .passkey-sheet{transform:translateY(0) scale(1)}
+.passkey-close{
+  position:absolute;top:16px;right:16px;width:30px;height:30px;
+  border:1px solid var(--border);background:var(--card-bg);border-radius:50%;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);transition:background .15s,color .15s;
+}
+.passkey-close:hover{background:var(--card-bg-hover);color:var(--text-primary)}
+.passkey-orb-wrap{display:flex;justify-content:center;margin-bottom:20px}
+.passkey-orb{
+  width:72px;height:72px;border-radius:50%;
+  background:linear-gradient(140deg,#4755d4 0%,#5e6ad2 55%,#7170ff 100%);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 12px rgba(94,106,210,0.10),0 0 32px rgba(113,112,255,0.25);
+  position:relative;overflow:hidden;
+}
+.fingerprint-svg{width:40px;height:40px;fill:none;stroke:rgba(255,255,255,.7);stroke-width:1.5;stroke-linecap:round}
+.passkey-copy{text-align:center;margin-bottom:20px}
+.passkey-eyebrow{font-size:11px;font-weight:510;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-bright);margin-bottom:6px}
+.passkey-title{font-size:17px;font-weight:590;color:var(--text-primary);letter-spacing:-0.165px;margin-bottom:8px}
+.passkey-sub{font-size:14px;color:var(--text-muted);line-height:1.5;letter-spacing:-0.182px}
+.passkey-device{
+  display:flex;align-items:center;gap:12px;background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:12px 16px;margin-bottom:16px;
+}
+.device-icon{
+  width:36px;height:36px;border-radius:var(--r-lg);background:var(--card-bg);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;color:var(--text-secondary);
+}
+.device-title{font-size:14px;font-weight:510;color:var(--text-primary);letter-spacing:-0.182px}
+.device-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.passkey-action{
+  width:100%;height:44px;background:var(--accent);border:none;border-radius:var(--r-md);
+  font-size:15px;font-weight:510;color:#fff;cursor:pointer;
+  font-family:var(--font);font-feature-settings:var(--font-features);
+  transition:background .15s;letter-spacing:-0.165px;
+}
+.passkey-action:hover:not(:disabled){background:var(--accent-hover)}
+.passkey-action:disabled{opacity:.5;cursor:default}
+
+/* ── HOME + PROMO SPLIT ROW ── */
+.home-promo-row{
+  display:grid;grid-template-columns:65fr 35fr;gap:var(--sp-16);
+  min-height:280px;margin-bottom:var(--sp-48);
+}
+.home-card{
+  position:relative;border-radius:var(--r-xl);overflow:hidden;
+  border:none;background:var(--bg-panel);
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:var(--sp-32);gap:var(--sp-32);
+  transition:border-color .2s,box-shadow .2s;
+  isolation:isolate;
+}
+.home-card::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,0.98) 0%,rgba(255,255,255,0.96) 60%,rgba(245,247,255,0.92) 100%),
+    radial-gradient(ellipse 90% 70% at 85% 10%,rgba(113,112,255,0.08) 0%,transparent 60%);
+}
+.home-card > *{position:relative;z-index:1}
+.home-card:hover{border-color:var(--border-strong);box-shadow:0 12px 30px rgba(15,23,42,.06)}
+.home-card-title{
+  font-size:48px;font-weight:700;color:var(--text-primary);
+  line-height:1.05;letter-spacing:-1.2px;
+}
+.home-card-slogan{
+  font-size:14px;color:var(--text-secondary);line-height:1.6;
+  letter-spacing:-0.14px;margin-top:var(--sp-12);max-width:36ch;
+}
+.home-card-ctas{display:flex;gap:var(--sp-8);flex-wrap:wrap}
+.home-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  height:44px;padding:0 16px;
+  background:transparent;border:1px solid #ECEDF0;border-radius:9999px;
+  font-size:14px;font-weight:500;color:#111D4A;cursor:pointer;
+  font-family:var(--font);font-feature-settings:var(--font-features);
+  transition:background .15s,border-color .15s,color .15s;
+}
+.home-cta:hover{background:rgba(17,29,74,0.04);border-color:#D0D2DB}
+.home-cta.primary{
+  background:radial-gradient(ellipse at 75% 25%, rgba(12,197,255,0.85) 0%, #007FFF 100%);
+  border:1px solid rgba(255,255,255,0.5);
+  color:#fff;font-weight:400;font-size:14px;
+}
+.home-cta.primary:hover{filter:brightness(1.08)}
+
+/* Promo card */
+.promo-card{
+  position:relative;border-radius:var(--r-xl);overflow:hidden;
+  border:1px solid var(--border);
+  display:block;width:100%;padding:0;cursor:pointer;text-align:left;
+  font-family:var(--font);font-feature-settings:var(--font-features);
+  transition:border-color .2s,box-shadow .2s;
+}
+.promo-card:hover{border-color:var(--border-strong);box-shadow:0 12px 30px rgba(15,23,42,.08)}
+.promo-card:focus-visible{outline:2px solid var(--accent-bright);outline-offset:2px}
+.promo-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 110% 80% at 85% 115%,rgba(113,112,255,0.20) 0%,rgba(94,106,210,0.10) 40%,transparent 68%),
+    radial-gradient(ellipse 70% 60% at 15% 10%,rgba(122,127,173,0.16) 0%,transparent 55%),
+    linear-gradient(135deg,#ffffff 0%,#f5f7ff 55%,#eef2ff 100%);
+  transition:transform .45s ease;
+}
+.promo-bg-img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;opacity:1;mix-blend-mode:normal;
+}
+.promo-card:hover .promo-bg{transform:scale(1.03)}
+.promo-content{
+  position:relative;z-index:1;
+  padding:8px;min-height:280px;
+  display:flex;flex-direction:column;justify-content:space-between;
+}
+.promo-content > div{
+  width:100%;
+  max-width:none;
+  align-self:flex-start;
+  background:rgba(255,255,255,0.22);
+  border:1px solid rgba(208,214,224,0.72);
+  border-radius:18px;
+  padding:16px;
+  box-shadow:0 10px 28px rgba(15,23,42,.08);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.promo-eyebrow{
+  display:inline-flex;align-items:center;gap:5px;align-self:flex-start;
+  height:22px;padding:0 10px;
+  background:rgba(255,255,255,0.88);border:1px solid rgba(208,214,224,0.9);border-radius:var(--r-full);
+  font-size:10px;font-weight:510;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-muted);
+}
+.promo-title{
+  font-size:20px;font-weight:590;color:var(--text-primary);
+  line-height:1.3;letter-spacing:-0.24px;
+  display:block;width:100%;
+  margin:0 0 16px;
+  box-sizing:border-box;
+  max-width:none;
+  text-shadow:0 1px 0 rgba(255,255,255,.65);
+}
+.promo-collection-card{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--sp-16);
+  width:100%;padding:8px;
+  border:1px solid rgba(208,214,224,0.9);
+  border-radius:14px;background:rgba(255,255,255,0.58);
+  box-shadow:0 6px 18px rgba(15,23,42,.05);
+}
+.promo-collection-body{display:flex;align-items:center;gap:12px;min-width:0}
+.promo-collection-icons{display:flex;flex-direction:row-reverse;flex-shrink:0}
+.promo-collection-icons .token-icon{
+  width:24px;height:24px;font-size:7px;margin-left:-5px;border:1.5px solid #f7f8f8;
+}
+.promo-collection-icons .token-icon:last-child{margin-left:0}
+.promo-collection-info{min-width:0}
+.promo-collection-name{
+  font-size:13px;font-weight:590;color:var(--text-primary);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.promo-collection-meta{
+  font-size:11px;color:var(--text-muted);margin-top:2px;
+}
+
+@media(max-width:900px){
+  .home-promo-row{grid-template-columns:1fr;min-height:0;margin-bottom:var(--sp-32)}
+  .home-card-title{font-size:26px;letter-spacing:-0.572px}
+  .promo-title{font-size:20px;letter-spacing:-0.24px}
+  .promo-content{min-height:220px;padding:var(--sp-24)}
+  .home-card{padding:var(--sp-24)}
+}
+@media(max-width:600px){
+  .home-card-title{font-size:22px;letter-spacing:-0.484px}
+  .promo-title{font-size:20px;letter-spacing:-0.24px}
+  .home-cta{height:40px;padding:0 14px;font-size:13px}
+  .home-cta.primary{font-size:13px}
+  .promo-collection-card{padding:10px 12px}
+}
+
+/* ── SKELETON ── */
+.skeleton{
+  background:linear-gradient(90deg,var(--bg-surface) 25%,var(--bg-hover) 50%,var(--bg-surface) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--r-sm);
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── FOCUS ── */
+:focus-visible{outline:2px solid var(--accent-bright);outline-offset:2px}
+
+/* ── RESPONSIVE ── */
+
+/* Large desktop: reduce panel when viewport < 1280px */
+@media(max-width:1280px){
+  :root{--panel-width:680px}
+  .panel-left{width:280px}
+  .panel-cta{width:280px}
+}
+
+/* Laptop: further reduce panel */
+@media(max-width:1024px){
+  :root{--panel-width:560px}
+  .panel-left{width:220px}
+  .panel-cta{width:220px}
+  .coll-list-header,.coll-row{grid-template-columns:2fr 70px 80px 44px}
+  .coll-list-header span:nth-child(4),.coll-row > *:nth-child(4){display:none}
+}
+
+/* Medium: panel full-width, gutter down, stack panel body */
+@media(max-width:900px){
+  :root{--panel-width:100vw;--page-gutter:24px}
+  .panel-body{flex-direction:column}
+  .panel-left{width:100%;max-height:50vh;border-right:none;border-bottom:1px solid var(--border-subtle)}
+  .panel-cta{width:100%;position:sticky;bottom:0}
+  .coll-list-header,.coll-row{grid-template-columns:2fr 60px 44px}
+  .coll-list-header span:nth-child(3),.coll-row > *:nth-child(3),
+  .coll-list-header span:nth-child(4),.coll-row > *:nth-child(4){display:none}
+}
+
+/* Small / narrow: single-column table, tighter min-width */
+@media(max-width:600px){
+  :root{--page-gutter:16px}
+  .trending-card{min-width:280px}
+  .rec-card{min-width:260px}
+  .section-title{font-size:17px;letter-spacing:-0.16px}
+  .coll-list-header,.coll-row{grid-template-columns:1fr 44px}
+  .coll-list-header span:nth-child(2),.coll-list-header span:nth-child(3),
+  .coll-row > *:nth-child(2),.coll-row > *:nth-child(3){display:none}
+  .nav-create{padding:0 12px;font-size:14px}
+  .nav-signin{padding:0 12px;font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── SHARED NAV (unsigned state) ── -->
+<nav id="nav" aria-label="Primary navigation">
+  <div class="nav-shell">
+    <a class="nav-logo" href="#" aria-label="imToken home">
+      <img src="https://www.figma.com/api/mcp/asset/a37152cb-026b-4659-85cb-6579cc03fd0a" alt="" aria-hidden="true">
+    </a>
+    <div class="nav-right">
+    <button class="nav-icon-btn" title="Search" aria-label="Search tokens and collections">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="M21 21l-4.35-4.35"></path>
+      </svg>
+    </button>
+    <button class="nav-icon-btn" title="Settings" aria-label="Settings">
+      <img src="https://www.figma.com/api/mcp/asset/8730436a-fabf-4dd9-9346-e3f13b4290fd" alt="" aria-hidden="true">
+    </button>
+    <div class="nav-sep"></div>
+    <button class="nav-signin" id="signInBtn">Sign in</button>
+    <button class="nav-create" id="createBtn">Create account</button>
+  </div>
+  </div>
+</nav>
+
+<!-- ── DASHBOARD ── -->
+<main id="dashboard" role="main">
+
+  <!-- ── SECTION 1: HOME + PROMO ── -->
+  <section id="section-home-promo" aria-label="Home and featured promo">
+    <div class="page-container">
+      <div class="home-promo-row">
+
+        <!-- Left: Curated token collections -->
+        <div class="home-card">
+          <div>
+            <h1 class="home-card-title">Home of Tokens</h1>
+            <p class="home-card-slogan">Digital assets under your control</p>
+          </div>
+          <div class="home-card-ctas">
+            <button class="home-cta primary" id="home-link-btn" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.71"/></svg>
+              Send by link
+            </button>
+            <button class="home-cta" id="home-send-btn" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg>
+              Send token
+            </button>
+            <button class="home-cta" id="home-receive-btn" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v10m0 0l-3-3m3 3l3-3"/><path d="M3 15v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/></svg>
+              Receive
+            </button>
+            <button class="home-cta" id="home-scan-btn" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3m0 4h3m-3-4v7"/></svg>
+              Scan
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Promo card -->
+        <button class="promo-card" id="promo-card-btn" type="button" aria-label="Explore Stock Tokens collection">
+          <div class="promo-bg">
+            <img class="promo-bg-img" src="assets/wall-street-hero.jpg" alt="" loading="lazy" aria-hidden="true">
+          </div>
+          <div class="promo-content">
+            <span class="promo-eyebrow">Featured collection</span>
+            <div>
+              <h2 class="promo-title">Welcome to Wall Street 2.0</h2>
+              <div class="promo-collection-card" aria-label="Stock Tokens collection">
+                <div class="promo-collection-body">
+                  <div class="promo-collection-info">
+                    <div class="promo-collection-name">Stock Tokens</div>
+                    <div class="promo-collection-meta">4 tokens</div>
+                  </div>
+                </div>
+                <div class="promo-collection-icons" aria-hidden="true">
+                  <div class="token-icon" style="background:#A2AAAD">AAP</div>
+                  <div class="token-icon" style="background:#76B900">NVI</div>
+                  <div class="token-icon" style="background:#E82127">TSL</div>
+                  <div class="token-icon" style="background:#4B6BFB">SPY</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="dashboard-section" id="section-trending" aria-labelledby="trending-title">
+    <div class="page-container">
+      <div class="section-header">
+        <h2 class="section-title" id="trending-title">Trending tokens and featured collections</h2>
+      </div>
+      <div class="scroll-rail" id="trending-rail" role="list" aria-label="Trending tokens"></div>
+    </div>
+  </section>
+
+  <section class="dashboard-section" id="section-interested" aria-labelledby="interested-title">
+    <div class="page-container">
+      <div class="section-header">
+        <h2 class="section-title" id="interested-title">Suggested collections</h2>
+      </div>
+      <div class="scroll-rail" id="interested-rail" role="list" aria-label="Recommended collections"></div>
+    </div>
+  </section>
+
+  <section class="dashboard-section" id="section-all-collections" aria-labelledby="allcoll-title">
+    <div class="page-container">
+      <div class="section-header">
+        <h2 class="section-title" id="allcoll-title">All collections</h2>
+        <button class="section-action" id="filter-btn" aria-label="Filter collections">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <line x1="4" y1="6" x2="20" y2="6"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+            <line x1="11" y1="18" x2="13" y2="18"/>
+          </svg>
+          Filter
+        </button>
+      </div>
+      <div class="collections-list" id="all-collections-list" role="list" aria-label="All collections">
+        <div class="coll-list-header" role="row" aria-hidden="true">
+          <span>Collection</span><span>Tokens</span><span>Token icons</span><span>24h avg</span><span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div id="panel-backdrop" aria-hidden="true"></div>
+
+<aside id="collection-panel" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="panel-coll-name" tabindex="-1">
+  <div class="panel-header">
+    <span class="panel-breadcrumb">Collection detail</span>
+    <button class="panel-close" id="panel-close-btn" aria-label="Close collection detail">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="panel-body">
+    <div class="panel-left">
+      <div class="panel-left-scroll">
+        <div class="panel-cover" id="panel-cover"><img id="panel-cover-img" src="" alt="" /></div>
+        <div class="panel-collection-info">
+          <div id="panel-coll-name" class="panel-coll-name"></div>
+          <div id="panel-coll-desc" class="panel-coll-desc"></div>
+        </div>
+        <div class="panel-meta">
+          <div class="panel-meta-label">About</div>
+          <div class="meta-row"><span class="ml">Token number</span><span class="mv" id="panel-token-count">24</span></div>
+          <div class="meta-row"><span class="ml">Created by</span><span class="mv" id="panel-created-by">Preset</span></div>
+          <div class="meta-row"><span class="ml">Theme</span><span class="mv">Bucket</span></div>
+          <div class="meta-row"><span class="ml">Category</span><span class="mv" id="panel-category"></span></div>
+          <div class="meta-row"><span class="ml">Created time</span><span class="mv">July 31, 2025</span></div>
+          <div class="meta-row"><span class="ml">Updated time</span><span class="mv">October 1, 2025</span></div>
+        </div>
+        <div class="panel-related">
+          <div class="panel-related-title">Related collections</div>
+          <div class="related-list" id="panel-related-list"></div>
+        </div>
+      </div>
+      <div class="panel-cta">
+        <button class="cta-btn cta-copy" id="cta-copy-btn">Copy</button>
+        <button class="cta-btn cta-edit" id="cta-edit-btn">Edit</button>
+        <button class="cta-btn cta-delete" id="cta-delete-btn">Delete</button>
+      </div>
+    </div>
+    <div class="panel-right">
+      <div class="panel-tokens-header">
+        <div class="panel-tokens-title" id="panel-tokens-title">All tokens</div>
+        <div class="panel-token-intro">Key token info, recent activity, and actions in one place.</div>
+      </div>
+      <div class="panel-tokens-list" id="panel-tokens-list" role="list" aria-label="Tokens in this collection"></div>
+    </div>
+  </div>
+</aside>
+
+<div id="passkey-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="passkeyTitle">
+  <div class="passkey-sheet">
+    <button class="passkey-close" id="passkeyClose" aria-label="Close">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="passkey-orb-wrap">
+      <div class="passkey-orb">
+        <svg class="fingerprint-svg" viewBox="0 0 72 72" aria-hidden="true">
+          <path d="M20 34c0-9 7-16 16-16s16 7 16 16"/>
+          <path d="M16 43c0-14 9-25 20-25s20 11 20 25"/>
+          <path d="M23 45c0-8 5-14 13-14s13 6 13 14"/>
+          <path d="M29 54c-1-5-1-12 1-15 2-4 10-4 12 0 2 3 2 10 1 15"/>
+          <path d="M36 42c0 10-2 16-7 22"/>
+          <path d="M42 60c3-7 5-14 4-22"/>
+        </svg>
+      </div>
+    </div>
+    <div class="passkey-copy">
+      <div class="passkey-eyebrow" id="passkeyEyebrow">Passkey</div>
+      <h2 class="passkey-title" id="passkeyTitle">Create your account with a passkey</h2>
+      <p class="passkey-sub" id="passkeySub">Use this device to unlock token access without a seed phrase or browser extension.</p>
+    </div>
+    <div class="passkey-device">
+      <div class="device-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="device-title">This device</div>
+        <div class="device-sub">Face ID, Touch ID, or screen lock</div>
+      </div>
+    </div>
+    <button class="passkey-action" id="passkeyAction" disabled aria-live="polite">Scanning fingerprint…</button>
+  </div>
+</div>
+
+<script>
+const COLLECTIONS = [
+  { id:"stock-tokens", name:"Stock Tokens", desc:"Blockchain-based tokens representing traditional equities. They are pegged to the underlying stock price, self-custodied, available 24/7, and designed to lower entry barriers through fractional exposure.", cover:"../v4/assets/collections/real-world-assets.svg", tokens:4, avgChange:"+1.1%", pos:true, category:"Stocks", createdAt:"May 2026", createdBy:"imToken", relatedIds:["defi-protocol-stablecoins","trending-rwas"], tokenData:[
+    {name:"AAPLon",full:"Apple",price:"$198.42",chg:"+1.6%",pos:true,color:"#A2AAAD"},
+    {name:"NVDAon",full:"NVIDIA",price:"$124.80",chg:"+2.4%",pos:true,color:"#76B900"},
+    {name:"TSLAon",full:"Tesla",price:"$178.15",chg:"-0.8%",pos:false,color:"#E82127"},
+    {name:"SPYon",full:"S&P 500 ETF",price:"$512.30",chg:"+0.5%",pos:true,color:"#4B6BFB"}
+  ]},
+  { id:"defi-protocol-stablecoins", name:"DeFi Protocol Stablecoins", desc:"Stablecoins grouped by use case and risk profile. imToken Web describes this collection family as a way to help users choose stablecoins by purpose, safety, and destination.", cover:"../v4/assets/collections/yield-stablecoins.svg", tokens:14, avgChange:"+0.0%", pos:true, category:"Stablecoins", createdAt:"May 2026", createdBy:"imToken", relatedIds:["stock-tokens","trending-rwas"], tokenData:[
+    {name:"USDT",full:"Tether USD",price:"$1.00",chg:"+0.0%",pos:true,color:"#26A17B"},
+    {name:"USDC",full:"USD Coin",price:"$1.00",chg:"+0.0%",pos:true,color:"#2775CA"},
+    {name:"DAI",full:"Dai",price:"$1.00",chg:"+0.1%",pos:true,color:"#F5AC37"},
+    {name:"crvUSD",full:"Curve USD",price:"$1.00",chg:"+0.0%",pos:true,color:"#F09020"},
+    {name:"USDe",full:"Ethena USDe",price:"$1.00",chg:"+0.2%",pos:true,color:"#6B7280"},
+    {name:"TRON-USDT",full:"USDT on Tron",price:"$1.00",chg:"+0.0%",pos:true,color:"#FF060A"},
+    {name:"TUSD",full:"TrueUSD",price:"$1.00",chg:"+0.0%",pos:true,color:"#2C7BE5"},
+    {name:"PYUSD",full:"PayPal USD",price:"$1.00",chg:"+0.0%",pos:true,color:"#00A3E0"},
+    {name:"FDUSD",full:"First Digital USD",price:"$1.00",chg:"+0.0%",pos:true,color:"#1D4ED8"},
+    {name:"USDS",full:"Sky Dollar",price:"$1.03",chg:"+0.2%",pos:true,color:"#0EA5E9"},
+    {name:"USDB",full:"USDB",price:"$1.02",chg:"+0.1%",pos:true,color:"#1E40AF"},
+    {name:"EURC",full:"Euro Coin",price:"$1.09",chg:"+0.1%",pos:true,color:"#0052B4"},
+    {name:"PAXG",full:"Pax Gold",price:"$2,345.20",chg:"+0.3%",pos:true,color:"#D4AF37"},
+    {name:"XAUt",full:"Tether Gold",price:"$2,344.80",chg:"+0.2%",pos:true,color:"#C9A227"}
+  ]},
+  { id:"trending-rwas", name:"Trending RWAs", desc:"Real-world assets onchain, including tokenized equities and other traditional assets. imToken Web positions this as part of its broader token-centric and RWA narrative.", cover:"../v4/assets/collections/real-world-assets.svg", tokens:5, avgChange:"+0.8%", pos:true, category:"RWA", createdAt:"May 2026", createdBy:"imToken", relatedIds:["stock-tokens","defi-protocol-stablecoins"], tokenData:[
+    {name:"AAPLon",full:"Apple exposure",price:"$198.42",chg:"+1.6%",pos:true,color:"#A2AAAD"},
+    {name:"TSLAon",full:"Tesla exposure",price:"$178.15",chg:"-0.8%",pos:false,color:"#E82127"},
+    {name:"NVDAon",full:"NVIDIA exposure",price:"$124.80",chg:"+2.4%",pos:true,color:"#76B900"},
+    {name:"USTB",full:"U.S. Treasury bill token",price:"$100.02",chg:"+0.1%",pos:true,color:"#4B6BFB"},
+    {name:"MMF",full:"Money market fund token",price:"$1.01",chg:"+0.0%",pos:true,color:"#22C55E"}
+  ]},
+  { id:"defi-blue-chips", name:"DeFi Blue Chips", desc:"Established DeFi leaders with deep liquidity, strong fundamentals, and a familiar blue-chip style of token discovery.", cover:"../v4/assets/collections/defi-blue-chips.svg", tokens:18, avgChange:"+4.2%", pos:true, category:"DeFi", createdAt:"May 2026", createdBy:"imToken", relatedIds:["defi-summer-2026","base-ecosystem","defi-protocol-stablecoins"], tokenData:[
+    {name:"UNI",full:"Uniswap",price:"$7.82",chg:"+4.3%",pos:true,color:"#FF4592"},
+    {name:"AAVE",full:"Aave",price:"$104.20",chg:"+8.7%",pos:true,color:"#8A45F0"},
+    {name:"MKR",full:"Maker",price:"$2,840",chg:"+5.2%",pos:true,color:"#4DB89A"},
+    {name:"COMP",full:"Compound",price:"$51.30",chg:"+3.8%",pos:true,color:"#27B768"},
+    {name:"SNX",full:"Synthetix",price:"$2.14",chg:"+1.9%",pos:true,color:"#08BBFF"}
+  ]},
+  { id:"gamefi", name:"GameFi", desc:"Gaming tokens and metaverse assets for users exploring play-to-earn, digital ownership, and interactive onchain economies.", cover:"../v4/assets/collections/gamefi.svg", tokens:16, avgChange:"+7.1%", pos:true, category:"Gaming", createdAt:"May 2026", createdBy:"imToken", relatedIds:["ai-tokens","layer-2-leaders","base-ecosystem"], tokenData:[
+    {name:"AXS",full:"Axie Infinity",price:"$6.42",chg:"+7.1%",pos:true,color:"#26B6D7"},
+    {name:"SAND",full:"The Sandbox",price:"$0.38",chg:"+11.3%",pos:true,color:"#04ADEF"},
+    {name:"ILV",full:"Illuvium",price:"$38.70",chg:"+9.4%",pos:true,color:"#2B60DF"},
+    {name:"GALA",full:"Gala",price:"$0.021",chg:"+4.8%",pos:true,color:"#5E5CE6"},
+    {name:"IMX",full:"Immutable",price:"$1.24",chg:"+6.2%",pos:true,color:"#17B5CB"}
+  ]},
+  { id:"ai-tokens", name:"AI Tokens", desc:"AI and machine learning protocol tokens covering compute, inference, and data-network narratives.", cover:"../v4/assets/collections/ai-tokens.svg", tokens:12, avgChange:"+15.3%", pos:true, category:"AI", createdAt:"May 2026", createdBy:"imToken", relatedIds:["gamefi","defi-blue-chips","layer-2-leaders"], tokenData:[
+    {name:"TAO",full:"Bittensor",price:"$284.40",chg:"+18.2%",pos:true,color:"#333333"},
+    {name:"RNDR",full:"Render",price:"$4.85",chg:"+15.3%",pos:true,color:"#FF4A4A"},
+    {name:"FET",full:"Fetch.ai",price:"$1.32",chg:"+12.7%",pos:true,color:"#1571E2"},
+    {name:"GRT",full:"The Graph",price:"$0.18",chg:"+9.4%",pos:true,color:"#6747ED"},
+    {name:"OCEAN",full:"Ocean Protocol",price:"$0.64",chg:"+8.1%",pos:true,color:"#594DBD"}
+  ]},
+  { id:"base-ecosystem", name:"Base Ecosystem", desc:"Protocols and tokens native to the Base ecosystem, from memecoin discovery to infrastructure plays.", cover:"../v4/assets/collections/base-ecosystem.svg", tokens:16, avgChange:"+2.8%", pos:true, category:"Base", createdAt:"May 2026", createdBy:"imToken", relatedIds:["layer-2-leaders","defi-blue-chips","trending-rwas"], tokenData:[
+    {name:"AERO",full:"Aerodrome",price:"$0.94",chg:"+2.8%",pos:true,color:"#0052FF"},
+    {name:"BRETT",full:"Brett",price:"$0.074",chg:"+6.1%",pos:true,color:"#1652F0"},
+    {name:"VIRTUAL",full:"Virtual Protocol",price:"$1.82",chg:"+14.3%",pos:true,color:"#7C3AED"},
+    {name:"MORPHO",full:"Morpho",price:"$1.47",chg:"+3.9%",pos:true,color:"#2470FF"},
+    {name:"DEGEN",full:"Degen",price:"$0.0062",chg:"-1.2%",pos:false,color:"#9B59B6"}
+  ]},
+  { id:"layer-2-leaders", name:"Layer 2 Leaders", desc:"The leading Layer 2 scaling solutions and native tokens, organized for users comparing throughput and ecosystem depth.", cover:"../v4/assets/collections/layer-2-leaders.svg", tokens:10, avgChange:"-1.4%", pos:false, category:"Scaling", createdAt:"May 2026", createdBy:"imToken", relatedIds:["base-ecosystem","ai-tokens","defi-summer-2026"], tokenData:[
+    {name:"ARB",full:"Arbitrum",price:"$0.44",chg:"-1.4%",pos:false,color:"#28A0F0"},
+    {name:"OP",full:"Optimism",price:"$1.12",chg:"-0.8%",pos:false,color:"#FF0420"},
+    {name:"POL",full:"Polygon",price:"$0.24",chg:"-2.3%",pos:false,color:"#8247E5"},
+    {name:"STRK",full:"Starknet",price:"$0.38",chg:"+0.4%",pos:true,color:"#EC796B"},
+    {name:"METIS",full:"Metis",price:"$28.60",chg:"-1.8%",pos:false,color:"#00D2FF"}
+  ]},
+  { id:"defi-summer-2026", name:"DeFi Summer 2026", desc:"A seasonal basket of high-conviction DeFi names surfacing the current wave of yield, governance, and liquidity activity.", cover:"../v4/assets/collections/defi-summer-2026.svg", tokens:24, avgChange:"+9.4%", pos:true, category:"Seasonal", createdAt:"May 2026", createdBy:"imToken", relatedIds:["defi-blue-chips","ai-tokens","layer-2-leaders"], tokenData:[
+    {name:"PENDLE",full:"Pendle",price:"$3.24",chg:"+22.4%",pos:true,color:"#5468FF"},
+    {name:"AAVE",full:"Aave",price:"$104.20",chg:"+8.7%",pos:true,color:"#8A45F0"},
+    {name:"CRV",full:"Curve",price:"$0.64",chg:"+18.3%",pos:true,color:"#F09020"},
+    {name:"CVX",full:"Convex",price:"$4.11",chg:"+14.6%",pos:true,color:"#3A3A8F"},
+    {name:"LDO",full:"Lido",price:"$1.38",chg:"+9.2%",pos:true,color:"#F7931A"},
+    {name:"FXS",full:"Frax Share",price:"$3.76",chg:"+11.8%",pos:true,color:"#1A1A2E"}
+  ]},
+];
+
+const COLLECTION_MAP = Object.fromEntries(COLLECTIONS.map(c => [c.id, c]));
+const TRENDING_TOKENS = [
+  { name:"Apple", sym:"AAPLon", color:"#A2AAAD", price:"$198.42", chg:"+1.6%", pos:true, collections:["stock-tokens","trending-rwas"] },
+  { name:"USD Coin", sym:"USDC", color:"#2775CA", price:"$1.00", chg:"+0.0%", pos:true, collections:["defi-protocol-stablecoins"] },
+  { name:"NVIDIA", sym:"NVDAon", color:"#76B900", price:"$124.80", chg:"+2.4%", pos:true, collections:["stock-tokens","trending-rwas"] },
+  { name:"U.S. Treasury bill", sym:"USTB", color:"#4B6BFB", price:"$100.02", chg:"+0.1%", pos:true, collections:["trending-rwas","defi-protocol-stablecoins"] },
+];
+const RECOMMENDATIONS = [
+  { title:"Stock exposure", desc:"Tokenized equities and index-style exposure for users who want familiar market names.", collections:["stock-tokens","trending-rwas"] },
+  { title:"Stablecoin rails", desc:"Purpose-built dollar and commodity-linked tokens for transfers, liquidity, and treasury use.", collections:["defi-protocol-stablecoins"] },
+  { title:"RWA watchlist", desc:"A mixed basket of tokenized real-world assets for browsing cash-like and equity-style access.", collections:["trending-rwas","stock-tokens"] },
+];
+
+function tokenIcon(sym, color, size=40, textColor='#fff') {
+  const el = document.createElement('div');
+  el.className = 'token-icon';
+  el.style.cssText = `width:${size}px;height:${size}px;background:${color};font-size:${Math.max(7,size*.26)}px;color:${textColor}`;
+  el.textContent = sym.slice(0,3);
+  el.setAttribute('aria-label', sym);
+  return el;
+}
+function arrowIcon(size=16) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width',size);svg.setAttribute('height',size);
+  svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('fill','none');
+  svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','1.8');
+  svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');
+  svg.setAttribute('aria-hidden','true');
+  svg.innerHTML='<path d="M5 12h14M13 6l6 6-6 6"/>';
+  return svg;
+}
+
+function renderTrendingRail() {
+  const rail = document.getElementById('trending-rail');
+  TRENDING_TOKENS.forEach(token => {
+    const card = document.createElement('div');
+    card.className='trending-card';card.setAttribute('role','listitem');
+    const left = document.createElement('button');
+    left.className='tc-left';left.setAttribute('aria-label',`View ${token.name} token detail`);
+    left.addEventListener('click',()=>handleTokenClick(token));
+    const icon=tokenIcon(token.sym,'transparent',96,token.color);
+    const spacer=document.createElement('div');spacer.className='tc-left-spacer';
+    const nameEl=document.createElement('div');nameEl.className='tc-token-name';nameEl.textContent=token.name;
+    const chgEl=document.createElement('div');chgEl.className=`tc-change ${token.pos?'pos':'neg'}`;chgEl.textContent=`${token.chg} (24h)`;
+    left.append(icon,spacer,nameEl,chgEl);
+    const right=document.createElement('div');right.className='tc-right';
+    token.collections.forEach(collId=>{
+      const coll=COLLECTION_MAP[collId];
+      const item=document.createElement('button');item.className='tc-coll-item';
+      item.setAttribute('aria-label',`Open ${coll.name} collection`);
+      item.dataset.collId=collId;item.addEventListener('click',()=>openPanel(collId));
+      const header=document.createElement('div');header.className='tc-ci-header';
+      const ciName=document.createElement('div');ciName.className='tc-ci-name';ciName.textContent=coll.name;
+      const ciArrow=document.createElement('div');ciArrow.className='tc-ci-arrow';ciArrow.appendChild(arrowIcon(12));
+      header.append(ciName,ciArrow);
+      const ciDesc=document.createElement('div');ciDesc.className='tc-ci-desc';ciDesc.textContent=coll.desc;
+      item.append(header,ciDesc);right.appendChild(item);
+    });
+    card.append(left,right);rail.appendChild(card);
+  });
+}
+
+function renderInterestedRail() {
+  const rail = document.getElementById('interested-rail');
+  RECOMMENDATIONS.forEach(rec => {
+    const card=document.createElement('div');card.className='rec-card';card.setAttribute('role','listitem');
+    const title=document.createElement('div');title.className='rc-title';title.textContent=rec.title;
+    const desc=document.createElement('div');desc.className='rc-desc';desc.textContent=rec.desc;
+    const groups=document.createElement('div');groups.className='rc-groups';
+    rec.collections.forEach(collId=>{
+      const coll=COLLECTION_MAP[collId];
+      const group=document.createElement('button');group.className='collection-group';
+      group.setAttribute('aria-label',`Open ${coll.name} collection`);
+      group.dataset.collId=collId;group.addEventListener('click',()=>openPanel(collId));
+      const iconsWrap=document.createElement('div');iconsWrap.className='cg-icons';
+      coll.tokenData.slice(0,5).reverse().forEach(t=>iconsWrap.appendChild(tokenIcon(t.name,t.color,22)));
+      const body=document.createElement('div');body.className='cg-body';
+      const cgName=document.createElement('div');cgName.className='cg-name';cgName.textContent=coll.name;
+      const cgMeta=document.createElement('div');cgMeta.className='cg-meta';cgMeta.textContent=`${coll.tokens} tokens`;
+      body.append(cgName,cgMeta);
+      const arrow=document.createElement('div');arrow.className='cg-arrow';arrow.appendChild(arrowIcon(13));
+      group.append(body,iconsWrap,arrow);groups.appendChild(group);
+    });
+    card.append(title,desc,groups);rail.appendChild(card);
+  });
+}
+
+function renderAllCollections() {
+  const list = document.getElementById('all-collections-list');
+  COLLECTIONS.forEach(coll => {
+    const row=document.createElement('div');row.className='coll-row';
+    row.setAttribute('role','listitem');row.setAttribute('tabindex','0');
+    row.setAttribute('aria-label',`Open ${coll.name} collection`);row.dataset.collId=coll.id;
+    row.addEventListener('click',()=>openPanel(coll.id));
+    row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openPanel(coll.id);}});
+    const identity=document.createElement('div');identity.className='cr-coll-identity';
+    const iconEl=document.createElement('div');iconEl.className='coll-icon';
+    const img=document.createElement('img');img.src=coll.cover;img.alt='';img.loading='lazy';
+    iconEl.appendChild(img);
+    const info=document.createElement('div');info.className='cr-coll-info';
+    const nm=document.createElement('div');nm.className='coll-row-name';nm.textContent=coll.name;
+    const dc=document.createElement('div');dc.className='coll-row-desc';dc.textContent=coll.desc;
+    info.append(nm,dc);identity.append(iconEl,info);
+    const tokensEl=document.createElement('div');tokensEl.className='coll-row-tokens';tokensEl.textContent=coll.tokens;
+    const iconsEl=document.createElement('div');iconsEl.className='coll-row-icons';
+    coll.tokenData.slice(0,5).reverse().forEach(t=>iconsEl.appendChild(tokenIcon(t.name,t.color,20)));
+    const chgEl=document.createElement('div');chgEl.className=`coll-row-change ${coll.pos?'pos':'neg'}`;chgEl.textContent=coll.avgChange;
+    const viewEl=document.createElement('div');viewEl.className='coll-row-view';
+    const viewArrow=document.createElement('div');viewArrow.className='view-arrow';viewArrow.setAttribute('aria-hidden','true');
+    viewArrow.appendChild(arrowIcon(11));viewEl.appendChild(viewArrow);
+    row.append(identity,tokensEl,iconsEl,chgEl,viewEl);list.appendChild(row);
+  });
+}
+
+let panelOpen=false,activeCollId=null,panelTriggerEl=null,passkeyTimers=[];
+
+function openPanel(collId) {
+  const coll=COLLECTION_MAP[collId];if(!coll)return;
+  panelTriggerEl=document.activeElement;activeCollId=collId;populatePanel(coll);
+  const panel=document.getElementById('collection-panel');
+  const backdrop=document.getElementById('panel-backdrop');
+  panel.removeAttribute('aria-hidden');panel.classList.add('open');
+  backdrop.classList.add('visible');panelOpen=true;
+  requestAnimationFrame(()=>panel.focus());
+}
+
+function closePanel() {
+  if(!panelOpen)return;
+  const panel=document.getElementById('collection-panel');
+  const backdrop=document.getElementById('panel-backdrop');
+  panel.classList.remove('open');backdrop.classList.remove('visible');
+  panel.setAttribute('aria-hidden','true');panelOpen=false;activeCollId=null;
+  if(panelTriggerEl){panelTriggerEl.focus();panelTriggerEl=null;}
+}
+
+function populatePanel(coll) {
+  const coverImg=document.getElementById('panel-cover-img');
+  coverImg.src=coll.cover;coverImg.alt=`${coll.name} collection cover`;
+  document.getElementById('panel-coll-name').textContent=coll.name;
+  document.getElementById('panel-coll-desc').textContent=coll.desc;
+  document.getElementById('panel-created-by').textContent=coll.createdBy||'Preset';
+  document.getElementById('panel-category').textContent=coll.category;
+  document.getElementById('panel-token-count').textContent=coll.tokens;
+  const relList=document.getElementById('panel-related-list');relList.innerHTML='';
+  (coll.relatedIds||[]).forEach(relId=>{
+    const rel=COLLECTION_MAP[relId];if(!rel)return;
+    const group=document.createElement('button');group.className='collection-group';
+    group.setAttribute('aria-label',`Switch to ${rel.name} collection`);
+    group.addEventListener('click',()=>openPanel(relId));
+    const iconsWrap=document.createElement('div');iconsWrap.className='cg-icons';
+    rel.tokenData.slice(0,5).reverse().forEach(t=>iconsWrap.appendChild(tokenIcon(t.name,t.color,22)));
+    const body=document.createElement('div');body.className='cg-body';
+    const cgName=document.createElement('div');cgName.className='cg-name';cgName.textContent=rel.name;
+    const cgMeta=document.createElement('div');cgMeta.className='cg-meta';cgMeta.textContent=`${rel.tokens} tokens · ${rel.avgChange}`;
+    body.append(cgName,cgMeta);
+    const arrow=document.createElement('div');arrow.className='cg-arrow';arrow.appendChild(arrowIcon(13));
+    group.append(iconsWrap,body,arrow);relList.appendChild(group);
+  });
+  const tokensList=document.getElementById('panel-tokens-list');tokensList.innerHTML='';
+  document.getElementById('panel-tokens-title').textContent=`All tokens (${coll.tokens})`;
+  coll.tokenData.forEach(token=>{
+    const row=document.createElement('div');row.className='token-row';
+    row.setAttribute('role','listitem');row.setAttribute('tabindex','0');
+    row.setAttribute('aria-label',`${token.full} — ${token.price} ${token.chg}`);
+    row.addEventListener('click',()=>handleTokenClick(token));
+    row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();handleTokenClick(token);}});
+    const icon=tokenIcon(token.name,token.color,96);
+    const info=document.createElement('div');info.className='tr-info';
+    const trName=document.createElement('div');trName.className='tr-name';trName.textContent=token.name;
+    const trFull=document.createElement('div');trFull.className='tr-full';trFull.textContent=token.full;
+    info.append(trName,trFull);
+    const priceBlock=document.createElement('div');priceBlock.className='tr-price-block';
+    const trPrice=document.createElement('div');trPrice.className='tr-price';trPrice.textContent=token.price;
+    const trChg=document.createElement('div');trChg.className=`tr-change ${token.pos?'pos':'neg'}`;trChg.textContent=token.chg;
+    priceBlock.append(trPrice,trChg);
+    const arrowEl=document.createElement('div');arrowEl.className='tr-arrow';arrowEl.setAttribute('aria-hidden','true');
+    arrowEl.appendChild(arrowIcon(11));
+    row.append(icon,info,priceBlock,arrowEl);tokensList.appendChild(row);
+  });
+  const leftScroll=document.querySelector('.panel-left-scroll');if(leftScroll)leftScroll.scrollTop=0;
+}
+
+function handleTokenClick(token){console.log('Token detail:',token.name||token.sym)}
+
+document.getElementById('panel-close-btn').addEventListener('click',closePanel);
+document.getElementById('panel-backdrop').addEventListener('click',closePanel);
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(panelOpen){closePanel();return;}
+    if(document.getElementById('passkey-modal').classList.contains('open')){closePasskeyModal();return;}
+  }
+  if(panelOpen&&e.key==='Tab'){
+    const panel=document.getElementById('collection-panel');
+    const focusable=panel.querySelectorAll('button:not([disabled]),a,[tabindex="0"],input,select,textarea');
+    const first=focusable[0],last=focusable[focusable.length-1];
+    if(e.shiftKey){if(document.activeElement===first){e.preventDefault();last.focus();}}
+    else{if(document.activeElement===last){e.preventDefault();first.focus();}}
+  }
+});
+
+function openPasskeyModal(mode) {
+  clearPasskeyTimers();
+  const modal=document.getElementById('passkey-modal');
+  const action=document.getElementById('passkeyAction');
+  const title=document.getElementById('passkeyTitle');
+  const sub=document.getElementById('passkeySub');
+  if(mode==='signin'){title.textContent='Sign in with your passkey';sub.textContent='Use the passkey you registered on this device to access your account.';}
+  else{title.textContent='Create your account with a passkey';sub.textContent='Use this device to unlock token access without a seed phrase or browser extension.';}
+  action.textContent='Scanning fingerprint…';action.disabled=true;
+  modal.setAttribute('aria-hidden','false');modal.classList.add('open');
+  passkeyTimers.push(setTimeout(()=>{action.textContent='Continue';action.disabled=false;},2200));
+}
+function closePasskeyModal(){
+  clearPasskeyTimers();
+  const modal=document.getElementById('passkey-modal');
+  modal.classList.remove('open');modal.setAttribute('aria-hidden','true');
+}
+function clearPasskeyTimers(){passkeyTimers.forEach(clearTimeout);passkeyTimers=[];}
+
+document.getElementById('signInBtn').addEventListener('click',()=>openPasskeyModal('signin'));
+document.getElementById('createBtn').addEventListener('click',()=>openPasskeyModal('create'));
+document.getElementById('passkeyClose').addEventListener('click',closePasskeyModal);
+document.getElementById('passkeyAction').addEventListener('click',closePasskeyModal);
+document.getElementById('filter-btn').addEventListener('click',()=>console.log('Filter collections'));
+document.getElementById('home-send-btn').addEventListener('click',()=>console.log('Action: send token'));
+document.getElementById('home-link-btn').addEventListener('click',()=>console.log('Action: send with link'));
+document.getElementById('home-receive-btn').addEventListener('click',()=>console.log('Action: receive'));
+document.getElementById('home-scan-btn').addEventListener('click',()=>console.log('Action: scan'));
+document.getElementById('promo-card-btn').addEventListener('click',()=>openPanel('stock-tokens'));
+
+renderTrendingRail();
+renderInterestedRail();
+renderAllCollections();
+</script>
+</body>
+</html>
