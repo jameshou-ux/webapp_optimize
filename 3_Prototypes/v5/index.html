@@ -105,6 +105,11 @@ button{font-family:var(--font);font-feature-settings:var(--font-features)}
   display:flex;align-items:center;gap:20px;
   font-family:'Noto Sans',var(--font);
 }
+.nav-actions-signed-in{display:flex;align-items:center;gap:12px}
+.nav-unsigned{display:flex;align-items:center;gap:20px}
+.nav-signed-in{display:none;align-items:center;gap:12px}
+.auth-signed-in .nav-unsigned{display:none}
+.auth-signed-in .nav-signed-in{display:flex}
 .nav-icon-btn{
   width:24px;height:24px;border:none;background:transparent;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -113,23 +118,22 @@ button{font-family:var(--font);font-feature-settings:var(--font-features)}
 }
 .nav-icon-btn:hover{color:#8490a4}
 .nav-icon-btn img{width:24px;height:24px;display:block}
-.nav-sep{width:1px;height:18px;background:#e6e6e6}
-.nav-signin{
-  height:44px;min-width:144px;padding:0 16px;background:#fff;
+.nav-pill-btn{
+  height:44px;min-width:143px;padding:0 16px;background:#fff;
   border:1px solid #ecedf0;border-radius:9999px;
   font-family:'Noto Sans',var(--font);
   font-size:14px;font-weight:500;line-height:1.4;color:#111d4a;
   cursor:pointer;transition:background .15s,border-color .15s,color .15s;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  white-space:nowrap;
 }
-.nav-signin:hover{background:rgba(17,29,74,0.04);border-color:#d0d2db}
-.nav-create{
-  height:44px;min-width:144px;padding:0 16px;background:#fff;
-  border:1px solid #007fff;border-radius:9999px;
-  font-family:'Noto Sans',var(--font);
-  font-size:14px;font-weight:400;color:#111d4a;cursor:pointer;
-  transition:background .15s,border-color .15s;white-space:nowrap;
+.nav-pill-btn:hover{background:rgba(17,29,74,0.04);border-color:#d0d2db}
+.nav-pill-icon{width:16px;height:16px;display:block;flex-shrink:0}
+.nav-avatar-btn{
+  width:32px;height:32px;border:none;background:transparent;padding:0;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
-.nav-create:hover{background:rgba(0,127,255,0.04);border-color:#1f86ff}
+.nav-avatar-btn img{width:20px;height:20px;display:block;flex-shrink:0}
 
 /* ── PAGE SHELL ── */
 #dashboard{padding-top:calc(var(--nav-height) + 40px);padding-bottom:80px;min-height:100vh}
@@ -408,6 +412,45 @@ button{font-family:var(--font);font-feature-settings:var(--font-features)}
 }
 .token-row:hover .tr-arrow{background:var(--accent);border-color:var(--accent);color:#fff}
 
+/* ── SIGN-IN PROMPT MODAL ── */
+#signin-needed-modal{
+  position:fixed;inset:0;z-index:8900;background:rgba(0,0,0,0.56);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s ease;
+}
+#signin-needed-modal.open{opacity:1;pointer-events:all}
+.signin-sheet{
+  width:100%;max-width:460px;margin:20px;background:var(--bg-panel);
+  border:1px solid var(--border);border-radius:22px;box-shadow:0 24px 80px rgba(15,23,42,.18);
+  padding:28px;transform:translateY(12px) scale(.98);transition:transform .25s cubic-bezier(.22,1,.36,1);
+}
+#signin-needed-modal.open .signin-sheet{transform:translateY(0) scale(1)}
+.signin-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}
+.signin-badge{
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(140deg,#4755d4 0%,#5e6ad2 55%,#7170ff 100%);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 0 0 8px rgba(94,106,210,0.08);
+  color:#fff;
+}
+.signin-kicker{font-size:11px;font-weight:510;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-bright);margin-bottom:6px}
+.signin-title{font-size:20px;font-weight:590;color:var(--text-primary);line-height:1.25;letter-spacing:-0.24px;margin-bottom:8px}
+.signin-sub{font-size:14px;color:var(--text-muted);line-height:1.55;letter-spacing:-0.182px}
+.signin-actions{display:flex;gap:10px;margin-top:24px}
+.signin-btn{
+  flex:1;height:44px;border-radius:9999px;border:1px solid var(--border);background:var(--card-bg);
+  color:var(--text-primary);font-size:14px;font-weight:510;cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.signin-btn:hover{background:var(--card-bg-hover);border-color:var(--border-strong)}
+.signin-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.signin-btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.signin-link{
+  display:inline-flex;align-items:center;justify-content:center;margin-top:14px;width:100%;
+  border:none;background:transparent;color:var(--text-secondary);font-size:13px;font-weight:510;cursor:pointer;
+}
+.signin-link:hover{color:var(--text-primary)}
+
 /* ── PASSKEY MODAL ── */
 #passkey-modal{
   position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);
@@ -468,28 +511,107 @@ button{font-family:var(--font);font-feature-settings:var(--font-features)}
 .home-card{
   position:relative;border-radius:var(--r-xl);overflow:hidden;
   border:none;background:var(--bg-panel);
-  display:flex;flex-direction:column;justify-content:space-between;
-  padding:var(--sp-32);gap:var(--sp-32);
   transition:border-color .2s,box-shadow .2s;
   isolation:isolate;
 }
 .home-card::before{
   content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
   background:
-    linear-gradient(180deg,rgba(255,255,255,0.98) 0%,rgba(255,255,255,0.96) 60%,rgba(245,247,255,0.92) 100%),
-    radial-gradient(ellipse 90% 70% at 85% 10%,rgba(113,112,255,0.08) 0%,transparent 60%);
+    linear-gradient(180deg,rgba(255,255,255,0.98) 0%,rgba(250,252,251,0.96) 60%,rgba(244,250,246,0.92) 100%),
+    radial-gradient(ellipse 90% 70% at 85% 10%,rgba(39,166,68,0.08) 0%,transparent 60%);
 }
 .home-card > *{position:relative;z-index:1}
 .home-card:hover{border-color:var(--border-strong);box-shadow:0 12px 30px rgba(15,23,42,.06)}
+.home-card-unsigned{
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:var(--sp-32);gap:var(--sp-32);min-height:280px;
+}
+.home-card-signed-in{
+  display:none;flex-direction:column;gap:16px;
+  padding:16px;min-height:280px;
+}
+.auth-signed-in .home-card-unsigned{display:none}
+.auth-signed-in .home-card-signed-in{display:flex}
+.home-signed-top{
+  display:flex;align-items:stretch;justify-content:space-between;gap:16px;
+  min-width:0;
+}
+.home-overview-copy{
+  flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:8px;
+}
+.home-overview-header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.balance-toggle{
+  width:auto;height:auto;padding:12px;border-radius:9999px;
+  border:1px solid #ecedf0;background:#fff;color:#334155;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s;
+  flex-shrink:0;
+}
+.balance-toggle:hover{background:rgba(17,29,74,0.04);border-color:#d0d2db;color:#0f172a}
+.balance-toggle svg{width:16px;height:16px}
 .home-card-title{
-  font-size:48px;font-weight:700;color:var(--text-primary);
-  line-height:1.05;letter-spacing:-1.2px;
+  font-size:20px;font-weight:590;color:var(--text-primary);
+  line-height:1.3;letter-spacing:-0.24px;
 }
 .home-card-slogan{
   font-size:14px;color:var(--text-secondary);line-height:1.6;
   letter-spacing:-0.14px;margin-top:var(--sp-12);max-width:36ch;
 }
-.home-card-ctas{display:flex;gap:var(--sp-8);flex-wrap:wrap}
+.home-card-unsigned .home-card-title,
+.home-card-unsigned .home-card-slogan{
+  white-space:nowrap;
+  max-width:none;
+}
+.home-card-unsigned .home-card-title{
+  font-size:40px;
+  line-height:1.08;
+  letter-spacing:-1px;
+}
+.home-balance-row{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--sp-16);
+}
+.home-balance-label{
+  font-size:12px;font-weight:510;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:0;
+}
+.home-balance-inline{
+  display:flex;align-items:center;gap:12px;min-width:0;
+}
+.home-balance-amount{
+  position:relative;
+  font-size:32px;font-weight:680;color:var(--text-primary);
+  line-height:1.1;letter-spacing:-0.8px;
+  min-height:36px;
+}
+.home-balance-change{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:14px;font-weight:590;line-height:1.2;
+  padding:0;border-radius:0;border:none;background:transparent;
+  flex-shrink:0;
+}
+.home-balance-change.pos{
+  color:var(--green);
+}
+.home-balance-change.neg{
+  color:var(--red);
+}
+.home-balance-row{margin-top:8px}
+.home-card-ctas{
+  display:flex;gap:var(--sp-8);flex-wrap:nowrap;align-items:center;
+}
+.home-card-signed-in .home-card-ctas{
+  overflow-x:auto;
+}
+.home-card-unsigned .home-cta{
+  flex:1 1 0;
+  min-width:0;
+}
+.home-card-signed-in .home-cta{
+  flex:0 0 auto;
+  min-width:144px;
+}
 .home-cta{
   display:inline-flex;align-items:center;gap:8px;
   height:44px;padding:0 16px;
@@ -505,6 +627,22 @@ button{font-family:var(--font);font-feature-settings:var(--font-features)}
   color:#fff;font-weight:400;font-size:14px;
 }
 .home-cta.primary:hover{filter:brightness(1.08)}
+.home-chart-panel{
+  width:min(320px,34%);
+  min-width:250px;
+  border-radius:18px;
+  background:transparent;
+  padding:0;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.home-chart{
+  width:100%;height:160px;display:block;overflow:visible;
+}
+.visible-balance,.hidden-balance{transition:opacity .18s ease}
+.hidden-balance{position:absolute;inset:0;opacity:0}
+.balance-hidden .visible-balance{opacity:0}
+.balance-hidden .hidden-balance{opacity:1}
 
 /* Promo card */
 .promo-card{
@@ -586,13 +724,24 @@ button{font-family:var(--font);font-feature-settings:var(--font-features)}
 
 @media(max-width:900px){
   .home-promo-row{grid-template-columns:1fr;min-height:0;margin-bottom:var(--sp-32)}
-  .home-card-title{font-size:26px;letter-spacing:-0.572px}
+  .home-card-unsigned{padding:var(--sp-24);gap:var(--sp-24);min-height:0}
+  .home-card-signed-in{padding:var(--sp-16);gap:16px;min-height:0}
+  .home-signed-top{flex-direction:column}
+  .home-card-unsigned .home-card-title,
+  .home-card-unsigned .home-card-slogan{white-space:normal}
+  .home-card-unsigned .home-card-ctas{flex-wrap:wrap}
+  .home-card-unsigned .home-cta{flex:0 0 auto}
+  .home-overview-copy{gap:var(--sp-12)}
+  .home-card-title{font-size:20px;letter-spacing:-0.24px}
+  .home-balance-amount{font-size:28px}
+  .home-chart-panel{width:100%;min-width:0}
   .promo-title{font-size:20px;letter-spacing:-0.24px}
   .promo-content{min-height:220px;padding:var(--sp-24)}
-  .home-card{padding:var(--sp-24)}
 }
 @media(max-width:600px){
   .home-card-title{font-size:22px;letter-spacing:-0.484px}
+  .home-balance-row{align-items:flex-start;flex-direction:column}
+  .home-balance-change{padding:16px}
   .promo-title{font-size:20px;letter-spacing:-0.24px}
   .home-cta{height:40px;padding:0 14px;font-size:13px}
   .home-cta.primary{font-size:13px}
@@ -647,32 +796,55 @@ button{font-family:var(--font);font-feature-settings:var(--font-features)}
   .coll-list-header,.coll-row{grid-template-columns:1fr 44px}
   .coll-list-header span:nth-child(2),.coll-list-header span:nth-child(3),
   .coll-row > *:nth-child(2),.coll-row > *:nth-child(3){display:none}
-  .nav-create{padding:0 12px;font-size:14px}
-  .nav-signin{padding:0 12px;font-size:13px}
+  .nav-actions-signed-in{gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .nav-unsigned{gap:12px;flex-wrap:wrap;justify-content:flex-end}
+  .nav-pill-btn{min-width:0;padding:0 12px;font-size:13px}
 }
 </style>
 </head>
 <body>
 
-<!-- ── SHARED NAV (unsigned state) ── -->
+<!-- ── SHARED NAV ── -->
 <nav id="nav" aria-label="Primary navigation">
   <div class="nav-shell">
     <a class="nav-logo" href="#" aria-label="imToken home">
       <img src="https://www.figma.com/api/mcp/asset/a37152cb-026b-4659-85cb-6579cc03fd0a" alt="" aria-hidden="true">
     </a>
-    <div class="nav-right">
-    <button class="nav-icon-btn" title="Search" aria-label="Search tokens and collections">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="11" cy="11" r="8"></circle>
-        <path d="M21 21l-4.35-4.35"></path>
-      </svg>
-    </button>
-    <button class="nav-icon-btn" title="Settings" aria-label="Settings">
-      <img src="https://www.figma.com/api/mcp/asset/8730436a-fabf-4dd9-9346-e3f13b4290fd" alt="" aria-hidden="true">
-    </button>
-    <div class="nav-sep"></div>
-    <button class="nav-signin" id="signInBtn">Sign in</button>
-    <button class="nav-create" id="createBtn">Create account</button>
+    <div class="nav-right nav-unsigned">
+      <button class="nav-icon-btn" title="Search" aria-label="Search tokens and collections">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="M21 21l-4.35-4.35"></path>
+        </svg>
+      </button>
+      <button class="nav-icon-btn" title="Settings" aria-label="Settings">
+        <img src="https://www.figma.com/api/mcp/asset/8730436a-fabf-4dd9-9346-e3f13b4290fd" alt="" aria-hidden="true">
+      </button>
+      <button class="nav-pill-btn" type="button" aria-label="Sign in" id="signInBtn">
+        <span>Sign in</span>
+      </button>
+      <button class="nav-pill-btn" type="button" aria-label="Create account" id="createBtn" style="border-color:#007fff;font-weight:400;">
+        <span>Create account</span>
+      </button>
+    </div>
+    <div class="nav-right nav-signed-in">
+      <button class="nav-icon-btn" title="Search" aria-label="Search tokens and collections">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="M21 21l-4.35-4.35"></path>
+        </svg>
+      </button>
+      <button class="nav-pill-btn" type="button" aria-label="My holdings">
+        <img class="nav-pill-icon" src="https://www.figma.com/api/mcp/asset/98b739f7-0eab-4c68-881f-4eb97996b8d9" alt="" aria-hidden="true">
+        <span>My holdings</span>
+      </button>
+      <button class="nav-pill-btn" type="button" aria-label="My collections">
+        <img class="nav-pill-icon" src="https://www.figma.com/api/mcp/asset/0a6fd496-32b0-4a16-beb8-e85f69b316f3" alt="" aria-hidden="true">
+        <span>My collections</span>
+      </button>
+      <button class="nav-avatar-btn" type="button" aria-label="Account menu">
+        <img src="https://www.figma.com/api/mcp/asset/1a696419-9412-43ae-9ce6-0d48885193e7" alt="" aria-hidden="true">
+      </button>
   </div>
   </div>
 </nav>
@@ -681,12 +853,12 @@ button{font-family:var(--font);font-feature-settings:var(--font-features)}
 <main id="dashboard" role="main">
 
   <!-- ── SECTION 1: HOME + PROMO ── -->
-  <section id="section-home-promo" aria-label="Home and featured promo">
+<section id="section-home-promo" aria-label="Home and featured promo">
     <div class="page-container">
       <div class="home-promo-row">
 
-        <!-- Left: Curated token collections -->
-        <div class="home-card">
+        <!-- Left: unsigned home -->
+        <div class="home-card home-card-unsigned">
           <div>
             <h1 class="home-card-title">Home of Tokens</h1>
             <p class="home-card-slogan">Digital assets under your control</p>
@@ -706,6 +878,75 @@ button{font-family:var(--font);font-feature-settings:var(--font-features)}
             </button>
             <button class="home-cta" id="home-scan-btn" type="button">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3m0 4h3m-3-4v7"/></svg>
+              Scan
+            </button>
+          </div>
+        </div>
+
+        <!-- Left: signed in account balance overview -->
+        <div class="home-card home-card-signed-in" id="balanceCard">
+          <div class="home-signed-top">
+            <div class="home-overview-copy">
+              <div class="home-overview-header">
+                <h1 class="home-card-title">Account balance overview</h1>
+                <button class="balance-toggle" id="balanceToggle" type="button" aria-label="Hide balance" aria-pressed="false">
+                  <svg class="balance-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2.5 12s3.8-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.8 6.5-9.5 6.5S2.5 12 2.5 12Z"></path>
+                    <circle cx="12" cy="12" r="3.5"></circle>
+                  </svg>
+                  <svg class="balance-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none">
+                    <path d="M3 3l18 18"></path>
+                    <path d="M10.6 10.6A3.5 3.5 0 0 0 12 15.5"></path>
+                    <path d="M2.5 12s3.8-6.5 9.5-6.5c1.7 0 3.2.4 4.5 1.1"></path>
+                    <path d="M21.5 12s-1.3 2.2-3.4 4.1"></path>
+                  <path d="M9 4.8A10.5 10.5 0 0 1 21.5 12"></path>
+                </svg>
+              </button>
+              </div>
+              <div class="home-balance-label">Total balance</div>
+              <div class="home-balance-row">
+                <div class="home-balance-inline">
+                  <div class="home-balance-amount" id="balanceAmount">
+                    <span class="visible-balance">$128,430.92</span>
+                    <span class="hidden-balance">••••••••••</span>
+                  </div>
+                  <div class="home-balance-change pos">+8.42%</div>
+                </div>
+              </div>
+            </div>
+            <div class="home-chart-panel" aria-label="Balance chart">
+              <svg class="home-chart" viewBox="0 0 320 160" role="img" aria-label="Green area chart showing balance trend">
+                <defs>
+                  <linearGradient id="balanceAreaGradient" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#27a644" stop-opacity="0.42"></stop>
+                    <stop offset="100%" stop-color="#27a644" stop-opacity="0.02"></stop>
+                  </linearGradient>
+                </defs>
+                <path d="M16 122 C 32 120, 48 98, 66 98 S 100 110, 120 89 S 156 60, 178 72 S 220 108, 240 82 S 282 48, 304 58 L 304 144 L 16 144 Z" fill="url(#balanceAreaGradient)"></path>
+                <path d="M16 122 C 32 120, 48 98, 66 98 S 100 110, 120 89 S 156 60, 178 72 S 220 108, 240 82 S 282 48, 304 58" fill="none" stroke="#27a644" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                <circle cx="66" cy="98" r="3.5" fill="#27a644"></circle>
+                <circle cx="120" cy="89" r="3.5" fill="#27a644"></circle>
+                <circle cx="178" cy="72" r="3.5" fill="#27a644"></circle>
+                <circle cx="240" cy="82" r="3.5" fill="#27a644"></circle>
+                <circle cx="304" cy="58" r="4" fill="#27a644"></circle>
+              </svg>
+            </div>
+          </div>
+          <div class="home-card-ctas">
+            <button class="home-cta primary" id="home-link-btn" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.71"></path></svg>
+              Send by link
+            </button>
+            <button class="home-cta" id="home-send-btn" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"></path><path d="m22 2-7 20-4-9-9-4 20-7Z"></path></svg>
+              Send token
+            </button>
+            <button class="home-cta" id="home-receive-btn" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v10m0 0l-3-3m3 3l3-3"></path><path d="M3 15v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"></path></svg>
+              Receive
+            </button>
+            <button class="home-cta" id="home-scan-btn" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><path d="M14 14h3v3m0 4h3m-3-4v7"></path></svg>
               Scan
             </button>
           </div>
@@ -829,6 +1070,30 @@ button{font-family:var(--font);font-feature-settings:var(--font-features)}
     </div>
   </div>
 </aside>
+
+<div id="signin-needed-modal" aria-hidden="true">
+  <div class="signin-sheet" role="dialog" aria-modal="true" aria-labelledby="signinNeededTitle" aria-describedby="signinNeededSub">
+    <div class="signin-top">
+      <div class="signin-badge" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v18"/>
+          <path d="M5 8.5c1.8-2.4 4.2-3.5 7-3.5s5.2 1.1 7 3.5"/>
+          <path d="M5 15.5c1.8 2.4 4.2 3.5 7 3.5s5.2-1.1 7-3.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="signin-kicker">Sign in needed</div>
+        <h2 class="signin-title" id="signinNeededTitle">Create an account to continue</h2>
+        <p class="signin-sub" id="signinNeededSub">This action needs a lightweight account so you can return later and keep the flow connected across devices.</p>
+      </div>
+    </div>
+    <div class="signin-actions">
+      <button class="signin-btn" id="signinKeepBrowsing" type="button">Keep browsing</button>
+      <button class="signin-btn primary" id="signinCreateAccount" type="button">Create account</button>
+    </div>
+    <button class="signin-link" id="signinNeedSignIn" type="button">Already have one? Sign in</button>
+  </div>
+</div>
 
 <div id="passkey-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="passkeyTitle">
   <div class="passkey-sheet">
@@ -1057,7 +1322,7 @@ function renderAllCollections() {
   });
 }
 
-let panelOpen=false,activeCollId=null,panelTriggerEl=null,passkeyTimers=[];
+let panelOpen=false,activeCollId=null,panelTriggerEl=null,passkeyTimers=[],signinModalTriggerLabel='';
 
 function openPanel(collId) {
   const coll=COLLECTION_MAP[collId];if(!coll)return;
@@ -1132,6 +1397,7 @@ document.getElementById('panel-backdrop').addEventListener('click',closePanel);
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     if(panelOpen){closePanel();return;}
+    if(document.getElementById('signin-needed-modal').classList.contains('open')){closeSigninNeededModal();return;}
     if(document.getElementById('passkey-modal').classList.contains('open')){closePasskeyModal();return;}
   }
   if(panelOpen&&e.key==='Tab'){
@@ -1143,6 +1409,25 @@ document.addEventListener('keydown',e=>{
   }
 });
 
+function openSigninNeededModal(actionLabel) {
+  const modal=document.getElementById('signin-needed-modal');
+  const title=document.getElementById('signinNeededTitle');
+  const sub=document.getElementById('signinNeededSub');
+  signinModalTriggerLabel=actionLabel||'this action';
+  title.textContent='Create an account to continue';
+  sub.textContent=`You clicked "${signinModalTriggerLabel}". Sign in is needed before you can continue with this action.`;
+  document.body.style.overflow='hidden';
+  modal.setAttribute('aria-hidden','false');
+  modal.classList.add('open');
+}
+
+function closeSigninNeededModal() {
+  const modal=document.getElementById('signin-needed-modal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  if(!document.getElementById('passkey-modal').classList.contains('open')){document.body.style.overflow='';}
+}
+
 function openPasskeyModal(mode) {
   clearPasskeyTimers();
   const modal=document.getElementById('passkey-modal');
@@ -1152,6 +1437,7 @@ function openPasskeyModal(mode) {
   if(mode==='signin'){title.textContent='Sign in with your passkey';sub.textContent='Use the passkey you registered on this device to access your account.';}
   else{title.textContent='Create your account with a passkey';sub.textContent='Use this device to unlock token access without a seed phrase or browser extension.';}
   action.textContent='Scanning fingerprint…';action.disabled=true;
+  document.body.style.overflow='hidden';
   modal.setAttribute('aria-hidden','false');modal.classList.add('open');
   passkeyTimers.push(setTimeout(()=>{action.textContent='Continue';action.disabled=false;},2200));
 }
@@ -1159,20 +1445,61 @@ function closePasskeyModal(){
   clearPasskeyTimers();
   const modal=document.getElementById('passkey-modal');
   modal.classList.remove('open');modal.setAttribute('aria-hidden','true');
+  if(!document.getElementById('signin-needed-modal').classList.contains('open')){document.body.style.overflow='';}
 }
 function clearPasskeyTimers(){passkeyTimers.forEach(clearTimeout);passkeyTimers=[];}
 
+document.getElementById('signinKeepBrowsing').addEventListener('click',closeSigninNeededModal);
+document.getElementById('signinCreateAccount').addEventListener('click',()=>{
+  closeSigninNeededModal();
+  setTimeout(()=>openPasskeyModal('create'),120);
+});
+document.getElementById('signinNeedSignIn').addEventListener('click',()=>{
+  closeSigninNeededModal();
+  setTimeout(()=>openPasskeyModal('signin'),120);
+});
+document.getElementById('signin-needed-modal').addEventListener('click',(e)=>{
+  if(e.target.id==='signin-needed-modal') closeSigninNeededModal();
+});
+document.getElementById('passkeyClose').addEventListener('click',closePasskeyModal);
+document.getElementById('passkeyAction').addEventListener('click',()=>{
+  setAuthState(true);
+  closePasskeyModal();
+});
+document.getElementById('filter-btn').addEventListener('click',()=>console.log('Filter collections'));
+document.getElementById('home-send-btn').addEventListener('click',()=>openSigninNeededModal('Send token'));
+document.getElementById('home-link-btn').addEventListener('click',()=>openSigninNeededModal('Send by link'));
+document.getElementById('home-receive-btn').addEventListener('click',()=>openSigninNeededModal('Receive'));
+document.getElementById('home-scan-btn').addEventListener('click',()=>openSigninNeededModal('Scan'));
+document.getElementById('promo-card-btn').addEventListener('click',()=>openPanel('stock-tokens'));
 document.getElementById('signInBtn').addEventListener('click',()=>openPasskeyModal('signin'));
 document.getElementById('createBtn').addEventListener('click',()=>openPasskeyModal('create'));
-document.getElementById('passkeyClose').addEventListener('click',closePasskeyModal);
-document.getElementById('passkeyAction').addEventListener('click',closePasskeyModal);
-document.getElementById('filter-btn').addEventListener('click',()=>console.log('Filter collections'));
-document.getElementById('home-send-btn').addEventListener('click',()=>console.log('Action: send token'));
-document.getElementById('home-link-btn').addEventListener('click',()=>console.log('Action: send with link'));
-document.getElementById('home-receive-btn').addEventListener('click',()=>console.log('Action: receive'));
-document.getElementById('home-scan-btn').addEventListener('click',()=>console.log('Action: scan'));
-document.getElementById('promo-card-btn').addEventListener('click',()=>openPanel('stock-tokens'));
 
+const balanceToggle=document.getElementById('balanceToggle');
+const balanceCard=document.getElementById('balanceCard');
+const visibleBalance=document.querySelector('.visible-balance');
+const hiddenBalance=document.querySelector('.hidden-balance');
+let balanceHidden=false;
+let authSignedIn=false;
+
+function setAuthState(signedIn){
+  authSignedIn=signedIn;
+  document.body.classList.toggle('auth-signed-in',signedIn);
+  document.body.classList.toggle('auth-signed-out',!signedIn);
+}
+
+balanceToggle.addEventListener('click',()=>{
+  balanceHidden=!balanceHidden;
+  balanceCard.classList.toggle('balance-hidden',balanceHidden);
+  visibleBalance.style.opacity=balanceHidden?'0':'1';
+  hiddenBalance.style.opacity=balanceHidden?'1':'0';
+  balanceToggle.setAttribute('aria-label',balanceHidden?'Show balance':'Hide balance');
+  balanceToggle.setAttribute('aria-pressed',String(balanceHidden));
+  balanceToggle.querySelector('.balance-eye-open').style.display=balanceHidden?'none':'block';
+  balanceToggle.querySelector('.balance-eye-off').style.display=balanceHidden?'block':'none';
+});
+
+setAuthState(false);
 renderTrendingRail();
 renderInterestedRail();
 renderAllCollections();
